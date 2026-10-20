@@ -1,0 +1,134 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[╭─](surface1)\
+[](deep_blue)\
+$os\
+${custom.directory}\
+$fill\
+${custom.right}\
+$line_break\
+[╰─](surface1)\
+$character"""
+
+palette = 'catppuccin_mocha'
+
+# --- Connecting Line Between Headers ---
+[fill]
+symbol = "─"
+style = "surface1"
+
+# --- Left Header: OS ---
+[os]
+disabled = false
+style = "bg:deep_blue fg:text"
+format = '[ $symbol ]($style)'
+
+[os.symbols]
+Arch = "󰣇"
+Linux = "󰌽"
+
+# --- Left Header: Directory (Continuous Powerline with matched colors) ---
+[directory]
+disabled = true
+
+[custom.directory]
+command = "/home/ludde/.local/bin/starship-powerline-dir"
+when = "true"
+format = "$output"
+
+# --- Right Header: Dynamic Gradient (User & Time) ---
+[custom.right]
+command = "/home/ludde/.local/bin/starship-powerline-dir --right"
+when = "true"
+format = "$output"
+
+# --- Left Header: Git (handled within custom.directory) ---
+[git_branch]
+disabled = true
+
+[git_status]
+disabled = true
+conflicted = '[=$count](bold red bg:steel_blue) '
+ahead = '[⇡$count](bold green bg:steel_blue) '
+behind = '[⇣$count](bold red bg:steel_blue) '
+diverged = '[⇕$count](bold peach bg:steel_blue) '
+untracked = '[?$count](bold lavender bg:steel_blue) '
+modified = '[!$count](bold yellow bg:steel_blue) '
+staged = '[+$count](bold green bg:steel_blue) '
+renamed = '[»$count](bold teal bg:steel_blue) '
+deleted = '[✘$count](bold red bg:steel_blue) '
+
+# --- Left Header: Languages & Runtimes (Shares steel_blue block) ---
+[java]
+symbol = " "
+style = "bg:steel_blue fg:text"
+format = '[ [$symbol](fg:maroon bg:steel_blue)$version ]($style)'
+
+[scala]
+symbol = " "
+style = "bg:steel_blue fg:text"
+format = '[ [$symbol](fg:red bg:steel_blue)$version ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:steel_blue fg:text"
+format = '[ [$symbol](fg:peach bg:steel_blue)$version ]($style)'
+
+[python]
+symbol = " "
+style = "bg:steel_blue fg:text"
+format = '[ [$symbol](fg:yellow bg:steel_blue)$version ]($style)'
+
+[c]
+symbol = " "
+style = "bg:steel_blue fg:text"
+format = '[ [$symbol](fg:blue bg:steel_blue)$version ]($style)'
+
+# --- Right Header: User (replaced by custom.right) ---
+[username]
+disabled = true
+
+# --- Right Header: Time (replaced by custom.right) ---
+[time]
+disabled = true
+
+# --- Bottom Input Line (Active Line Only) ---
+[character]
+disabled = false
+success_symbol = '[❯](bold blue) '
+error_symbol = '[❯](bold red) '
+
+# --- Catppuccin Mocha Palette with Dark Blues ---
+[palettes.catppuccin_mocha]
+deep_blue  = "#1e3a5f"
+dark_blue  = "#254874"
+steel_blue = "#2d578b"
+night_blue = "#162840"
+
+rosewater = "#f5e0dc"
+flamingo  = "#f2cdcd"
+pink      = "#f5c2e7"
+mauve     = "#cba6f7"
+red       = "#f38ba8"
+maroon    = "#eba0ac"
+peach     = "#fab387"
+yellow    = "#f9e2af"
+green     = "#a6e3a1"
+teal      = "#94e2d5"
+sky       = "#89dceb"
+sapphire  = "#74c7ec"
+blue      = "#89b4fa"
+lavender  = "#b4befe"
+text      = "#cdd6f4"
+subtext1  = "#bac2de"
+subtext0  = "#a6adc8"
+overlay2  = "#9399b2"
+overlay1  = "#7f849c"
+overlay0  = "#6c7086"
+surface2  = "#585b70"
+surface1  = "#45475a"
+surface0  = "#313244"
+base      = "#1e1e2e"
+mantle    = "#181825"
+crust     = "#11111b"

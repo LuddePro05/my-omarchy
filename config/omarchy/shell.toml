@@ -1,0 +1,23 @@
+[font]
+base-size = 11
+
+[bar]
+background-alpha = 0.88
+
+[popups]
+background-alpha = 0.5
+border-width     = 1
+border-alpha     = 0.5
+
+[notifications]
+background-alpha = 0.5
+border-width     = 1
+border-alpha     = 0.5
+
+[menu]
+background-alpha          = 0.5
+border-width              = 1
+border-alpha              = 0.5
+scrim-alpha               = 0
+selected-background-alpha = 0.08
+selected-border-alpha     = 0.25
