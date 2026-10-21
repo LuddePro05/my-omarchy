@@ -32,6 +32,10 @@ echo "📁 Deploying configurations into ~/.config..."
 mkdir -p "$HOME/.config"
 cp -a "$SCRIPT_DIR/config/"* "$HOME/.config/"
 
+# Ensure Chromium custom Catppuccin theme extension is installed
+mkdir -p "$HOME/.config/chromium/extensions"
+cp -a "$SCRIPT_DIR/extensions/chromium-theme-catppuccin-mocha" "$HOME/.config/chromium/extensions/catppuccin-mocha-blue"
+
 # Fix any hardcoded home paths in flag files for the new user's username
 if [ -f "$HOME/.config/chromium-flags.conf" ]; then
   sed -i "s|/home/[^/]*|$HOME|g" "$HOME/.config/chromium-flags.conf"
