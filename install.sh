@@ -95,10 +95,17 @@ echo "🐚 Deploying shell profiles (.zshrc, .bashrc)..."
 cp -a "$SCRIPT_DIR/shell/.zshrc" "$HOME/.zshrc"
 cp -a "$SCRIPT_DIR/shell/.bashrc" "$HOME/.bashrc"
 
-# 8. Set Catppuccin theme
-echo "🎨 Applying Catppuccin theme..."
+# 8. Set Catppuccin theme and custom background
+echo "🎨 Applying Catppuccin theme and custom rainbow background..."
 if command -v omarchy &>/dev/null; then
   omarchy theme set catppuccin || true
+  if [ -f "$HOME/.config/omarchy/backgrounds/catppuccin/rainbow-oil-toned.webp" ]; then
+    echo "🖼️  Setting custom rainbow oil slick background..."
+    omarchy theme bg set "$HOME/.config/omarchy/backgrounds/catppuccin/rainbow-oil-toned.webp" || true
+  fi
+  if command -v omarchy-theme-bg-cache &>/dev/null; then
+    omarchy theme bg cache 2>/dev/null || true
+  fi
 fi
 
 # 9. Reload Hyprland and Omarchy Shell

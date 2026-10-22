@@ -82,6 +82,19 @@ Specially tuned to match the browser frame and tab strip seamlessly with the top
 
 ---
 
+### 6. 🌈 Custom Rainbow Spectrum Backgrounds (`catppuccin/`)
+Located in [`config/omarchy/backgrounds/catppuccin/`](config/omarchy/backgrounds/catppuccin/):
+A suite of customized 4K wallpapers designed for Catppuccin, retaining the deep navy `#181824` base while introducing vibrant, fluid rainbow spectrum patterns:
+- **`rainbow-oil-toned.webp` (Default Active):** 3D liquid-glass / oil swirl adapted from `0xleovision`, tuned with softened highlights (max brightness 170) and rich ruby red/warm amber accents across the main fluid body so blurred frosted glass does not overpower white UI text.
+- **`rainbow-oil-velvet.webp`:** Deep, ultra-soft highlight ceiling (max brightness 122) with subtle crimson and iridescent shimmer for maximum text legibility under translucent panels.
+- **`rainbow-oil-slick.webp`:** High-contrast vibrant 3D liquid-glass swirl with intense specular reflections.
+- **`rainbow-oil-wave.webp`:** Broad 3D metallic/fluid wave filling the upper display with iridescent rainbow sheen.
+- **`rainbow-waves-ribbon.webp`:** Multi-strand stacked spectrum bands in classic ColecoVision / Activision ribbon style.
+- **`rainbow-waves-horizontal.webp`:** Smooth horizontal rainbow transition sweeping across thin wave lines.
+- **`rainbow-waves-prism.webp`:** Diagonal prism sweep across the wave bundle.
+
+---
+
 ## 📂 Repository Structure
 
 ```text
@@ -103,6 +116,7 @@ my-omarchy/
 │   │   ├── monitors.lua                        # Display resolutions & GDK scale
 │   │   └── autostart.lua                       # Startup services
 │   ├── omarchy/                                # Omarchy shell & custom QML plugins
+│   │   ├── backgrounds/catppuccin/             # Custom 4K rainbow spectrum & oil-slick wallpapers
 │   │   ├── shell.json                          # Bar layout & active plugins
 │   │   ├── shell.toml                          # Alpha, border widths, corner roundings
 │   │   ├── hooks/                              # Post-update and theme hooks
@@ -158,5 +172,5 @@ On a fresh Omarchy Linux installation:
 5. **Clones missing shell plugins:** `omaplug`, `omapods`, `omasend`, and `fzf-tab`.
 6. **Compiles** `starship-powerline-dir.c` into `~/.local/bin/starship-powerline-dir` using `gcc`.
 7. **Installs shell profiles** (`~/.zshrc` and `~/.bashrc`).
-8. **Applies the Catppuccin theme** via `omarchy theme set catppuccin`.
+8. **Applies the Catppuccin theme** and activates the custom frosted-glass-optimized rainbow background (`rainbow-oil-toned.webp`).
 9. **Reloads** Hyprland and restarts the Omarchy shell to activate all changes instantly.
