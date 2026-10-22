@@ -1460,32 +1460,38 @@ Item {
       return
     }
 
-    if (appColorCache[cls]) {
-      detectedAppColor = appColorCache[cls]
-    }
-
-    sampleColorTimer.restart()
-
-    // Chromium / Chrome
+    // Chromium / Chrome (frosted glass matching theme)
     if (cls.indexOf("chrom") !== -1) {
+      sampleColorTimer.stop()
+      detectedAppColor = defaultBarColor
       targetBarAlpha = 0.88
       return
     }
 
-    // VS Code
+    // VS Code (frosted glass matching theme)
     if (cls.indexOf("code") !== -1 || cls.indexOf("com.microsoft.vscode") !== -1) {
+      sampleColorTimer.stop()
+      detectedAppColor = defaultBarColor
       targetBarAlpha = 0.88
       return
     }
 
-    // Terminal
+    // Terminal (frosted glass matching theme)
     if (cls === "alacritty" || cls === "org.omarchy.agent" || cls === "kitty" || cls === "foot" || cls === "ghostty") {
-      targetBarAlpha = 0.65
+      sampleColorTimer.stop()
+      detectedAppColor = defaultBarColor
+      targetBarAlpha = 0.54
       return
     }
 
     // Default for other standard opaque applications (Obsidian, etc.)
     targetBarAlpha = 1.0
+    if (appColorCache[cls]) {
+      detectedAppColor = appColorCache[cls]
+    } else {
+      detectedAppColor = defaultBarColor
+    }
+    sampleColorTimer.restart()
   }
 
   Timer {
@@ -1509,14 +1515,20 @@ Item {
           root.targetBarAlpha = 0.0
           return
         }
+        if (colStr === "DEFAULT") {
+          root.detectedAppColor = root.defaultBarColor
+          return
+        }
         if (/^#[0-9A-Fa-f]{6}$/.test(colStr)) {
           var col = Qt.color(colStr)
-          root.detectedAppColor = col
-          // Never overwrite app cache with fullscreen black
-          if (root.activeWindowClass && !root.activeWindowFullscreen) {
-            root.appColorCache[root.activeWindowClass.toLowerCase()] = col
+          // Only apply and cache sampled colors when the active window is opaque
+          if (root.targetBarAlpha >= 0.99) {
+            root.detectedAppColor = col
+            if (root.activeWindowClass && !root.activeWindowFullscreen) {
+              root.appColorCache[root.activeWindowClass.toLowerCase()] = col
+            }
+            console.log("[AdaptiveBar] sampled color for opaque " + root.activeWindowClass + " -> " + colStr)
           }
-          console.log("[AdaptiveBar] sampled color for " + root.activeWindowClass + " -> " + colStr)
         }
       }
     }

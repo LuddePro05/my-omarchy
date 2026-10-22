@@ -19,6 +19,11 @@ def get_window_color():
         if is_floating and not is_fullscreen:
             return 'TRANSPARENT'
 
+        # Known frosted / transparent applications use the native desktop theme background
+        win_class = (win.get('class') or '').lower()
+        if any(c in win_class for c in ['alacritty', 'org.omarchy.agent', 'kitty', 'foot', 'ghostty', 'chrom', 'code']):
+            return 'DEFAULT'
+
         at_x, at_y = win.get('at', [0, 0])
         w, h = win.get('size', [0, 0])
         if w <= 0 or h <= 0:
