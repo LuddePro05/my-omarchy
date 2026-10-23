@@ -26,3 +26,11 @@
 -- o.bind("SUPER + SHIFT + S", nil, "omarchy-capture-screenshot")
 -- o.bind("SUPER + H", nil, "voxtype record toggle")
 -- o.bind("SUPER + PERIOD", nil, { panel = "omarchy.emojis" })
+
+-- Window focus navigation with edge wrapping (matching 3-finger swipe gesture)
+o.rebind("SUPER + LEFT", "Focus on left window (wrap)", function()
+  if _G.navigate_focus then _G.navigate_focus("l") else hl.dispatch(hl.dsp.focus({ direction = "l" })) end
+end)
+o.rebind("SUPER + RIGHT", "Focus on right window (wrap)", function()
+  if _G.navigate_focus then _G.navigate_focus("r") else hl.dispatch(hl.dsp.focus({ direction = "r" })) end
+end)

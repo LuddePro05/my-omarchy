@@ -58,6 +58,9 @@
 -- hl.gesture({ fingers = 3, direction = "right", action = function() hl.dispatch(hl.dsp.focus({ direction = "r" })) end })
 --
 hl.config({
+  cursor = {
+    no_warps = true,
+  },
   input = {
     kb_variant = "nodeadkeys",
   },
@@ -70,28 +73,131 @@ hl.config({
   }
 })
 
+-- Navigate focus between windows on the active workspace with seamless edge wrapping
+local function navigate_focus(dir)
+  local cur = hl.get_active_window()
+  if not cur then return end
+
+  hl.dispatch(hl.dsp.focus({ direction = dir }))
+  local nxt = hl.get_active_window()
+
+  -- If focus didn't change, we reached the end of the window columns: wrap around
+  if nxt and nxt.address == cur.address then
+    local windows = hl.get_windows() or {}
+    local ws_windows = {}
+    local cur_ws_id = cur.workspace and cur.workspace.id
+    for _, w in ipairs(windows) do
+      if w and w.workspace and w.workspace.id == cur_ws_id and not w.floating then
+        table.insert(ws_windows, w)
+      end
+    end
+
+    table.sort(ws_windows, function(a, b)
+      local ax = (a.at and a.at.x) or 0
+      local bx = (b.at and b.at.x) or 0
+      return ax < bx
+    end)
+
+    if #ws_windows > 1 then
+      if dir == "r" then
+        hl.dispatch(hl.dsp.focus({ window = "address:" .. ws_windows[1].address }))
+      else
+        hl.dispatch(hl.dsp.focus({ window = "address:" .. ws_windows[#ws_windows].address }))
+      end
+    end
+  end
+end
+
+_G.navigate_focus = navigate_focus
+
+-- Cursor travel animation on focus change
+local anim_id = 0
+
+local function animate_cursor_to(target_x, target_y)
+  local pos = hl.get_cursor_pos()
+  if not pos then return end
+  local from_x, from_y = pos.x, pos.y
+  local dx = target_x - from_x
+  local dy = target_y - from_y
+  local dist = math.sqrt(dx * dx + dy * dy)
+  if dist < 20 then return end
+
+  anim_id = anim_id + 1
+  local cur_id = anim_id
+
+  local steps = 14
+  local interval = 10 -- ~140ms duration
+  local step = 0
+
+  local function tick()
+    if cur_id ~= anim_id then return end
+    step = step + 1
+    local t = step / steps
+    -- Smooth cubic deceleration (fluent_decel style)
+    local ease = 1 - ((1 - t) ^ 3)
+
+    -- Track active window center dynamically in case the layout is animating into view
+    local cur_win = hl.get_active_window()
+    local tx, ty = target_x, target_y
+    if cur_win and cur_win.at and cur_win.size then
+      tx = cur_win.at.x + cur_win.size.x / 2
+      ty = cur_win.at.y + cur_win.size.y / 2
+    end
+
+    local cur_x = from_x + (tx - from_x) * ease
+    local cur_y = from_y + (ty - from_y) * ease
+    hl.dispatch(hl.dsp.cursor.move({ x = math.floor(cur_x + 0.5), y = math.floor(cur_y + 0.5) }))
+    if step < steps then
+      hl.timer(tick, { timeout = interval, type = "oneshot" })
+    end
+  end
+
+  tick()
+end
+
+hl.on("window.active", function(win)
+  if not win or not win.at or not win.size then return end
+  local pos = hl.get_cursor_pos()
+  if not pos then return end
+
+  -- If cursor is already inside the window, it was focused by direct mouse interaction
+  if pos.x >= win.at.x and pos.x <= win.at.x + win.size.x and
+     pos.y >= win.at.y and pos.y <= win.at.y + win.size.y then
+    return
+  end
+
+  local target_x = win.at.x + win.size.x / 2
+  local target_y = win.at.y + win.size.y / 2
+  animate_cursor_to(target_x, target_y)
+end)
+
 -- Three-finger vertical swipe switches workspaces up and down
 hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspace" })
 
--- Three-finger horizontal swipe scrolls active windows on the scrolling layout (inverted)
+-- Three-finger horizontal swipe moves focus between windows (with wrapping, like Super + Arrow)
+local swipe_accum_x = 0
+
 hl.gesture({
   fingers = 3,
   direction = "horizontal",
   action = {
+    start = function()
+      swipe_accum_x = 0
+    end,
     update = function(e)
       if e and e.delta and e.delta.x then
-        local delta_x = e.delta.x
-        if math.abs(delta_x) > 0.05 then
-          pcall(function()
-            hl.dispatch(hl.dsp.layout("move " .. string.format("%.2f", -delta_x)))
-          end)
+        swipe_accum_x = swipe_accum_x + e.delta.x
+        if swipe_accum_x > 35 then
+          swipe_accum_x = 0
+          navigate_focus("r")
+        elseif swipe_accum_x < -35 then
+          swipe_accum_x = 0
+          navigate_focus("l")
         end
       end
     end,
     finish = function()
-      pcall(function()
-        hl.dispatch(hl.dsp.layout("fit"))
-      end)
+      swipe_accum_x = 0
     end,
   },
 })
