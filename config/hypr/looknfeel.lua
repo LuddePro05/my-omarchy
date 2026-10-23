@@ -106,13 +106,13 @@ hl.curve("fluent_decel", { type = "bezier", points = { {0.1, 1}, {1, 1} } })
 hl.curve("easeOutExpo", { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
 hl.curve("geminiChill", { type = "bezier", points = { {0.33, 1}, {0.68, 1} } })
 
--- Apply the curve to workspace transitions
+-- Apply the curve to workspace transitions (vertical slide matches vertical swipe gestures)
 hl.animation({ 
   leaf = "workspaces", 
   enabled = true, 
   speed = 4, 
   bezier = "fluent_decel", 
-  style = "slide" 
+  style = "slidevert" 
 })
 
 -- Smart borders & gaps: remove outline and gaps when only one window is on the workspace

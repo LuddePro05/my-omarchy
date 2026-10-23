@@ -70,7 +70,11 @@ hl.config({
   }
 })
 
-hl.gesture({ fingers = 3, direction = "horizontal", scale = 1.1, action = "workspace" })
+-- Three-finger vertical swipe switches workspaces up and down
+hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspace" })
+
+-- Three-finger horizontal swipe scrolls active windows on the scrolling layout
+hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
 
 -- Dynamically manage persistent workspaces:
 -- Workspace 1 can never disappear.
