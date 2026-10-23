@@ -128,10 +128,11 @@ local stroke_anchor_right = 0
 local last_step_time = 0
 local momentum_session = 0
 
-local TRACKPAD_SPAN = 240
+local TRACKPAD_SPAN = 220
 local MIN_STEP_INTERVAL_MS = 65
 local MOMENTUM_INTERVAL_MS = 75
-local DEADZONE = 18
+local DEADZONE = 16
+local FIRST_STEP_DIST = 28
 
 local function get_layout_info()
   local cur = hl.get_active_window()
@@ -249,9 +250,8 @@ hl.gesture({
       local now = (e and e.time_ms) or (os.clock() * 1000)
       local speed = math.abs(dx)
 
-      if speed > stroke_peak_speed then
-        stroke_peak_speed = speed
-      end
+      -- Decay peak speed gently over time so resting fingers return to 1:1 drag
+      stroke_peak_speed = math.max(speed, stroke_peak_speed * 0.92)
 
       -- Turnaround detection: if user reverses direction, reset stroke accumulation and re-anchor
       if (stroke_direction > 0 and dx < -2) or (stroke_direction < 0 and dx > 2) then
@@ -270,37 +270,33 @@ hl.gesture({
       stroke_dist_x = stroke_dist_x + dx
       local abs_dist = math.abs(stroke_dist_x)
 
-      -- Deadzone check: require either minimal travel or distinct flick velocity to activate
-      if abs_dist < DEADZONE and not (abs_dist >= 10 and stroke_peak_speed >= 12) then
+      -- Deadzone check to prevent accidental triggers from resting touches
+      if abs_dist < DEADZONE then
         return
       end
 
       local info = get_layout_info()
       local total_steps = math.max(1, info.total_items - 1)
-      local step_dist = math.max(45, math.min(80, TRACKPAD_SPAN / total_steps))
+      local step_dist = math.max(45, math.min(75, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
 
-      -- Base steps from physical travel distance
-      local dist_steps = 1 + math.floor(math.max(0, abs_dist - DEADZONE) / step_dist)
-
-      -- Speed bonus: faster / harder swipes earn extra steps (Chromebook-like momentum)
-      local speed_bonus = 0
-      if stroke_peak_speed >= 30 then
-        speed_bonus = 4
-      elseif stroke_peak_speed >= 20 then
-        speed_bonus = 3
-      elseif stroke_peak_speed >= 13 then
-        speed_bonus = 2
-      elseif stroke_peak_speed >= 7 then
-        speed_bonus = 1
+      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 2.8x)
+      local velocity_mult = 1.0
+      if stroke_peak_speed > 5 then
+        velocity_mult = 1.0 + math.min(1.8, ((stroke_peak_speed - 5) / 10) ^ 1.05)
       end
 
-      local target_steps = dist_steps + speed_bonus
+      local effective_dist = abs_dist * velocity_mult
+      local target_steps = 0
+      if effective_dist >= FIRST_STEP_DIST then
+        target_steps = 1 + math.floor((effective_dist - FIRST_STEP_DIST) / step_dist)
+      end
 
-      -- Maximum swipe / hard flick reaches the end of the strip
+      -- A full physical trackpad swipe reaches all the way to the end
       local max_available = (stroke_dist_x > 0) and stroke_anchor_right or stroke_anchor_left
-      if stroke_peak_speed >= 30 then
+      if abs_dist >= TRACKPAD_SPAN * 0.85 then
         target_steps = math.max(target_steps, max_available)
       end
+
       target_steps = math.min(target_steps, max_available)
       stroke_target_steps = target_steps
 
