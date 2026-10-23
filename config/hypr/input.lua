@@ -117,11 +117,17 @@ hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspa
 -- Three-finger horizontal swipe moves focus between windows with Chromebook-like physics:
 -- sensitivity dynamically scales with the number of workspaces/windows so that a full
 -- edge-to-edge swipe spans across the entire strip to the far right/left, with swipe
--- length and drag speed naturally increasing travel distance.
-local swipe_accum_x = 0
-local MAX_SWIPE_DISTANCE = 350
+-- length and drag speed naturally increasing travel distance without overshooting.
+local stroke_dist_x = 0
+local stroke_steps_taken = 0
+local stroke_peak_speed = 0
+local stroke_direction = 0 -- 1 for right, -1 for left
+local last_step_time = 0
 
-local function get_swipe_step_threshold()
+local TRACKPAD_SPAN = 380
+local MIN_STEP_INTERVAL_MS = 140
+
+local function get_layout_info()
   local cur = hl.get_active_window()
   local cur_ws_id = cur and cur.workspace and cur.workspace.id
   if not cur_ws_id then
@@ -130,12 +136,26 @@ local function get_swipe_step_threshold()
   end
 
   local all_windows = hl.get_windows() or {}
-
-  -- Count tiled windows on current workspace
-  local win_count = 0
+  local ws_windows = {}
   for _, w in ipairs(all_windows) do
     if w and w.workspace and w.workspace.id == cur_ws_id and not w.floating and not w.pinned then
-      win_count = win_count + 1
+      table.insert(ws_windows, w)
+    end
+  end
+
+  table.sort(ws_windows, function(a, b)
+    local ax = (a.at and a.at.x) or 0
+    local bx = (b.at and b.at.x) or 0
+    return ax < bx
+  end)
+
+  local cur_idx = 1
+  if cur then
+    for i, w in ipairs(ws_windows) do
+      if w.address == cur.address then
+        cur_idx = i
+        break
+      end
     end
   end
 
@@ -155,12 +175,15 @@ local function get_swipe_step_threshold()
     end
   end
   local ws_count = max_active_ws - base
+  local total_items = math.max(#ws_windows, ws_count, 2)
 
-  -- Scale sensitivity by the number of items
-  local items = math.max(win_count, ws_count, 2)
-  local steps = math.max(1, items - 1)
-
-  return MAX_SWIPE_DISTANCE / steps
+  return {
+    cur_idx = cur_idx,
+    total_windows = #ws_windows,
+    total_items = total_items,
+    steps_left = cur_idx - 1,
+    steps_right = math.max(0, #ws_windows - cur_idx),
+  }
 end
 
 hl.gesture({
@@ -168,41 +191,74 @@ hl.gesture({
   direction = "horizontal",
   action = {
     start = function()
-      swipe_accum_x = 0
+      stroke_dist_x = 0
+      stroke_steps_taken = 0
+      stroke_peak_speed = 0
+      stroke_direction = 0
+      last_step_time = 0
     end,
     update = function(e)
-      if e and e.delta and e.delta.x then
-        local dx = e.delta.x
+      if not (e and e.delta and e.delta.x) then return end
+      local dx = e.delta.x
+      local now = (e and e.time_ms) or (os.clock() * 1000)
 
-        -- Instant turnaround if swiping direction reverses
-        if (swipe_accum_x > 0 and dx < 0) or (swipe_accum_x < 0 and dx > 0) then
-          swipe_accum_x = 0
-        end
+      -- Track peak velocity during this stroke
+      local speed = math.abs(dx)
+      if speed > stroke_peak_speed then
+        stroke_peak_speed = speed
+      end
 
-        -- Velocity scaling: faster drags travel further (Chromebook-like acceleration curve)
-        local speed = math.abs(dx)
-        local velocity_boost = 1.0
-        if speed > 5 then
-          velocity_boost = 1.0 + math.min(2.5, ((speed - 5) / 10) ^ 1.2)
-        end
+      -- Turnaround detection: if user reverses direction, reset stroke accumulation
+      if (stroke_direction > 0 and dx < -2) or (stroke_direction < 0 and dx > 2) then
+        stroke_dist_x = 0
+        stroke_steps_taken = 0
+        stroke_peak_speed = speed
+        stroke_direction = dx > 0 and 1 or -1
+      elseif stroke_direction == 0 and math.abs(dx) > 1 then
+        stroke_direction = dx > 0 and 1 or -1
+      end
 
-        swipe_accum_x = swipe_accum_x + (dx * velocity_boost)
+      stroke_dist_x = stroke_dist_x + dx
 
-        local step_threshold = get_swipe_step_threshold()
-        if swipe_accum_x >= step_threshold then
+      local info = get_layout_info()
+      local total_steps = math.max(1, info.total_items - 1)
+      local step_dist = TRACKPAD_SPAN / total_steps
+
+      -- Velocity gain: slow drag = 1.0x (1-to-1 distance); fast flick boosts up to 2.4x
+      local velocity_gain = 1.0
+      if stroke_peak_speed > 6 then
+        velocity_gain = 1.0 + math.min(1.4, ((stroke_peak_speed - 6) / 10) ^ 1.1)
+      end
+
+      local effective_dist = math.abs(stroke_dist_x) * velocity_gain
+      local target_steps = math.floor(effective_dist / step_dist)
+
+      -- Determine maximum possible steps in the current direction
+      local max_available = (stroke_dist_x > 0) and info.steps_right or info.steps_left
+      target_steps = math.min(target_steps, max_available)
+
+      -- Trigger step if target exceeds steps already taken, paced with minimum interval
+      if target_steps > stroke_steps_taken and (now - last_step_time >= MIN_STEP_INTERVAL_MS) then
+        if stroke_dist_x > 0 then
           navigate_focus("r")
-          swipe_accum_x = math.min(step_threshold * 0.35, swipe_accum_x - step_threshold)
-        elseif swipe_accum_x <= -step_threshold then
+        else
           navigate_focus("l")
-          swipe_accum_x = math.max(-step_threshold * 0.35, swipe_accum_x + step_threshold)
         end
+        stroke_steps_taken = stroke_steps_taken + 1
+        last_step_time = now
       end
     end,
     finish = function()
-      swipe_accum_x = 0
+      stroke_dist_x = 0
+      stroke_steps_taken = 0
+      stroke_peak_speed = 0
+      stroke_direction = 0
     end,
     ["end"] = function()
-      swipe_accum_x = 0
+      stroke_dist_x = 0
+      stroke_steps_taken = 0
+      stroke_peak_speed = 0
+      stroke_direction = 0
     end,
   },
 })
