@@ -128,11 +128,11 @@ local stroke_anchor_right = 0
 local last_step_time = 0
 local momentum_session = 0
 
-local TRACKPAD_SPAN = 220
-local MIN_STEP_INTERVAL_MS = 65
-local MOMENTUM_INTERVAL_MS = 75
-local DEADZONE = 16
-local FIRST_STEP_DIST = 28
+local TRACKPAD_SPAN = 260
+local MIN_STEP_INTERVAL_MS = 75
+local MOMENTUM_INTERVAL_MS = 85
+local DEADZONE = 20
+local FIRST_STEP_DIST = 35
 
 local function get_layout_info()
   local cur = hl.get_active_window()
@@ -277,12 +277,12 @@ hl.gesture({
 
       local info = get_layout_info()
       local total_steps = math.max(1, info.total_items - 1)
-      local step_dist = math.max(45, math.min(75, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
+      local step_dist = math.max(50, math.min(85, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
 
-      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 2.8x)
+      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 2.4x)
       local velocity_mult = 1.0
-      if stroke_peak_speed > 5 then
-        velocity_mult = 1.0 + math.min(1.8, ((stroke_peak_speed - 5) / 10) ^ 1.05)
+      if stroke_peak_speed > 7 then
+        velocity_mult = 1.0 + math.min(1.4, ((stroke_peak_speed - 7) / 10) ^ 1.0)
       end
 
       local effective_dist = abs_dist * velocity_mult
