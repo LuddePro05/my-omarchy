@@ -82,12 +82,16 @@ hl.gesture({
       if e and e.delta and e.delta.x then
         local delta_x = e.delta.x
         if math.abs(delta_x) > 0.05 then
-          hl.dispatch(hl.dsp.layout("move " .. string.format("%.2f", -delta_x)))
+          pcall(function()
+            hl.dispatch(hl.dsp.layout("move " .. string.format("%.2f", -delta_x)))
+          end)
         end
       end
     end,
     finish = function()
-      hl.dispatch(hl.dsp.layout("fit"))
+      pcall(function()
+        hl.dispatch(hl.dsp.layout("fit"))
+      end)
     end,
   },
 })
@@ -114,10 +118,10 @@ local function update_persistent_workspaces()
 
     local limit = math.min(10, maxActive + 1)
     for id = 1, limit do
-      hl.workspace_rule({ workspace = tostring(id), persistent = true })
+      hl.workspace_rule({ workspace = tostring(id), persistent = true, layout = "scrolling" })
     end
     for id = limit + 1, 10 do
-      hl.workspace_rule({ workspace = tostring(id), persistent = false })
+      hl.workspace_rule({ workspace = tostring(id), persistent = false, layout = "scrolling" })
     end
   end)
   if not ok then
