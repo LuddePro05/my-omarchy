@@ -1,6 +1,6 @@
 {
   "bar": {
-    "background": "opaque",
+    "background": "none",
     "id": "ludde.bar",
     "layout": {
       "center": [

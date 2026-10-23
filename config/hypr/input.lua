@@ -79,7 +79,7 @@ _G.navigate_focus = navigate_focus
 
 -- Toggle window between normal column width and fullscreen width (1.0),
 -- inflating to push adjacent windows aside in scrolling layout instead of hiding them.
-local previous_column_widths = {}
+local previous_window_states = {}
 
 local function toggle_fullscreen_inflate()
   local win = hl.get_active_window()
@@ -96,14 +96,33 @@ local function toggle_fullscreen_inflate()
 
   -- If already taking up roughly the full screen width (>= 85%)
   if win.size and win.size.x and win.size.x >= mon_width * 0.85 then
-    local target_width = previous_column_widths[win.address] or 0.49
-    previous_column_widths[win.address] = nil
-    hl.dispatch(hl.dsp.layout("colresize " .. string.format("%.2f", target_width)))
-    hl.dispatch(hl.dsp.layout("fit visible"))
-  else
-    if win.size and win.size.x and mon_width > 0 then
-      previous_column_widths[win.address] = win.size.x / mon_width
+    local state = previous_window_states[win.address] or { width = 0.5, at_x = 0 }
+    previous_window_states[win.address] = nil
+
+    local target_width = state.width or 0.5
+    -- Guarantee half width if it was around half or previously compressed to a third
+    if target_width >= 0.30 and target_width <= 0.55 then
+      target_width = 0.5
     end
+
+    hl.dispatch(hl.dsp.layout("colresize " .. string.format("%.2f", target_width)))
+
+    local cur_win = hl.get_active_window()
+    local cur_x = (cur_win and cur_win.at and cur_win.at.x) or 0
+    local shift = (state.at_x or 0) - cur_x
+    if shift ~= 0 then
+      hl.dispatch(hl.dsp.layout(string.format("move %+d", shift)))
+    end
+  else
+    local current_ratio = (win.size and win.size.x and mon_width > 0) and (win.size.x / mon_width) or 0.5
+    if math.abs(current_ratio - 0.5) < 0.08 then
+      current_ratio = 0.5
+    end
+    local current_at_x = (win.at and win.at.x) or 0
+    previous_window_states[win.address] = {
+      width = current_ratio,
+      at_x = current_at_x,
+    }
     hl.dispatch(hl.dsp.layout("colresize 1.0"))
     hl.dispatch(hl.dsp.layout("fit active"))
   end

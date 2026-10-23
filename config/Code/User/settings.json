@@ -42,14 +42,9 @@
   "editor.showFoldingControls": "mouseover",
   "editor.cursorStyle": "line",
   "editor.cursorBlinking": "smooth",
-  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorSmoothCaretAnimation": "off",
   "terminal.integrated.cursorBlinking": "smooth",
   "terminal.integrated.cursorSmoothCaretAnimation": "on",
-  "vscode_custom_css.imports": [
-    "file:///home/ludde/.config/Code/User/globalStorage/bxnbxrch.action-cursor/action-cursor-inject.js"
-  ],
-  "actionCursor.preset": "minimal",
-  "actionCursor.trailColor": "#89b4fa",
   "editor.renderLineHighlight": "all",
   "editor.renderLineHighlightOnlyWhenFocus": true,
   "editor.fontLigatures": true,
