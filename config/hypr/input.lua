@@ -58,9 +58,6 @@
 -- hl.gesture({ fingers = 3, direction = "right", action = function() hl.dispatch(hl.dsp.focus({ direction = "r" })) end })
 --
 hl.config({
-  cursor = {
-    no_warps = true,
-  },
   input = {
     kb_variant = "nodeadkeys",
   },
@@ -81,7 +78,7 @@ local function navigate_focus(dir)
   hl.dispatch(hl.dsp.focus({ direction = dir }))
   local nxt = hl.get_active_window()
 
-  -- If focus didn't change, we reached the end of the window columns: wrap around
+  -- If focus didn't change, we reached the end of the window columns: wrap around (only if 3+ windows)
   if nxt and nxt.address == cur.address then
     local windows = hl.get_windows() or {}
     local ws_windows = {}
@@ -98,7 +95,8 @@ local function navigate_focus(dir)
       return ax < bx
     end)
 
-    if #ws_windows > 1 then
+    -- Skip wrapping if there are only 2 (or fewer) windows to prevent overshooting
+    if #ws_windows > 2 then
       if dir == "r" then
         hl.dispatch(hl.dsp.focus({ window = "address:" .. ws_windows[1].address }))
       else
@@ -110,72 +108,12 @@ end
 
 _G.navigate_focus = navigate_focus
 
--- Cursor travel animation on focus change
-local anim_id = 0
-
-local function animate_cursor_to(target_x, target_y)
-  local pos = hl.get_cursor_pos()
-  if not pos then return end
-  local from_x, from_y = pos.x, pos.y
-  local dx = target_x - from_x
-  local dy = target_y - from_y
-  local dist = math.sqrt(dx * dx + dy * dy)
-  if dist < 20 then return end
-
-  anim_id = anim_id + 1
-  local cur_id = anim_id
-
-  local steps = 14
-  local interval = 10 -- ~140ms duration
-  local step = 0
-
-  local function tick()
-    if cur_id ~= anim_id then return end
-    step = step + 1
-    local t = step / steps
-    -- Smooth cubic deceleration (fluent_decel style)
-    local ease = 1 - ((1 - t) ^ 3)
-
-    -- Track active window center dynamically in case the layout is animating into view
-    local cur_win = hl.get_active_window()
-    local tx, ty = target_x, target_y
-    if cur_win and cur_win.at and cur_win.size then
-      tx = cur_win.at.x + cur_win.size.x / 2
-      ty = cur_win.at.y + cur_win.size.y / 2
-    end
-
-    local cur_x = from_x + (tx - from_x) * ease
-    local cur_y = from_y + (ty - from_y) * ease
-    hl.dispatch(hl.dsp.cursor.move({ x = math.floor(cur_x + 0.5), y = math.floor(cur_y + 0.5) }))
-    if step < steps then
-      hl.timer(tick, { timeout = interval, type = "oneshot" })
-    end
-  end
-
-  tick()
-end
-
-hl.on("window.active", function(win)
-  if not win or not win.at or not win.size then return end
-  local pos = hl.get_cursor_pos()
-  if not pos then return end
-
-  -- If cursor is already inside the window, it was focused by direct mouse interaction
-  if pos.x >= win.at.x and pos.x <= win.at.x + win.size.x and
-     pos.y >= win.at.y and pos.y <= win.at.y + win.size.y then
-    return
-  end
-
-  local target_x = win.at.x + win.size.x / 2
-  local target_y = win.at.y + win.size.y / 2
-  animate_cursor_to(target_x, target_y)
-end)
-
 -- Three-finger vertical swipe switches workspaces up and down
 hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspace" })
 
--- Three-finger horizontal swipe moves focus between windows (with wrapping, like Super + Arrow)
+-- Three-finger horizontal swipe moves focus between windows (latched to trigger exactly once per stroke)
 local swipe_accum_x = 0
+local swipe_triggered = false
 
 hl.gesture({
   fingers = 3,
@@ -183,21 +121,27 @@ hl.gesture({
   action = {
     start = function()
       swipe_accum_x = 0
+      swipe_triggered = false
     end,
     update = function(e)
-      if e and e.delta and e.delta.x then
+      if not swipe_triggered and e and e.delta and e.delta.x then
         swipe_accum_x = swipe_accum_x + e.delta.x
-        if swipe_accum_x > 35 then
-          swipe_accum_x = 0
+        if swipe_accum_x > 40 then
+          swipe_triggered = true
           navigate_focus("r")
-        elseif swipe_accum_x < -35 then
-          swipe_accum_x = 0
+        elseif swipe_accum_x < -40 then
+          swipe_triggered = true
           navigate_focus("l")
         end
       end
     end,
     finish = function()
       swipe_accum_x = 0
+      swipe_triggered = false
+    end,
+    ["end"] = function()
+      swipe_accum_x = 0
+      swipe_triggered = false
     end,
   },
 })

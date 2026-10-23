@@ -63,6 +63,7 @@ hl.config({
     gaps_in = 0,
     gaps_out = 0,
     border_size = 0,
+    layout = "scrolling",
   },
   decoration = {
     -- Setting global rounding to 23 aligns Omarchy shell popups, widgets, and menus with oxleovision.
@@ -113,6 +114,14 @@ hl.animation({
   speed = 4, 
   bezier = "fluent_decel", 
   style = "slidevert" 
+})
+
+-- Smooth cross-fade when switching active window focus
+hl.animation({
+  leaf = "fadeSwitch",
+  enabled = true,
+  speed = 3,
+  bezier = "fluent_decel",
 })
 
 -- Smart borders & gaps: remove outline and gaps when only one window is on the workspace
