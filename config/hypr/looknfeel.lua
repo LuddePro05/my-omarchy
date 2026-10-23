@@ -135,14 +135,14 @@ hl.window_rule({
   opacity = "0.88 0.82 1.0",
 })
 
--- Obsidian frosted glass transparency (subtle when active, glassier when inactive, fully solid in fullscreen)
+-- Obsidian frosted glass transparency (pronounced frosted glass effect, solid in fullscreen)
 hl.window_rule({
   match = { class = "([oO]bsidian|md\\.obsidian\\.Obsidian)" },
-  opacity = "0.88 0.82 1.0",
+  opacity = "0.78 0.72 1.0",
 })
 hl.window_rule({
   match = { initial_class = "([oO]bsidian|md\\.obsidian\\.Obsidian)" },
-  opacity = "0.88 0.82 1.0",
+  opacity = "0.78 0.72 1.0",
 })
 
 -- Blur layer-shell surfaces

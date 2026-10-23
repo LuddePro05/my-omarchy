@@ -1480,7 +1480,7 @@ Item {
     if (cls.indexOf("obsidian") !== -1) {
       sampleColorTimer.stop()
       detectedAppColor = defaultBarColor
-      targetBarAlpha = 0.88
+      targetBarAlpha = 0.78
       return
     }
 
