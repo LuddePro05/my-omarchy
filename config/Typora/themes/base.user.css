@@ -1,0 +1,17 @@
+/* Typora smooth cursor transition & soft blink */
+.CodeMirror-cursor, 
+.md-cursor {
+  border-left: 2.5px solid #89b4fa !important;
+  border-radius: 1.5px;
+  transition: transform 0.08s ease-out, left 0.08s ease-out, top 0.08s ease-out !important;
+  animation: smooth-blink 1.2s ease-in-out infinite !important;
+}
+
+@keyframes smooth-blink {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 1;
+  }
+}
