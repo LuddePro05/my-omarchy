@@ -146,32 +146,158 @@ hl.gesture({
   },
 })
 
--- Dynamically manage persistent workspaces:
+-- Dynamically manage persistent workspaces and auto-collapse empty middle workspaces:
 -- Workspace 1 can never disappear.
 -- Workspaces up to (maxActive + 1) are kept persistent so trackpad swipe gestures
 -- can navigate continuously to 1 workspace to the right of the highest active window,
 -- without skipping empty workspaces or allowing navigation beyond that.
+--
+-- If an intermediate workspace is emptied (e.g. windows on 1, 2, 3, 4 and all windows
+-- on 2 are closed/moved), subsequent workspaces collapse left (3->2, 4->3), keeping
+-- active workspaces contiguous and leaving only the one right after them empty.
 local timer_pending = false
+local is_collapsing = false
 
-local function update_persistent_workspaces()
+local function collapse_workspaces()
+  if is_collapsing then return end
+  is_collapsing = true
+
   local ok, err = pcall(function()
-    local maxActive = 1
-    local windows = hl.get_windows() or {}
-    for _, w in ipairs(windows) do
-      if w and w.workspace and type(w.workspace.id) == "number" then
-        local wid = w.workspace.id
-        if wid > 0 and wid <= 10 and wid > maxActive then
-          maxActive = wid
-        end
+    local all_windows = hl.get_windows() or {}
+
+    -- Identify workspace blocks (base 0 for 1..10, base 10 for 11..20, etc.)
+    local bases = {}
+    bases[0] = true
+    for _, w in ipairs(all_windows) do
+      if w and w.workspace and type(w.workspace.id) == "number" and not w.pinned and w.workspace.id > 0 then
+        local b = math.floor((w.workspace.id - 1) / 10) * 10
+        bases[b] = true
       end
     end
 
-    local limit = math.min(10, maxActive + 1)
-    for id = 1, limit do
-      hl.workspace_rule({ workspace = tostring(id), persistent = true, layout = "scrolling" })
+    local active_ws = hl.get_active_workspace()
+    local active_ws_id = active_ws and active_ws.id
+    local active_win = hl.get_active_window()
+    local active_win_addr = active_win and active_win.address
+    local active_win_ws = active_win and active_win.workspace and active_win.workspace.id
+
+    for base in pairs(bases) do
+      local windows_by_ws = {}
+      for id = base + 1, base + 10 do
+        windows_by_ws[id] = {}
+      end
+
+      for _, w in ipairs(all_windows) do
+        if w and w.workspace and type(w.workspace.id) == "number" and not w.pinned then
+          local wid = w.workspace.id
+          if wid >= base + 1 and wid <= base + 10 then
+            table.insert(windows_by_ws[wid], w)
+          end
+        end
+      end
+
+      local occupied = {}
+      for id = base + 1, base + 10 do
+        if #windows_by_ws[id] > 0 then
+          table.insert(occupied, id)
+        end
+      end
+
+      -- Check if any workspace needs shifting
+      local needs_shift = false
+      for i, src_ws in ipairs(occupied) do
+        local target_ws = base + i
+        if src_ws ~= target_ws then
+          needs_shift = true
+          break
+        end
+      end
+
+      if needs_shift then
+        local ws_map = {}
+        for i, src_ws in ipairs(occupied) do
+          local target_ws = base + i
+          ws_map[src_ws] = target_ws
+
+          if src_ws ~= target_ws then
+            -- Sort windows left-to-right to preserve column order
+            table.sort(windows_by_ws[src_ws], function(a, b)
+              local ax = (a.at and a.at.x) or 0
+              local bx = (b.at and b.at.x) or 0
+              return ax < bx
+            end)
+
+            for _, w in ipairs(windows_by_ws[src_ws]) do
+              hl.dispatch(hl.dsp.window.move({
+                workspace = tostring(target_ws),
+                follow = false,
+                window = "address:" .. w.address
+              }))
+            end
+          end
+        end
+
+        -- Update focus so user stays with their active window or workspace
+        if active_win and active_win_ws and ws_map[active_win_ws] then
+          local new_ws = ws_map[active_win_ws]
+          if new_ws ~= active_win_ws then
+            hl.dispatch(hl.dsp.focus({ workspace = tostring(new_ws) }))
+            hl.dispatch(hl.dsp.focus({ window = "address:" .. active_win_addr }))
+          end
+        elseif active_ws_id and active_ws_id >= base + 1 and active_ws_id <= base + 10 then
+          if ws_map[active_ws_id] then
+            local new_ws = ws_map[active_ws_id]
+            if new_ws ~= active_ws_id then
+              hl.dispatch(hl.dsp.focus({ workspace = tostring(new_ws) }))
+            end
+          else
+            local target_focus = math.min(active_ws_id, base + math.max(1, #occupied + 1))
+            if target_focus ~= active_ws_id then
+              hl.dispatch(hl.dsp.focus({ workspace = tostring(target_focus) }))
+            end
+          end
+        end
+      end
     end
-    for id = limit + 1, 10 do
-      hl.workspace_rule({ workspace = tostring(id), persistent = false, layout = "scrolling" })
+  end)
+
+  if not ok then
+    print("collapse_workspaces error: " .. tostring(err))
+  end
+
+  is_collapsing = false
+end
+
+local function update_persistent_workspaces()
+  local ok, err = pcall(function()
+    local windows = hl.get_windows() or {}
+    local bases = {}
+    bases[0] = true
+    for _, w in ipairs(windows) do
+      if w and w.workspace and type(w.workspace.id) == "number" and not w.pinned and w.workspace.id > 0 then
+        local b = math.floor((w.workspace.id - 1) / 10) * 10
+        bases[b] = true
+      end
+    end
+
+    for base in pairs(bases) do
+      local maxActive = base + 1
+      for _, w in ipairs(windows) do
+        if w and w.workspace and type(w.workspace.id) == "number" and not w.pinned then
+          local wid = w.workspace.id
+          if wid >= base + 1 and wid <= base + 10 and wid > maxActive then
+            maxActive = wid
+          end
+        end
+      end
+
+      local limit = math.min(base + 10, maxActive + 1)
+      for id = base + 1, limit do
+        hl.workspace_rule({ workspace = tostring(id), persistent = true, layout = "scrolling" })
+      end
+      for id = limit + 1, base + 10 do
+        hl.workspace_rule({ workspace = tostring(id), persistent = false, layout = "scrolling" })
+      end
     end
   end)
   if not ok then
@@ -184,22 +310,32 @@ local function schedule_workspace_update()
     timer_pending = true
     hl.timer(function()
       timer_pending = false
+      if not is_collapsing then
+        collapse_workspaces()
+      end
       update_persistent_workspaces()
     end, { timeout = 50, type = "oneshot" })
   end
 end
 
 local function on_workspace_state_change()
-  update_persistent_workspaces()
+  if is_collapsing then return end
   schedule_workspace_update()
 end
 
 update_persistent_workspaces()
 
-hl.on("window.open", on_workspace_state_change)
+hl.on("window.open", function()
+  if is_collapsing then return end
+  update_persistent_workspaces()
+  schedule_workspace_update()
+end)
 hl.on("window.close", on_workspace_state_change)
 hl.on("window.destroy", on_workspace_state_change)
 hl.on("window.move_to_workspace", on_workspace_state_change)
 hl.on("workspace.active", schedule_workspace_update)
-hl.on("config.reloaded", update_persistent_workspaces)
+hl.on("config.reloaded", function()
+  collapse_workspaces()
+  update_persistent_workspaces()
+end)
 
