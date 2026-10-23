@@ -139,7 +139,7 @@ hl.gesture({
         local speed = math.abs(dx)
         local multiplier = 1.0
         if speed > 4 then
-          multiplier = 1.0 + math.min(4.0, math.pow((speed - 4) / 8, 1.3))
+          multiplier = 1.0 + math.min(4.0, ((speed - 4) / 8) ^ 1.3)
         end
 
         swipe_accum_x = swipe_accum_x + (dx * multiplier)
