@@ -24,7 +24,7 @@ if command -v omarchy-pkg-add &>/dev/null; then
   omarchy-pkg-add kitty 2>/dev/null || sudo pacman -S --noconfirm --needed kitty 2>/dev/null || true
 fi
 
-for item in hypr omarchy alacritty kitty ghostty fontconfig gtk-4.0 fastfetch walker waybar chromium-flags.conf brave-flags.conf starship.toml Code Typora; do
+for item in hypr omarchy alacritty kitty ghostty fontconfig gtk-4.0 fastfetch walker waybar chromium-flags.conf brave-flags.conf starship.toml Code Typora nvim; do
   if [ -e "$HOME/.config/$item" ]; then
     cp -a "$HOME/.config/$item" "$BACKUP_DIR/"
   fi
