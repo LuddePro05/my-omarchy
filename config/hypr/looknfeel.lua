@@ -65,7 +65,9 @@ hl.config({
     border_size = 0,
   },
   decoration = {
-    rounding = 0,
+    -- Setting global rounding to 23 aligns Omarchy shell popups, widgets, and menus with oxleovision.
+    -- Workspace windows are pinned to rounding = 0 via window rules below.
+    rounding = 23,
 
     dim_inactive = true,
     dim_strength = 0.15,
@@ -96,9 +98,8 @@ hl.config({
   },
 })
 
--- Keep workspace windows at corner rounding = 0, no outline/border
-hl.window_rule({ match = { class = ".*" }, rounding = 0, border_size = 0 })
-hl.window_rule({ match = { title = ".*" }, rounding = 0, border_size = 0 })
+-- Keep workspace tiled windows at corner rounding = 0, no outline/border
+hl.window_rule({ match = { float = false }, rounding = 0, border_size = 0 })
 
 -- Define your custom Chromebook-style curves
 hl.curve("fluent_decel", { type = "bezier", points = { {0.1, 1}, {1, 1} } })
