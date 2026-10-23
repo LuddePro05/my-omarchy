@@ -1476,6 +1476,14 @@ Item {
       return
     }
 
+    // Obsidian (frosted glass matching theme)
+    if (cls.indexOf("obsidian") !== -1) {
+      sampleColorTimer.stop()
+      detectedAppColor = defaultBarColor
+      targetBarAlpha = 0.88
+      return
+    }
+
     // Terminal (frosted glass matching theme)
     if (cls === "alacritty" || cls === "org.omarchy.agent" || cls === "kitty" || cls === "foot" || cls === "ghostty") {
       sampleColorTimer.stop()

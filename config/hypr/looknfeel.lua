@@ -135,6 +135,16 @@ hl.window_rule({
   opacity = "0.88 0.82 1.0",
 })
 
+-- Obsidian frosted glass transparency (subtle when active, glassier when inactive, fully solid in fullscreen)
+hl.window_rule({
+  match = { class = "([oO]bsidian|md\\.obsidian\\.Obsidian)" },
+  opacity = "0.88 0.82 1.0",
+})
+hl.window_rule({
+  match = { initial_class = "([oO]bsidian|md\\.obsidian\\.Obsidian)" },
+  opacity = "0.88 0.82 1.0",
+})
+
 -- Blur layer-shell surfaces
 hl.layer_rule({ match = { namespace = "omarchy-osd" }, blur = true, ignore_alpha = 0.3 })
 hl.layer_rule({ match = { namespace = "omarchy-notifications" }, blur = true, ignore_alpha = 0.3 })

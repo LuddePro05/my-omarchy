@@ -21,7 +21,7 @@ def get_window_color():
 
         # Known frosted / transparent applications use the native desktop theme background
         win_class = (win.get('class') or '').lower()
-        if any(c in win_class for c in ['alacritty', 'org.omarchy.agent', 'kitty', 'foot', 'ghostty', 'chrom', 'code']):
+        if any(c in win_class for c in ['alacritty', 'org.omarchy.agent', 'kitty', 'foot', 'ghostty', 'chrom', 'code', 'obsidian']):
             return 'DEFAULT'
 
         at_x, at_y = win.get('at', [0, 0])
