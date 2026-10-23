@@ -120,12 +120,18 @@ hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspa
 -- length and drag speed naturally increasing travel distance without overshooting.
 local stroke_dist_x = 0
 local stroke_steps_taken = 0
+local stroke_target_steps = 0
 local stroke_peak_speed = 0
 local stroke_direction = 0 -- 1 for right, -1 for left
+local stroke_anchor_left = 0
+local stroke_anchor_right = 0
 local last_step_time = 0
+local momentum_session = 0
 
-local TRACKPAD_SPAN = 380
-local MIN_STEP_INTERVAL_MS = 140
+local TRACKPAD_SPAN = 240
+local MIN_STEP_INTERVAL_MS = 65
+local MOMENTUM_INTERVAL_MS = 75
+local DEADZONE = 18
 
 local function get_layout_info()
   local cur = hl.get_active_window()
@@ -146,7 +152,12 @@ local function get_layout_info()
   table.sort(ws_windows, function(a, b)
     local ax = (a.at and a.at.x) or 0
     local bx = (b.at and b.at.x) or 0
-    return ax < bx
+    if ax ~= bx then
+      return ax < bx
+    end
+    local ay = (a.at and a.at.y) or 0
+    local by = (b.at and b.at.y) or 0
+    return ay < by
   end)
 
   local cur_idx = 1
@@ -186,58 +197,114 @@ local function get_layout_info()
   }
 end
 
+local function handle_stroke_end()
+  local dir = stroke_direction > 0 and "r" or "l"
+  local remaining_steps = stroke_target_steps - stroke_steps_taken
+
+  if remaining_steps > 0 and stroke_direction ~= 0 then
+    local session = momentum_session
+    local function run_momentum(remaining)
+      if remaining <= 0 then return end
+      hl.timer(function()
+        if session ~= momentum_session then return end
+        navigate_focus(dir)
+        run_momentum(remaining - 1)
+      end, { timeout = MOMENTUM_INTERVAL_MS, type = "oneshot" })
+    end
+    run_momentum(remaining_steps)
+  end
+
+  stroke_dist_x = 0
+  stroke_steps_taken = 0
+  stroke_target_steps = 0
+  stroke_peak_speed = 0
+  stroke_direction = 0
+  stroke_anchor_left = 0
+  stroke_anchor_right = 0
+  last_step_time = 0
+end
+
 hl.gesture({
   fingers = 3,
   direction = "horizontal",
   action = {
     start = function()
+      -- Cancel any active momentum from a previous flick
+      momentum_session = momentum_session + 1
+
       stroke_dist_x = 0
       stroke_steps_taken = 0
+      stroke_target_steps = 0
       stroke_peak_speed = 0
       stroke_direction = 0
       last_step_time = 0
+
+      local info = get_layout_info()
+      stroke_anchor_left = info.steps_left
+      stroke_anchor_right = info.steps_right
     end,
     update = function(e)
       if not (e and e.delta and e.delta.x) then return end
       local dx = e.delta.x
       local now = (e and e.time_ms) or (os.clock() * 1000)
-
-      -- Track peak velocity during this stroke
       local speed = math.abs(dx)
+
       if speed > stroke_peak_speed then
         stroke_peak_speed = speed
       end
 
-      -- Turnaround detection: if user reverses direction, reset stroke accumulation
+      -- Turnaround detection: if user reverses direction, reset stroke accumulation and re-anchor
       if (stroke_direction > 0 and dx < -2) or (stroke_direction < 0 and dx > 2) then
         stroke_dist_x = 0
         stroke_steps_taken = 0
+        stroke_target_steps = 0
         stroke_peak_speed = speed
         stroke_direction = dx > 0 and 1 or -1
+        local info = get_layout_info()
+        stroke_anchor_left = info.steps_left
+        stroke_anchor_right = info.steps_right
       elseif stroke_direction == 0 and math.abs(dx) > 1 then
         stroke_direction = dx > 0 and 1 or -1
       end
 
       stroke_dist_x = stroke_dist_x + dx
+      local abs_dist = math.abs(stroke_dist_x)
+
+      -- Deadzone check: require either minimal travel or distinct flick velocity to activate
+      if abs_dist < DEADZONE and not (abs_dist >= 10 and stroke_peak_speed >= 12) then
+        return
+      end
 
       local info = get_layout_info()
       local total_steps = math.max(1, info.total_items - 1)
-      local step_dist = TRACKPAD_SPAN / total_steps
+      local step_dist = math.max(45, math.min(80, TRACKPAD_SPAN / total_steps))
 
-      -- Velocity gain: slow drag = 1.0x (1-to-1 distance); fast flick boosts up to 2.4x
-      local velocity_gain = 1.0
-      if stroke_peak_speed > 6 then
-        velocity_gain = 1.0 + math.min(1.4, ((stroke_peak_speed - 6) / 10) ^ 1.1)
+      -- Base steps from physical travel distance
+      local dist_steps = 1 + math.floor(math.max(0, abs_dist - DEADZONE) / step_dist)
+
+      -- Speed bonus: faster / harder swipes earn extra steps (Chromebook-like momentum)
+      local speed_bonus = 0
+      if stroke_peak_speed >= 30 then
+        speed_bonus = 4
+      elseif stroke_peak_speed >= 20 then
+        speed_bonus = 3
+      elseif stroke_peak_speed >= 13 then
+        speed_bonus = 2
+      elseif stroke_peak_speed >= 7 then
+        speed_bonus = 1
       end
 
-      local effective_dist = math.abs(stroke_dist_x) * velocity_gain
-      local target_steps = math.floor(effective_dist / step_dist)
+      local target_steps = dist_steps + speed_bonus
 
-      -- Determine maximum possible steps in the current direction
-      local max_available = (stroke_dist_x > 0) and info.steps_right or info.steps_left
+      -- Maximum swipe / hard flick reaches the end of the strip
+      local max_available = (stroke_dist_x > 0) and stroke_anchor_right or stroke_anchor_left
+      if stroke_peak_speed >= 30 then
+        target_steps = math.max(target_steps, max_available)
+      end
       target_steps = math.min(target_steps, max_available)
+      stroke_target_steps = target_steps
 
-      -- Trigger step if target exceeds steps already taken, paced with minimum interval
+      -- Fire steps during contact if target exceeds steps taken, paced at MIN_STEP_INTERVAL_MS
       if target_steps > stroke_steps_taken and (now - last_step_time >= MIN_STEP_INTERVAL_MS) then
         if stroke_dist_x > 0 then
           navigate_focus("r")
@@ -248,18 +315,8 @@ hl.gesture({
         last_step_time = now
       end
     end,
-    finish = function()
-      stroke_dist_x = 0
-      stroke_steps_taken = 0
-      stroke_peak_speed = 0
-      stroke_direction = 0
-    end,
-    ["end"] = function()
-      stroke_dist_x = 0
-      stroke_steps_taken = 0
-      stroke_peak_speed = 0
-      stroke_direction = 0
-    end,
+    finish = handle_stroke_end,
+    ["end"] = handle_stroke_end,
   },
 })
 
