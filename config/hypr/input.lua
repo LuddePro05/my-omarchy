@@ -279,10 +279,10 @@ hl.gesture({
       local total_steps = math.max(1, info.total_items - 1)
       local step_dist = math.max(50, math.min(85, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
 
-      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 1.5x)
+      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 1.25x)
       local velocity_mult = 1.0
-      if stroke_peak_speed > 11 then
-        velocity_mult = 1.0 + math.min(0.5, ((stroke_peak_speed - 11) / 14) ^ 1.0)
+      if stroke_peak_speed > 14 then
+        velocity_mult = 1.0 + math.min(0.25, ((stroke_peak_speed - 14) / 16) ^ 1.0)
       end
 
       local effective_dist = abs_dist * velocity_mult
