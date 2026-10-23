@@ -60,14 +60,12 @@ o.transparent_window("(com\\.microsoft\\.VSCode|code-url-handler|code)", "0.90 0
 
 hl.config({
   general = {
-    gaps_in = 2,
-    gaps_out = 2,
+    gaps_in = 0,
+    gaps_out = 0,
     border_size = 0,
   },
   decoration = {
-    -- Setting global rounding to 23 aligns Omarchy shell popups and menus with oxleovision.
-    -- Workspace windows are pinned to rounding = 3 via window rules below.
-    rounding = 23,
+    rounding = 0,
 
     blur = {
       enabled = true,
@@ -87,9 +85,9 @@ hl.config({
   },
 })
 
--- Keep workspace windows at corner rounding = 3, no outline/border
-hl.window_rule({ match = { class = ".*" }, rounding = 3, border_size = 0 })
-hl.window_rule({ match = { title = ".*" }, rounding = 3, border_size = 0 })
+-- Keep workspace windows at corner rounding = 0, no outline/border
+hl.window_rule({ match = { class = ".*" }, rounding = 0, border_size = 0 })
+hl.window_rule({ match = { title = ".*" }, rounding = 0, border_size = 0 })
 
 -- Define your custom Chromebook-style curves
 hl.curve("fluent_decel", { type = "bezier", points = { {0.1, 1}, {1, 1} } })
