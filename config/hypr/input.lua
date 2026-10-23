@@ -133,6 +133,7 @@ local MIN_STEP_INTERVAL_MS = 75
 local MOMENTUM_INTERVAL_MS = 85
 local DEADZONE = 20
 local FIRST_STEP_DIST = 35
+local MULTIPLIER_MIN_DIST = 55
 
 local function get_layout_info()
   local cur = hl.get_active_window()
@@ -279,13 +280,14 @@ hl.gesture({
       local total_steps = math.max(1, info.total_items - 1)
       local step_dist = math.max(50, math.min(85, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
 
-      -- Velocity scaling: faster drags travel further by magnifying physical distance (1.0x to 1.10x)
-      local velocity_mult = 1.0
-      if stroke_peak_speed > 18 then
-        velocity_mult = 1.0 + math.min(0.10, ((stroke_peak_speed - 18) / 16) ^ 1.0)
+      -- Velocity scaling: only activates after traveling past MULTIPLIER_MIN_DIST,
+      -- ensuring short swipes are strictly 1:1 physical distance without speed magnification.
+      local effective_dist = abs_dist
+      if abs_dist > MULTIPLIER_MIN_DIST and stroke_peak_speed > 14 then
+        local excess_dist = abs_dist - MULTIPLIER_MIN_DIST
+        local boost_factor = math.min(0.35, ((stroke_peak_speed - 14) / 14) ^ 1.0)
+        effective_dist = abs_dist + (excess_dist * boost_factor)
       end
-
-      local effective_dist = abs_dist * velocity_mult
       local target_steps = 0
       if effective_dist >= FIRST_STEP_DIST then
         target_steps = 1 + math.floor((effective_dist - FIRST_STEP_DIST) / step_dist)
