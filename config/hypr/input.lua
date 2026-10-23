@@ -70,50 +70,54 @@ hl.config({
   }
 })
 
--- Navigate focus between windows on the active workspace with seamless edge wrapping
+-- Navigate focus between windows on the active workspace without wrap-around
 local function navigate_focus(dir)
-  local cur = hl.get_active_window()
-  if not cur then return end
-
   hl.dispatch(hl.dsp.focus({ direction = dir }))
-  local nxt = hl.get_active_window()
-
-  -- If focus didn't change, we reached the end of the window columns: wrap around (only if 3+ windows)
-  if nxt and nxt.address == cur.address then
-    local windows = hl.get_windows() or {}
-    local ws_windows = {}
-    local cur_ws_id = cur.workspace and cur.workspace.id
-    for _, w in ipairs(windows) do
-      if w and w.workspace and w.workspace.id == cur_ws_id and not w.floating then
-        table.insert(ws_windows, w)
-      end
-    end
-
-    table.sort(ws_windows, function(a, b)
-      local ax = (a.at and a.at.x) or 0
-      local bx = (b.at and b.at.x) or 0
-      return ax < bx
-    end)
-
-    -- Skip wrapping if there are only 2 (or fewer) windows to prevent overshooting
-    if #ws_windows > 2 then
-      if dir == "r" then
-        hl.dispatch(hl.dsp.focus({ window = "address:" .. ws_windows[1].address }))
-      else
-        hl.dispatch(hl.dsp.focus({ window = "address:" .. ws_windows[#ws_windows].address }))
-      end
-    end
-  end
 end
 
 _G.navigate_focus = navigate_focus
 
+-- Toggle window between normal column width and fullscreen width (1.0),
+-- inflating to push adjacent windows aside in scrolling layout instead of hiding them.
+local previous_column_widths = {}
+
+local function toggle_fullscreen_inflate()
+  local win = hl.get_active_window()
+  if not win then return end
+
+  -- If floating or in native fullscreen, use normal fullscreen toggle
+  if win.floating or (win.fullscreen and win.fullscreen ~= 0) then
+    hl.dispatch(hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+    return
+  end
+
+  local mon = hl.get_active_monitor()
+  local mon_width = (mon and mon.width) or 1920
+
+  -- If already taking up roughly the full screen width (>= 85%)
+  if win.size and win.size.x and win.size.x >= mon_width * 0.85 then
+    local target_width = previous_column_widths[win.address] or 0.49
+    previous_column_widths[win.address] = nil
+    hl.dispatch(hl.dsp.layout("colresize " .. string.format("%.2f", target_width)))
+    hl.dispatch(hl.dsp.layout("fit visible"))
+  else
+    if win.size and win.size.x and mon_width > 0 then
+      previous_column_widths[win.address] = win.size.x / mon_width
+    end
+    hl.dispatch(hl.dsp.layout("colresize 1.0"))
+    hl.dispatch(hl.dsp.layout("fit active"))
+  end
+end
+
+_G.toggle_fullscreen_inflate = toggle_fullscreen_inflate
+
 -- Three-finger vertical swipe switches workspaces up and down
 hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspace" })
 
--- Three-finger horizontal swipe moves focus between windows (latched to trigger exactly once per stroke)
+-- Three-finger horizontal swipe moves focus between windows continuously with velocity scaling:
+-- faster drags travel further across the window tape.
 local swipe_accum_x = 0
-local swipe_triggered = false
+local SWIPE_THRESHOLD = 32
 
 hl.gesture({
   fingers = 3,
@@ -121,27 +125,40 @@ hl.gesture({
   action = {
     start = function()
       swipe_accum_x = 0
-      swipe_triggered = false
     end,
     update = function(e)
-      if not swipe_triggered and e and e.delta and e.delta.x then
-        swipe_accum_x = swipe_accum_x + e.delta.x
-        if swipe_accum_x > 40 then
-          swipe_triggered = true
+      if e and e.delta and e.delta.x then
+        local dx = e.delta.x
+
+        -- Instant turnaround if swiping direction reverses
+        if (swipe_accum_x > 0 and dx < 0) or (swipe_accum_x < 0 and dx > 0) then
+          swipe_accum_x = 0
+        end
+
+        -- Velocity scaling: faster drags travel further
+        local speed = math.abs(dx)
+        local multiplier = 1.0
+        if speed > 4 then
+          multiplier = 1.0 + math.min(4.0, math.pow((speed - 4) / 8, 1.3))
+        end
+
+        swipe_accum_x = swipe_accum_x + (dx * multiplier)
+
+        -- Continuous stepping through windows
+        if swipe_accum_x >= SWIPE_THRESHOLD then
           navigate_focus("r")
-        elseif swipe_accum_x < -40 then
-          swipe_triggered = true
+          swipe_accum_x = math.min(SWIPE_THRESHOLD * 0.5, swipe_accum_x - SWIPE_THRESHOLD)
+        elseif swipe_accum_x <= -SWIPE_THRESHOLD then
           navigate_focus("l")
+          swipe_accum_x = math.max(-SWIPE_THRESHOLD * 0.5, swipe_accum_x + SWIPE_THRESHOLD)
         end
       end
     end,
     finish = function()
       swipe_accum_x = 0
-      swipe_triggered = false
     end,
     ["end"] = function()
       swipe_accum_x = 0
-      swipe_triggered = false
     end,
   },
 })
