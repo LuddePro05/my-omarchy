@@ -114,10 +114,54 @@ _G.toggle_fullscreen_inflate = toggle_fullscreen_inflate
 -- Three-finger vertical swipe switches workspaces up and down
 hl.gesture({ fingers = 3, direction = "vertical", scale = 1.1, action = "workspace" })
 
--- Three-finger horizontal swipe moves focus between windows continuously with velocity scaling:
--- faster drags travel further across the window tape.
+-- Three-finger horizontal swipe moves focus between windows with Chromebook-like physics:
+-- sensitivity dynamically scales with the number of workspaces/windows so that a full
+-- edge-to-edge swipe spans across the entire strip to the far right/left, with swipe
+-- length and drag speed naturally increasing travel distance.
 local swipe_accum_x = 0
-local SWIPE_THRESHOLD = 32
+local MAX_SWIPE_DISTANCE = 350
+
+local function get_swipe_step_threshold()
+  local cur = hl.get_active_window()
+  local cur_ws_id = cur and cur.workspace and cur.workspace.id
+  if not cur_ws_id then
+    local ws = hl.get_active_workspace()
+    cur_ws_id = ws and ws.id
+  end
+
+  local all_windows = hl.get_windows() or {}
+
+  -- Count tiled windows on current workspace
+  local win_count = 0
+  for _, w in ipairs(all_windows) do
+    if w and w.workspace and w.workspace.id == cur_ws_id and not w.floating and not w.pinned then
+      win_count = win_count + 1
+    end
+  end
+
+  -- Count active workspaces in current monitor block
+  local base = 0
+  if cur_ws_id and cur_ws_id > 0 then
+    base = math.floor((cur_ws_id - 1) / 10) * 10
+  end
+
+  local max_active_ws = base + 1
+  for _, w in ipairs(all_windows) do
+    if w and w.workspace and type(w.workspace.id) == "number" and not w.pinned then
+      local wid = w.workspace.id
+      if wid >= base + 1 and wid <= base + 10 and wid > max_active_ws then
+        max_active_ws = wid
+      end
+    end
+  end
+  local ws_count = max_active_ws - base
+
+  -- Scale sensitivity by the number of items
+  local items = math.max(win_count, ws_count, 2)
+  local steps = math.max(1, items - 1)
+
+  return MAX_SWIPE_DISTANCE / steps
+end
 
 hl.gesture({
   fingers = 3,
@@ -135,22 +179,22 @@ hl.gesture({
           swipe_accum_x = 0
         end
 
-        -- Velocity scaling: faster drags travel further
+        -- Velocity scaling: faster drags travel further (Chromebook-like acceleration curve)
         local speed = math.abs(dx)
-        local multiplier = 1.0
-        if speed > 4 then
-          multiplier = 1.0 + math.min(4.0, ((speed - 4) / 8) ^ 1.3)
+        local velocity_boost = 1.0
+        if speed > 5 then
+          velocity_boost = 1.0 + math.min(2.5, ((speed - 5) / 10) ^ 1.2)
         end
 
-        swipe_accum_x = swipe_accum_x + (dx * multiplier)
+        swipe_accum_x = swipe_accum_x + (dx * velocity_boost)
 
-        -- Continuous stepping through windows
-        if swipe_accum_x >= SWIPE_THRESHOLD then
+        local step_threshold = get_swipe_step_threshold()
+        if swipe_accum_x >= step_threshold then
           navigate_focus("r")
-          swipe_accum_x = math.min(SWIPE_THRESHOLD * 0.5, swipe_accum_x - SWIPE_THRESHOLD)
-        elseif swipe_accum_x <= -SWIPE_THRESHOLD then
+          swipe_accum_x = math.min(step_threshold * 0.35, swipe_accum_x - step_threshold)
+        elseif swipe_accum_x <= -step_threshold then
           navigate_focus("l")
-          swipe_accum_x = math.max(-SWIPE_THRESHOLD * 0.5, swipe_accum_x + SWIPE_THRESHOLD)
+          swipe_accum_x = math.max(-step_threshold * 0.35, swipe_accum_x + step_threshold)
         end
       end
     end,
