@@ -128,12 +128,14 @@ local stroke_anchor_right = 0
 local last_step_time = 0
 local momentum_session = 0
 
-local TRACKPAD_SPAN = 260
+-- Match Hyprland workspace swipe parameters (workspace_swipe_distance = 350, scale = 1.1)
+local SWIPE_DISTANCE = 318 -- 350 / 1.1
+local MIN_SPEED_TO_FORCE = 5 -- matches workspace_swipe_min_speed_to_force
+local CANCEL_RATIO = 0.1 -- matches workspace_swipe_cancel_ratio
+local COMMIT_THRESHOLD = SWIPE_DISTANCE * CANCEL_RATIO -- ~32px
+local NOISE_DEADZONE = 15
 local MIN_STEP_INTERVAL_MS = 75
 local MOMENTUM_INTERVAL_MS = 85
-local DEADZONE = 20
-local FIRST_STEP_DIST = 35
-local MULTIPLIER_MIN_DIST = 55
 
 local function get_layout_info()
   local cur = hl.get_active_window()
@@ -271,34 +273,19 @@ hl.gesture({
       stroke_dist_x = stroke_dist_x + dx
       local abs_dist = math.abs(stroke_dist_x)
 
-      -- Deadzone check to prevent accidental triggers from resting touches
-      if abs_dist < DEADZONE then
+      -- Ignore minor noise under deadzone
+      if abs_dist < NOISE_DEADZONE and stroke_peak_speed < MIN_SPEED_TO_FORCE then
         return
       end
 
-      local info = get_layout_info()
-      local total_steps = math.max(1, info.total_items - 1)
-      local step_dist = math.max(50, math.min(85, (TRACKPAD_SPAN - FIRST_STEP_DIST) / total_steps))
-
-      -- Velocity scaling: only activates after traveling past MULTIPLIER_MIN_DIST,
-      -- ensuring short swipes are strictly 1:1 physical distance without speed magnification.
-      local effective_dist = abs_dist
-      if abs_dist > MULTIPLIER_MIN_DIST and stroke_peak_speed > 14 then
-        local excess_dist = abs_dist - MULTIPLIER_MIN_DIST
-        local boost_factor = math.min(0.35, ((stroke_peak_speed - 14) / 14) ^ 1.0)
-        effective_dist = abs_dist + (excess_dist * boost_factor)
-      end
+      -- Match Hyprland workspace swipe logic:
+      -- Commit step if distance exceeds cancel_ratio threshold (~32px) OR if speed exceeds min_speed_to_force (5)
       local target_steps = 0
-      if effective_dist >= FIRST_STEP_DIST then
-        target_steps = 1 + math.floor((effective_dist - FIRST_STEP_DIST) / step_dist)
+      if abs_dist >= COMMIT_THRESHOLD or stroke_peak_speed >= MIN_SPEED_TO_FORCE then
+        target_steps = 1 + math.floor(math.max(0, abs_dist - COMMIT_THRESHOLD) / SWIPE_DISTANCE)
       end
 
-      -- A full physical trackpad swipe reaches all the way to the end
       local max_available = (stroke_dist_x > 0) and stroke_anchor_right or stroke_anchor_left
-      if abs_dist >= TRACKPAD_SPAN * 0.85 then
-        target_steps = math.max(target_steps, max_available)
-      end
-
       target_steps = math.min(target_steps, max_available)
       stroke_target_steps = target_steps
 
