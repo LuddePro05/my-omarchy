@@ -98,6 +98,7 @@ Item {
     "code": Commons.Color.background,
     "com.microsoft.vscode": Commons.Color.background,
     "alacritty": Commons.Color.background,
+    "kitty": Commons.Color.background,
     "org.omarchy.agent": Commons.Color.background,
     "md.obsidian.obsidian": Qt.color("#282828"),
     "obsidian": Qt.color("#282828")
