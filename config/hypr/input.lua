@@ -95,9 +95,14 @@ local function toggle_fullscreen_inflate()
   local cur_ws_id = win.workspace and win.workspace.id
   if cur_ws_id and ws_extra_shift[cur_ws_id] then
     local shift_info = ws_extra_shift[cur_ws_id]
-    if shift_info and shift_info.is_fullscreen then
-      hl.dispatch(hl.dsp.layout("move -col"))
-    else
+    if shift_info and shift_info.state == "full" then
+      if shift_info.was_half then
+        local shift = shift_info.shift or 960
+        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift * 2)))
+      else
+        hl.dispatch(hl.dsp.layout("move -col"))
+      end
+    elseif shift_info and shift_info.state == "half" then
       local shift = (shift_info and shift_info.shift) or 960
       hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
     end
@@ -224,18 +229,20 @@ local function get_layout_info()
   local mon = hl.get_active_monitor()
   local mon_width = (mon and mon.width) or 1920
 
+  local rightmost = (#ws_windows > 0) and ws_windows[#ws_windows] or nil
+  local is_fs = rightmost and get_window_is_fullscreen(rightmost, mon_width)
+
   -- Check if workspace is currently extra-shifted to the right:
-  local is_shifted = false
+  local shift_state = "none"
   local shift_info = cur_ws_id and ws_extra_shift[cur_ws_id]
-  if shift_info and #ws_windows > 0 then
-    local rightmost = ws_windows[#ws_windows]
-    if rightmost and rightmost.address == shift_info.address then
-      is_shifted = true
-    else
-      ws_extra_shift[cur_ws_id] = nil
-    end
+  if shift_info and #ws_windows > 0 and rightmost and rightmost.address == shift_info.address then
+    shift_state = shift_info.state or "half"
+  else
+    if cur_ws_id then ws_extra_shift[cur_ws_id] = nil end
+    shift_info = nil
   end
 
+  local is_shifted = (shift_state ~= "none")
   local cur_idx = is_shifted and #ws_windows or 1
   if cur then
     for i, w in ipairs(ws_windows) do
@@ -264,8 +271,24 @@ local function get_layout_info()
   local ws_count = max_active_ws - base
   local total_items = math.max(#ws_windows, ws_count, 2)
 
-  local steps_left = (cur_idx - 1) + (is_shifted and 1 or 0)
-  local steps_right = math.max(0, #ws_windows - cur_idx) + (is_shifted and 0 or (#ws_windows > 0 and 1 or 0))
+  local steps_right = 0
+  local steps_left = 0
+
+  if shift_state == "full" then
+    steps_right = 0
+    if shift_info and shift_info.was_half then
+      steps_left = (#ws_windows - 1) + 2
+    else
+      steps_left = (#ws_windows - 1) + 1
+    end
+  elseif shift_state == "half" then
+    steps_right = 1
+    steps_left = (#ws_windows - 1) + 1
+  else
+    local extra_available = (#ws_windows > 0) and (is_fs and 1 or 2) or 0
+    steps_right = math.max(0, #ws_windows - cur_idx) + extra_available
+    steps_left = cur_idx - 1
+  end
 
   return {
     cur_idx = cur_idx,
@@ -278,6 +301,8 @@ local function get_layout_info()
     cur_win = cur,
     mon_width = mon_width,
     is_shifted = is_shifted,
+    shift_state = shift_state,
+    shift_info = shift_info,
   }
 end
 
@@ -286,22 +311,34 @@ navigate_focus = function(dir)
   local cur_ws_id = info.ws_id
   local ws_windows = info.ws_windows or {}
   local mon_width = info.mon_width or 1920
+  local shift_info = cur_ws_id and ws_extra_shift[cur_ws_id]
+  local rightmost_win = ws_windows[#ws_windows] or info.cur_win
+  local is_fs = get_window_is_fullscreen(rightmost_win, mon_width)
 
   if dir == "r" then
-    if info.is_shifted then
-      -- Already extra shifted to the right; boundary reached
+    if shift_info and shift_info.state == "full" then
+      -- Boundary reached
       return
-    end
-
-    if #ws_windows > 0 and info.cur_idx >= #ws_windows then
-      -- At the rightmost window: take the extra step to the right!
-      local rightmost_win = ws_windows[#ws_windows] or info.cur_win
-      local is_fs = get_window_is_fullscreen(rightmost_win, mon_width)
+    elseif shift_info and shift_info.state == "half" then
+      -- Transition from half-shifted to full-shifted:
+      -- User was at "half app half screen", swiped right again -> go an entire window to the right!
+      hl.dispatch(hl.dsp.layout("move +col"))
+      if cur_ws_id and rightmost_win then
+        ws_extra_shift[cur_ws_id] = {
+          state = "full",
+          was_half = true,
+          shift = shift_info.shift or math.floor(mon_width * 0.5),
+          address = rightmost_win.address,
+        }
+      end
+    elseif #ws_windows > 0 and info.cur_idx >= #ws_windows then
+      -- At rightmost window, take extra step right
       if is_fs then
         hl.dispatch(hl.dsp.layout("move +col"))
         if cur_ws_id and rightmost_win then
           ws_extra_shift[cur_ws_id] = {
-            is_fullscreen = true,
+            state = "full",
+            was_half = false,
             address = rightmost_win.address,
           }
         end
@@ -310,39 +347,54 @@ navigate_focus = function(dir)
         hl.dispatch(hl.dsp.layout(string.format("move -%d", shift)))
         if cur_ws_id and rightmost_win then
           ws_extra_shift[cur_ws_id] = {
-            is_fullscreen = false,
+            state = "half",
+            was_half = true,
             shift = shift,
             address = rightmost_win.address,
           }
         end
       end
     else
-      -- Move focus right to the next window
+      -- Normal move focus right
       hl.dispatch(hl.dsp.focus({ direction = "r" }))
     end
 
   elseif dir == "l" then
-    if info.is_shifted and cur_ws_id then
-      -- Undo the extra shift!
-      local shift_info = ws_extra_shift[cur_ws_id]
-      if shift_info and shift_info.is_fullscreen then
-        hl.dispatch(hl.dsp.layout("move -col"))
-      else
-        local shift = (shift_info and shift_info.shift) or math.floor(mon_width * 0.5)
+    if shift_info and shift_info.state == "full" then
+      if shift_info.was_half then
+        -- Return from full to half!
+        local shift = shift_info.shift or math.floor(mon_width * 0.5)
         hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
-      end
-      ws_extra_shift[cur_ws_id] = nil
-      if #ws_windows > 0 then
-        local rightmost_win = ws_windows[#ws_windows]
+        ws_extra_shift[cur_ws_id] = {
+          state = "half",
+          was_half = true,
+          shift = shift,
+          address = rightmost_win.address,
+        }
         if rightmost_win and rightmost_win.address then
           hl.dispatch(hl.dsp.focus({ window = "address:" .. rightmost_win.address }))
         end
+      else
+        -- Was fullscreen: return from full to normal
+        hl.dispatch(hl.dsp.layout("move -col"))
+        ws_extra_shift[cur_ws_id] = nil
+        if rightmost_win and rightmost_win.address then
+          hl.dispatch(hl.dsp.focus({ window = "address:" .. rightmost_win.address }))
+        end
+      end
+    elseif shift_info and shift_info.state == "half" then
+      -- Return from half to normal
+      local shift = shift_info.shift or math.floor(mon_width * 0.5)
+      hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+      ws_extra_shift[cur_ws_id] = nil
+      if rightmost_win and rightmost_win.address then
+        hl.dispatch(hl.dsp.focus({ window = "address:" .. rightmost_win.address }))
       end
     elseif info.cur_idx > 1 then
       -- Move focus left
       hl.dispatch(hl.dsp.focus({ direction = "l" }))
     else
-      -- At the leftmost window: do not wrap around
+      -- At leftmost window: do not wrap around
       return
     end
   end
@@ -629,10 +681,108 @@ local function on_workspace_state_change()
   schedule_workspace_update()
 end
 
+-- Automatically size newly spawned apps so they always cover the available empty screen:
+-- 1. Full empty screen (swiped right an entire window, or empty workspace) -> covers entire screen (1.0).
+-- 2. Half empty screen (terminal on half screen, or swiped right half a window) -> covers other half (0.5).
+local spawn_timers = {}
+local function set_spawn_timer(fn, timeout)
+  local t
+  t = hl.timer(function()
+    spawn_timers[t] = nil
+    fn()
+  end, { type = "oneshot", timeout = timeout or 25 })
+  spawn_timers[t] = true
+  return t
+end
+
+local function handle_window_spawned(win)
+  if not win then
+    win = hl.get_active_window()
+  end
+  if not win or win.floating then return end
+
+  local win_ws_id = win.workspace and win.workspace.id
+  if not win_ws_id then
+    local ws = hl.get_active_workspace()
+    win_ws_id = ws and ws.id
+  end
+
+  local shift_info = win_ws_id and ws_extra_shift[win_ws_id]
+  local mon = hl.get_active_monitor()
+  local mon_width = (mon and mon.width) or 1920
+
+  local target_ratio = nil
+  local fit_method = "fit active"
+
+  if shift_info and shift_info.state == "full" then
+    target_ratio = 1.0
+    fit_method = "fit active"
+  elseif shift_info and shift_info.state == "half" then
+    target_ratio = 0.5
+    fit_method = "fit toend"
+  else
+    local all_windows = hl.get_windows() or {}
+    local ws_windows = {}
+    for _, w in ipairs(all_windows) do
+      if w and w.workspace and w.workspace.id == win_ws_id and not w.floating and not w.pinned and w.address ~= win.address then
+        table.insert(ws_windows, w)
+      end
+    end
+
+    table.sort(ws_windows, function(a, b)
+      local ax = (a.at and a.at.x) or 0
+      local bx = (b.at and b.at.x) or 0
+      if ax ~= bx then return ax < bx end
+      return (a.at.y or 0) < (b.at.y or 0)
+    end)
+
+    if #ws_windows == 0 then
+      target_ratio = 0.5
+      fit_method = "fit active"
+    else
+      local last_w = ws_windows[#ws_windows]
+      if get_window_is_fullscreen(last_w, mon_width) then
+        target_ratio = 1.0
+        fit_method = "fit active"
+      else
+        target_ratio = 0.5
+        fit_method = "fit toend"
+      end
+    end
+  end
+
+  if win_ws_id then
+    ws_extra_shift[win_ws_id] = nil
+  end
+
+  if target_ratio then
+    local win_addr = win.address
+    local function apply_resize()
+      if win_addr then
+        local w = hl.get_window("address:" .. win_addr)
+        if w and not w.floating then
+          local mon = hl.get_active_monitor()
+          local mon_w = (mon and mon.width) or 1920
+          local cur_ratio = (w.size and w.size.x and mon_w > 0) and (w.size.x / mon_w) or 0
+          if math.abs(cur_ratio - target_ratio) > 0.08 then
+            hl.dispatch(hl.dsp.focus({ window = "address:" .. win_addr }))
+            hl.dispatch(hl.dsp.layout(string.format("colresize %.2f", target_ratio)))
+            hl.dispatch(hl.dsp.layout(fit_method))
+          end
+        end
+      end
+    end
+
+    set_spawn_timer(apply_resize, 80)
+    set_spawn_timer(apply_resize, 200)
+  end
+end
+
 update_persistent_workspaces()
 
-hl.on("window.open", function()
+hl.on("window.open", function(window)
   if is_collapsing then return end
+  handle_window_spawned(window)
   update_persistent_workspaces()
   schedule_workspace_update()
 end)

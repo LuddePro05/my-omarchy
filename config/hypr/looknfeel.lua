@@ -68,6 +68,7 @@ hl.config({
   scrolling = {
     column_width = 0.5,
     wrap_focus = false,
+    fullscreen_on_one_column = false,
   },
   decoration = {
     -- Setting global rounding to 23 aligns Omarchy shell popups, widgets, and menus with oxleovision.
