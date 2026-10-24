@@ -108,19 +108,51 @@ if [ -d "/usr/share/code" ]; then
   python3 "$SCRIPT_DIR/config/Code/install-cursor-trail.py" || true
 fi
 
-# 8. Omarchy shell shadow patch
+# 8. Obsidian Codeblock Customizer deployment
+if [ -f "$HOME/.config/obsidian/obsidian.json" ]; then
+  echo "📝 Ensuring Obsidian Codeblock Customizer is deployed across vaults..."
+  python3 -c '
+import json, os, shutil
+cfg_path = os.path.expanduser("~/.config/obsidian/obsidian.json")
+try:
+    with open(cfg_path) as f:
+        data = json.load(f)
+    for v in data.get("vaults", {}).values():
+        vpath = v.get("path")
+        if vpath and os.path.isdir(vpath):
+            plugin_dir = os.path.join(vpath, ".obsidian", "plugins", "codeblock-customizer")
+            os.makedirs(plugin_dir, exist_ok=True)
+            src_dir = os.path.expanduser("'"$SCRIPT_DIR"'/config/obsidian/plugins/codeblock-customizer")
+            if os.path.isdir(src_dir):
+                for f in os.listdir(src_dir):
+                    shutil.copy2(os.path.join(src_dir, f), os.path.join(plugin_dir, f))
+            cp_path = os.path.join(vpath, ".obsidian", "community-plugins.json")
+            cp_list = []
+            if os.path.exists(cp_path):
+                with open(cp_path) as cpf:
+                    cp_list = json.load(cpf)
+            if "codeblock-customizer" not in cp_list:
+                cp_list.append("codeblock-customizer")
+                with open(cp_path, "w") as cpf:
+                    json.dump(cp_list, cpf, indent=2)
+except Exception as e:
+    print("Warning updating Obsidian vaults:", e)
+' || true
+fi
+
+# 9. Omarchy shell shadow patch
 OMARCHY_DIR="${OMARCHY_PATH:-$HOME/.local/share/omarchy}"
 if [ -d "$OMARCHY_DIR/.git" ] && [ -f "$SCRIPT_DIR/patches/omarchy-shell-shadow.patch" ]; then
   echo "✨ Applying Omarchy shell popup drop shadows..."
   git -C "$OMARCHY_DIR" apply "$SCRIPT_DIR/patches/omarchy-shell-shadow.patch" 2>/dev/null || true
 fi
 
-# 9. Shell rc files
+# 10. Shell rc files
 echo "🐚 Deploying shell profiles (.zshrc, .bashrc)..."
 cp -a "$SCRIPT_DIR/shell/.zshrc" "$HOME/.zshrc"
 cp -a "$SCRIPT_DIR/shell/.bashrc" "$HOME/.bashrc"
 
-# 10. Set Catppuccin theme and custom background
+# 11. Set Catppuccin theme and custom background
 echo "🎨 Applying Catppuccin theme and custom rainbow background..."
 if command -v omarchy &>/dev/null; then
   omarchy theme set catppuccin || true
@@ -133,14 +165,14 @@ if command -v omarchy &>/dev/null; then
   fi
 fi
 
-# 11. Ensure Herdr integration and agent setup
+# 12. Ensure Herdr integration and agent setup
 if command -v herdr &>/dev/null; then
   echo "🤖 Ensuring Herdr Antigravity CLI integration..."
   herdr integration install antigravity-cli 2>/dev/null || true
   herdr server reload-config 2>/dev/null || true
 fi
 
-# 12. Reload Hyprland and Omarchy Shell
+# 13. Reload Hyprland and Omarchy Shell
 echo "🔄 Reloading Hyprland and restarting Omarchy Shell..."
 if command -v hyprctl &>/dev/null; then
   hyprctl reload || true

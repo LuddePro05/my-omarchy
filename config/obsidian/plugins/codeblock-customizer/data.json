@@ -1,0 +1,118 @@
+{
+  "ThemeName": "Obsidian",
+  "pluginSettings": {
+    "codeblock": {
+      "enableLineNumbers": true,
+      "enableActiveLineHighlight": true,
+      "codeBlockBorderStylingPosition": "disable",
+      "showIndentationLines": false,
+      "enableLinks": true,
+      "enableLinkUpdate": false,
+      "enableBracketHighlight": true,
+      "highlightNonMatchingBrackets": true,
+      "enableSelectionMatching": true,
+      "usePrismHighlight": false,
+      "unwrapcode": false,
+      "hideFenceLines": false,
+      "lineNumberSeparatorStyle": "dashed",
+      "hiddenLinesStyle": "dashed",
+      "buttons": {
+        "alwaysShowButtons": false,
+        "alwaysShowCopyCodeButton": true,
+        "enableSelectCodeButton": false,
+        "enableDeleteCodeButton": false,
+        "enableWrapCodeButton": false,
+        "enableSnapshotButton": false,
+        "modifierKey": "ctrl"
+      },
+      "folding": {
+        "inverseFold": false,
+        "rememberFoldState": true,
+        "scope": "noFoldSpecified",
+        "persistence": "session",
+        "ignoreShortBlocksOnInverseFold": false
+      }
+    },
+    "textHighlight": {
+      "lineSeparator": "",
+      "textSeparator": ""
+    },
+    "semiFold": {
+      "enableSemiFold": true,
+      "visibleLines": 5,
+      "showAdditionalUncollapseButon": true,
+      "autoFoldLongCodeblocks": false,
+      "longCodeBlockLines": 30,
+      "semifoldEffect": "opacity"
+    },
+    "header": {
+      "boldText": false,
+      "italicText": false,
+      "collapseIconPosition": "right",
+      "collapseIconStyle": "chevrons",
+      "collapsedCodeText": "",
+      "codeblockLangBoldText": true,
+      "codeblockLangItalicText": false,
+      "alwaysDisplayCodeblockLang": true,
+      "alwaysDisplayCodeblockIcon": true,
+      "displayCodeBlockLanguage": true,
+      "displayCodeBlockIcon": true,
+      "disableFoldUnlessSpecified": false
+    },
+    "gutter": {
+      "highlightActiveLineNr": true,
+      "enableHighlight": false
+    },
+    "inlineCode": {
+      "enableInlineCodeStyling": true,
+      "enableSyntaxHighlight": true,
+      "showIcons": true,
+      "enableCopyOnClick": true,
+      "copyModifierKey": "ctrl"
+    },
+    "printing": {
+      "enablePrintToPDFStyling": true,
+      "forceCurrentColorUse": false,
+      "uncollapseDuringPrint": true,
+      "printAnnotationsAsComments": false,
+      "avoidPageBreaks": false
+    },
+    "common": {
+      "enableInSourceMode": false
+    },
+    "prompts": {
+      "editedDefaults": {},
+      "customPrompts": {},
+      "includePromptsInCopy": false
+    },
+    "groupedCodeBlocks": {
+      "rememberTabState": true,
+      "persistence": "session",
+      "showAddRemoveButtons": true
+    },
+    "annotations": {
+      "convertAllComments": false,
+      "excludeAnnotationsFromCopy": false
+    },
+    "plugins": {
+      "admonitions": {
+        "enabled": true,
+        "enableTimeOut": false,
+        "timeOut": 100
+      },
+      "executeCode": {
+        "enabled": true,
+        "styleOutput": true,
+        "executeCodeSeparatorStyle": "zigzag"
+      }
+    },
+    "frontmatter": {
+      "enableFrontmatterStyling": true
+    },
+    "enableEditorActiveLineHighlight": true,
+    "syntaxThemes": {
+      "globalSyntaxTheme": "",
+      "languageSpecificSyntaxThemes": {}
+    }
+  }
+}
