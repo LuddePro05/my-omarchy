@@ -1,0 +1,962 @@
+/* @settings
+
+name: Oil Rainbow & Frosted Glass (Omarchy)
+id: oil-rainbow-glass
+settings:
+    - 
+        id: glass-title
+        title: Frosted Glass Styling
+        type: heading
+        level: 1
+    - 
+        id: glass-unified-opacity
+        title: Unified Frosted Glass Opacity
+        description: Unified background opacity across all divisions (note, sidebars, ribbon)
+        type: variable-number-slider
+        default: 0.50
+        min: 0.15
+        max: 0.90
+        step: 0.02
+        format: "0.00"
+    - 
+        id: rainbow-title
+        title: Oil Rainbow Accents
+        type: heading
+        level: 1
+    - 
+        id: rainbow-glow-enabled
+        title: Enable Rainbow Text & Accent Glow
+        description: Adds radiant iridescent drop-shadow glow to titles and headers
+        type: class-toggle
+        default: true
+*/
+
+/* ==========================================================================
+   Omarchy Catppuccin Mocha: Unified Frosted Glass & Vivid Oil Rainbow
+   Matching rainbow-oil-toned wallpaper & Oxleovision frosted glass desktop
+   ========================================================================== */
+
+/* --- Root & Palette Definitions --- */
+.theme-dark, .theme-light {
+  /* Catppuccin Mocha Frosted Palette */
+  --base-rgb: 30, 30, 46;
+  --mantle-rgb: 24, 24, 37;
+  --crust-rgb: 17, 17, 27;
+  --surface0-rgb: 49, 50, 68;
+  --surface1-rgb: 69, 71, 90;
+  --surface2-rgb: 88, 91, 112;
+  --text-rgb: 205, 214, 244;
+
+  /* Unified Frosted Glass Opacity */
+  --glass-unified-opacity: 0.50;
+  --glass-bg: rgba(var(--base-rgb), var(--glass-unified-opacity));
+
+  /* Unified Frosted Glass Backgrounds */
+  --background-primary: var(--glass-bg);
+  --background-primary-alt: var(--glass-bg);
+  --background-secondary: var(--glass-bg);
+  --background-secondary-alt: var(--glass-bg);
+  --background-modifier-form-field: rgba(var(--crust-rgb), 0.40);
+
+  /* Top Bar & Titlebar - Unified with glass */
+  --titlebar-background: var(--glass-bg);
+  --titlebar-background-focused: var(--glass-bg);
+  --tab-background-active: rgba(var(--surface0-rgb), 0.45);
+  --status-bar-background: var(--glass-bg);
+
+  /* Borders & Specular Glass Dividers */
+  --divider-color: rgba(var(--text-rgb), 0.08);
+  --background-modifier-border: rgba(255, 255, 255, 0.09);
+  --background-modifier-border-hover: rgba(255, 255, 255, 0.18);
+  --background-modifier-border-focus: rgba(0, 245, 212, 0.50);
+  --background-modifier-box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+
+  /* Core Typography */
+  --text-normal: #cdd6f4;
+  --text-muted: #a6adc8;
+  --text-faint: #7f849c;
+  --text-selection: rgba(0, 245, 212, 0.22);
+
+  /* Vivid Oil-Rainbow Palette */
+  --oil-crimson: #ff2a6d;
+  --oil-orange: #ff6b35;
+  --oil-amber: #ffb703;
+  --oil-gold: #ffc300;
+  --oil-lime: #a7f432;
+  --oil-mint: #00f5a0;
+  --oil-teal: #00f5d4;
+  --oil-cyan: #00bbf9;
+  --oil-blue: #3a86ff;
+  --oil-violet: #8b5cf6;
+  --oil-fuchsia: #f72585;
+
+  /* Headings Color Fallbacks */
+  --text-title-h1: var(--oil-crimson);
+  --text-title-h2: var(--oil-orange);
+  --text-title-h3: var(--oil-gold);
+  --text-title-h4: var(--oil-mint);
+  --text-title-h5: var(--oil-cyan);
+  --text-title-h6: var(--oil-violet);
+
+  /* Interactive Accents & Links */
+  --interactive-accent: #00f5d4;
+  --interactive-accent-hover: #38bdf8;
+  --text-accent: #00f5d4;
+  --text-accent-hover: #38bdf8;
+  --text-link: #00f5d4;
+  --text-link-hover: #00bbf9;
+  --code-normal: #94e2d5;
+
+  /* Graph Colors */
+  --graph-line: rgba(205, 214, 244, 0.12);
+  --graph-node: #00bbf9;
+  --graph-node-focused: #ff2a6d;
+  --graph-node-tag: #ffb703;
+  --graph-node-attachment: #00f5a0;
+}
+
+/* ==========================================================================
+   Unified Frosted Glass Surfaces Across All Divisions
+   ========================================================================== */
+
+/* Single Unified Translucent Base Layer on App & Body */
+body,
+.app-container {
+  background-color: var(--glass-bg) !important;
+}
+
+/* Eliminate All Intermediate Layer Stacking & Double-Blending */
+.horizontal-main-container,
+.workspace,
+.workspace-split,
+.workspace-split.mod-left-split,
+.workspace-split.mod-right-split,
+.workspace-split.mod-root,
+.workspace-tabs,
+.workspace-tab-container,
+.workspace-leaf,
+.workspace-leaf-content,
+.workspace-leaf-content[data-type="markdown"],
+.workspace-leaf-content[data-type="file-explorer"],
+.workspace-ribbon,
+.workspace-ribbon.mod-left,
+.nav-files-container,
+.view-content,
+.markdown-reading-view,
+.cm-scroller,
+.markdown-source-view.mod-cm6 .cm-scroller {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Crisp Specular Glass Dividers */
+.workspace-ribbon.mod-left {
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.workspace-ribbon .clickable-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--oil-teal);
+}
+
+.workspace-split.mod-left-split {
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.workspace-split.mod-right-split {
+  border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Tab Bar Header Container */
+.workspace-tab-header-container {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(8px);
+  padding-top: 2px;
+}
+
+/* Individual Tabs (Glass Bevels) */
+.workspace-tab-header {
+  position: relative;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px 8px 0 0;
+  margin: 0 2px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+
+.workspace-tab-header:hover:not(.is-active) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Active Floating Glass Tab with Oil Rainbow Top Line */
+.workspace-tab-header.is-active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(var(--surface0-rgb), 0.40) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.workspace-tab-header.is-active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff2a6d, #ff6b35, #ffb703, #00f5a0, #00f5d4, #00bbf9, #8b5cf6, #f72585);
+  box-shadow: 0 0 10px rgba(0, 245, 160, 0.5), 0 0 4px rgba(255, 42, 109, 0.5);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Status Bar */
+.status-bar {
+  background-color: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: var(--text-muted);
+}
+
+/* Floating Modals, Prompts, Menus & Command Palette (Ultra Glass) */
+.modal,
+.prompt,
+.menu,
+.suggestion-container,
+.hover-editor {
+  background: rgba(24, 24, 37, 0.78) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+  border-radius: 14px !important;
+}
+
+.prompt-input {
+  background: rgba(17, 17, 27, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 9px !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.prompt-input:focus {
+  border-color: var(--oil-teal) !important;
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.35) !important;
+}
+
+.suggestion-item.is-selected {
+  background: linear-gradient(90deg, rgba(255, 42, 109, 0.28), rgba(0, 245, 212, 0.22)) !important;
+  border-radius: 8px;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   Pronounced Oil-Rainbow Gradients & Headings
+   ========================================================================== */
+
+/* Note Title (Inline title at note top) - Majestic Sweeping Oil Slick */
+.inline-title {
+  background: linear-gradient(135deg, #ff2a6d 0%, #ff5e36 15%, #ffb703 32%, #00f5a0 50%, #00f5d4 68%, #00bbf9 82%, #8b5cf6 93%, #f72585 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 850;
+  letter-spacing: -0.025em;
+  caret-color: #ff5e36;
+  filter: drop-shadow(0 2px 10px rgba(255, 42, 109, 0.28));
+  padding-bottom: 0.2em;
+}
+
+/* View Header Note Title & Breadcrumb Path at Top (Clean Solid Text) */
+.view-header-title,
+.view-header-breadcrumb,
+.workspace-leaf.mod-active .view-header-title,
+.workspace-leaf.mod-active .view-header-breadcrumb {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: var(--text-normal) !important;
+  color: var(--text-normal) !important;
+  filter: none !important;
+  font-weight: 600;
+}
+
+/* Heading 1 - Multi-stop Chromatic Oil Slick with Glowing Bottom Bar */
+.markdown-rendered h1 {
+  background: linear-gradient(135deg, #ff2a6d 0%, #ff6b35 24%, #ffc300 52%, #00f5a0 80%, #00d9f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 850;
+  letter-spacing: -0.015em;
+  padding-bottom: 0.35em;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(90deg, #ff2a6d, #ffc300, #00f5a0, transparent) 1;
+  filter: drop-shadow(0 2px 8px rgba(255, 42, 109, 0.22));
+}
+
+.cm-header-1 {
+  color: var(--oil-crimson);
+  font-weight: 850;
+}
+
+.cm-line:not(.cm-active) .cm-header-1 {
+  background: linear-gradient(135deg, #ff2a6d 0%, #ff6b35 24%, #ffc300 52%, #00f5a0 80%, #00d9f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Heading 2 - Solar Amber / Tangerine Flare */
+.markdown-rendered h2 {
+  background: linear-gradient(120deg, #ff4500 0%, #ff8c00 45%, #ffc300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid rgba(255, 140, 0, 0.25);
+}
+
+.cm-header-2 {
+  color: #ff8c00;
+  font-weight: 800;
+}
+
+.cm-line:not(.cm-active) .cm-header-2 {
+  background: linear-gradient(120deg, #ff4500 0%, #ff8c00 45%, #ffc300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Heading 3 - Iridescent Gold to Emerald Mint */
+.markdown-rendered h3 {
+  background: linear-gradient(120deg, #ffc300 0%, #a7f432 45%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 750;
+}
+
+.cm-header-3 {
+  color: #ffc300;
+  font-weight: 750;
+}
+
+.cm-line:not(.cm-active) .cm-header-3 {
+  background: linear-gradient(120deg, #ffc300 0%, #a7f432 45%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Heading 4 - Luminous Aquamarine to Electric Cyan */
+.markdown-rendered h4 {
+  background: linear-gradient(120deg, #00f5d4 0%, #00bbf9 60%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.cm-header-4 {
+  color: #00f5d4;
+  font-weight: 700;
+}
+
+.cm-line:not(.cm-active) .cm-header-4 {
+  background: linear-gradient(120deg, #00f5d4 0%, #00bbf9 60%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Heading 5 - Electric Sapphire into Deep Violet */
+.markdown-rendered h5 {
+  background: linear-gradient(120deg, #38bdf8 0%, #6366f1 55%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.cm-header-5 {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.cm-line:not(.cm-active) .cm-header-5 {
+  background: linear-gradient(120deg, #38bdf8 0%, #6366f1 55%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Heading 6 - Vivid Orchid Fuchsia / Magenta */
+.markdown-rendered h6 {
+  background: linear-gradient(120deg, #8b5cf6 0%, #c026d3 50%, #f72585 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.cm-header-6 {
+  color: #c026d3;
+  font-weight: 700;
+}
+
+.cm-line:not(.cm-active) .cm-header-6 {
+  background: linear-gradient(120deg, #8b5cf6 0%, #c026d3 50%, #f72585 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   Interactive Accents, Buttons, Tags & Glass Components
+   ========================================================================== */
+
+/* Links with Iridescent Cyan Sheen */
+.markdown-rendered a,
+.cm-hmd-internal-link {
+  background: linear-gradient(120deg, #00f5d4, #00bbf9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 550;
+  text-decoration: none;
+  border-bottom: 1.5px solid rgba(0, 245, 212, 0.4);
+  transition: all 0.22s ease;
+}
+
+.markdown-rendered a:hover,
+.cm-hmd-internal-link:hover {
+  border-bottom-color: #00f5d4;
+  filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.65));
+}
+
+/* Tags (Frosted Iridescent Pills with Gradient Glow) */
+.tag,
+a.tag {
+  background: linear-gradient(135deg, rgba(255, 42, 109, 0.12), rgba(0, 187, 249, 0.12)) !important;
+  color: #00f5d4 !important;
+  border: 1px solid rgba(0, 245, 212, 0.35) !important;
+  border-radius: 9999px !important;
+  padding: 3px 12px !important;
+  font-size: 0.84em !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transition: all 0.22s ease !important;
+}
+
+.tag:hover,
+a.tag:hover {
+  background: linear-gradient(135deg, rgba(255, 42, 109, 0.30), rgba(255, 183, 3, 0.30)) !important;
+  border-color: #ffb703 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(255, 183, 3, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* Blockquotes with Rich Oil-Rainbow Gradient Border */
+.markdown-rendered blockquote {
+  border-left: 4px solid !important;
+  border-image: linear-gradient(to bottom, #ff2a6d 0%, #ff6b35 25%, #ffb703 50%, #00f5a0 75%, #00bbf9 100%) 1 100% !important;
+  background: linear-gradient(90deg, rgba(255, 42, 109, 0.06) 0%, rgba(0, 187, 249, 0.04) 50%, transparent 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-radius: 0 10px 10px 0;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+}
+
+/* Horizontal Rule (Glowing Chromatic Stream) */
+.markdown-rendered hr {
+  border: none !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, transparent 0%, #ff2a6d 15%, #ffb703 35%, #00f5a0 55%, #00bbf9 75%, #8b5cf6 90%, transparent 100%) !important;
+  box-shadow: 0 0 12px rgba(0, 245, 160, 0.45);
+  margin: 2.2rem 0 !important;
+  border-radius: 9999px;
+  opacity: 0.9;
+}
+
+/* Code Blocks & Inline Code (Dark Smoked Glass) */
+.markdown-rendered code,
+.cm-inline-code {
+  background: rgba(17, 17, 27, 0.65) !important;
+  color: #00f5d4 !important;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 6px;
+  padding: 0.18em 0.45em;
+  font-size: 0.88em;
+}
+
+.markdown-rendered pre {
+  background: rgba(17, 17, 27, 0.70) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Task Checkboxes (Prismatic Checked State) */
+.task-list-item-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.2em;
+  height: 1.2em;
+  border: 1.8px solid rgba(205, 214, 244, 0.35);
+  border-radius: 5px;
+  background-color: rgba(var(--crust-rgb), 0.55);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.22s ease;
+}
+
+.task-list-item-checkbox:hover {
+  border-color: var(--oil-teal);
+  box-shadow: 0 0 8px rgba(0, 245, 212, 0.35);
+}
+
+.task-list-item-checkbox:checked {
+  background: linear-gradient(135deg, #ff2a6d 0%, #ffb703 50%, #00f5a0 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 10px rgba(0, 245, 160, 0.55);
+}
+
+.task-list-item-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 0.35em;
+  top: 0.12em;
+  width: 0.35em;
+  height: 0.65em;
+  border: solid #ffffff;
+  border-width: 0 2.2px 2.2px 0;
+  transform: rotate(45deg);
+}
+
+/* Callouts (Floating Frosted Glass Cards) */
+.callout {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(var(--base-rgb), 0.55);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Buttons */
+button.mod-cta {
+  background: linear-gradient(135deg, #ff2a6d 0%, #ff6b35 50%, #ffb703 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(255, 42, 109, 0.35) !important;
+  transition: all 0.2s ease !important;
+}
+
+button.mod-cta:hover {
+  box-shadow: 0 6px 22px rgba(255, 42, 109, 0.55) !important;
+  transform: translateY(-1px);
+}
+
+/* Sleek Frosted Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(205, 214, 244, 0.18);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 245, 212, 0.45);
+}
+
+/* ==========================================================================
+   File Explorer Tree: Left Spanning Rainbow Gradient, Directory Hues & Icons
+   ========================================================================== */
+
+/* --- Rainbow Spectrum Definitions --- */
+:root {
+  --rainbow-1: #ff2a6d;
+  --rainbow-1-glow: rgba(255, 42, 109, 0.45);
+  --rainbow-2: #ff6b35;
+  --rainbow-2-glow: rgba(255, 107, 53, 0.45);
+  --rainbow-3: #ffb703;
+  --rainbow-3-glow: rgba(255, 183, 3, 0.45);
+  --rainbow-4: #a7f432;
+  --rainbow-4-glow: rgba(167, 244, 50, 0.45);
+  --rainbow-5: #00f5a0;
+  --rainbow-5-glow: rgba(0, 245, 160, 0.45);
+  --rainbow-6: #00f5d4;
+  --rainbow-6-glow: rgba(0, 245, 212, 0.45);
+  --rainbow-7: #00bbf9;
+  --rainbow-7-glow: rgba(0, 187, 249, 0.45);
+  --rainbow-8: #3a86ff;
+  --rainbow-8-glow: rgba(58, 134, 255, 0.45);
+  --rainbow-9: #8b5cf6;
+  --rainbow-9-glow: rgba(139, 92, 246, 0.45);
+  --rainbow-10: #f72585;
+  --rainbow-10-glow: rgba(247, 37, 133, 0.45);
+}
+
+/* Base Explorer Setup */
+.nav-files-container {
+  position: relative;
+  overflow-x: hidden !important;
+}
+
+/* Default Tree Color fallback */
+.tree-item,
+.nav-folder,
+.nav-file {
+  --tree-color: var(--rainbow-6);
+  --tree-glow: var(--rainbow-6-glow);
+}
+
+/* --- Level 1: Root Folders & Root Files Rainbow Cycle --- */
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 1),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 1) {
+  --tree-color: var(--rainbow-1);
+  --tree-glow: var(--rainbow-1-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 2),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 2) {
+  --tree-color: var(--rainbow-2);
+  --tree-glow: var(--rainbow-2-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 3),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 3) {
+  --tree-color: var(--rainbow-3);
+  --tree-glow: var(--rainbow-3-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 4),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 4) {
+  --tree-color: var(--rainbow-4);
+  --tree-glow: var(--rainbow-4-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 5),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 5) {
+  --tree-color: var(--rainbow-5);
+  --tree-glow: var(--rainbow-5-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 6),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 6) {
+  --tree-color: var(--rainbow-6);
+  --tree-glow: var(--rainbow-6-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 7),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 7) {
+  --tree-color: var(--rainbow-7);
+  --tree-glow: var(--rainbow-7-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 8),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 8) {
+  --tree-color: var(--rainbow-8);
+  --tree-glow: var(--rainbow-8-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 9),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 9) {
+  --tree-color: var(--rainbow-9);
+  --tree-glow: var(--rainbow-9-glow);
+}
+
+.nav-files-container > div > .nav-folder:nth-of-type(10n + 10),
+.nav-files-container > div > .nav-file:nth-of-type(10n + 10) {
+  --tree-color: var(--rainbow-10);
+  --tree-glow: var(--rainbow-10-glow);
+}
+
+/* --- Level 2 Sub-Folders: Advance to Next Gradient Step --- */
+.nav-folder-children > .nav-folder:nth-of-type(10n + 1) { --tree-color: var(--rainbow-2); --tree-glow: var(--rainbow-2-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 2) { --tree-color: var(--rainbow-3); --tree-glow: var(--rainbow-3-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 3) { --tree-color: var(--rainbow-4); --tree-glow: var(--rainbow-4-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 4) { --tree-color: var(--rainbow-5); --tree-glow: var(--rainbow-5-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 5) { --tree-color: var(--rainbow-6); --tree-glow: var(--rainbow-6-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 6) { --tree-color: var(--rainbow-7); --tree-glow: var(--rainbow-7-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 7) { --tree-color: var(--rainbow-8); --tree-glow: var(--rainbow-8-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 8) { --tree-color: var(--rainbow-9); --tree-glow: var(--rainbow-9-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 9) { --tree-color: var(--rainbow-10); --tree-glow: var(--rainbow-10-glow); }
+.nav-folder-children > .nav-folder:nth-of-type(10n + 10) { --tree-color: var(--rainbow-1); --tree-glow: var(--rainbow-1-glow); }
+
+/* --- Files Inside a Folder: INHERIT the parent folder's color so they are 100% cohesive --- */
+.nav-folder-children .nav-file {
+  --tree-color: inherit;
+  --tree-glow: inherit;
+}
+
+/* --- Native Indentation Guide Lines (Colored per Folder, zero layout shifts) --- */
+.nav-folder-children {
+  --nav-indentation-guide-width: 2px;
+  --nav-indentation-guide-color: var(--tree-color);
+  position: relative;
+  border-inline-start: var(--nav-indentation-guide-width) solid var(--nav-indentation-guide-color) !important;
+  box-shadow: -1px 0 6px var(--tree-glow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-folder:hover > .nav-folder-children {
+  box-shadow: -1px 0 10px var(--tree-glow);
+}
+
+/* --- Row Titles: Clean geometry without cumulative padding shifts --- */
+.nav-folder-title,
+.nav-file-title {
+  position: relative;
+  border-radius: 6px;
+  font-size: 0.9em;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Top-Level Items Only: Sleek Colored Left Accent */
+.nav-files-container > div > .nav-folder > .nav-folder-title,
+.nav-files-container > div > .nav-file > .nav-file-title {
+  border-left: 3px solid var(--tree-color) !important;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Files and Subfolders INSIDE a folder: NO separate border-left bar (removes the yellow bar artifact!) */
+.nav-folder-children .nav-file-title,
+.nav-folder-children .nav-folder-title {
+  border-left: none !important;
+}
+
+/* Subtle Hover & Active Highlighting */
+.nav-folder-title:hover,
+.nav-file-title:hover {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--tree-color) 16%, transparent) 0%,
+    color-mix(in srgb, var(--tree-color) 4%, transparent) 70%,
+    transparent 100%
+  ) !important;
+  color: #ffffff !important;
+}
+
+.nav-file-title.is-active {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--tree-color) 28%, transparent) 0%,
+    color-mix(in srgb, var(--tree-color) 8%, transparent) 70%,
+    transparent 100%
+  ) !important;
+  box-shadow: inset 2px 0 8px var(--tree-glow) !important;
+  color: #ffffff !important;
+  font-weight: 650;
+}
+
+/* Collapse Arrow Accent Colored Per Folder */
+.nav-folder-collapse-indicator {
+  color: var(--tree-color) !important;
+  filter: drop-shadow(0 0 4px var(--tree-glow));
+  margin-right: 4px;
+  opacity: 0.9;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* --- Icons & Emojis Colored to Match Each Item's Gradient Step --- */
+
+/* Closed / Collapsed Folder Icon */
+.nav-folder.is-collapsed > .nav-folder-title > .nav-folder-title-content::before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background-color: var(--tree-color) !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  transition: background-color 0.15s ease;
+  filter: drop-shadow(0 0 5px var(--tree-glow)) !important;
+}
+
+/* Open / Expanded Folder Icon */
+.nav-folder:not(.is-collapsed) > .nav-folder-title > .nav-folder-title-content::before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background-color: var(--tree-color) !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  transition: background-color 0.15s ease;
+  filter: drop-shadow(0 0 6px var(--tree-glow)) !important;
+}
+
+/* Standard File Note Icon (Inherits folder color seamlessly) */
+.nav-file-title-content::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 7px;
+  vertical-align: -2.5px;
+  background-color: var(--tree-color) !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='16' x2='8' y1='13' y2='13'/%3E%3Cline x1='16' x2='8' y1='17' y2='17'/%3E%3Cline x1='10' x2='8' y1='9' y2='9'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  opacity: 0.9;
+  transition: background-color 0.15s ease;
+  filter: drop-shadow(0 0 5px var(--tree-glow)) !important;
+}
+
+/* Image Attachment File Icon */
+.nav-file[data-path$=".png"] .nav-file-title-content::before,
+.nav-file[data-path$=".jpg"] .nav-file-title-content::before,
+.nav-file[data-path$=".jpeg"] .nav-file-title-content::before,
+.nav-file[data-path$=".webp"] .nav-file-title-content::before {
+  background-color: var(--tree-color) !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 5px var(--tree-glow)) !important;
+}
+
+/* Canvas File Icon */
+.nav-file[data-path$=".canvas"] .nav-file-title-content::before {
+  background-color: var(--tree-color) !important;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='7' height='7' x='3' y='3' rx='1'/%3E%3Crect width='7' height='7' x='14' y='3' rx='1'/%3E%3Crect width='7' height='7' x='14' y='14' rx='1'/%3E%3Crect width='7' height='7' x='3' y='14' rx='1'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 5px var(--tree-glow)) !important;
+}
+
+/* Iconize Plugin Icons & SVGs - Tinted to Match Tree Step */
+.iconize-icon,
+.obsidian-icon-folder-icon,
+.nav-folder-title .svg-icon:not(.nav-folder-collapse-indicator svg),
+.nav-file-title .svg-icon {
+  color: var(--tree-color) !important;
+  fill: var(--tree-color) !important;
+  filter: drop-shadow(0 0 6px var(--tree-glow)) !important;
+}
+
+/* Emoji Icons - Glowing Radiance Matching Tree Step */
+.nav-folder-title [class*="emoji"],
+.nav-file-title [class*="emoji"],
+.iconize-icon:not(svg) {
+  filter: drop-shadow(0 0 7px var(--tree-glow)) !important;
+}
+
+/* If Iconize assigns custom icon, hide the default CSS icon to prevent overlap */
+.nav-file-title:has(.iconize-icon) .nav-file-title-content::before,
+.nav-folder-title:has(.iconize-icon) .nav-folder-title-content::before,
+.nav-file-title:has(.obsidian-icon-folder-icon) .nav-file-title-content::before,
+.nav-folder-title:has(.obsidian-icon-folder-icon) .nav-folder-title-content::before {
+  display: none !important;
+}
+
+/* Real Editor Caret / Cursor: Clean Pure White */
+:root, body, .cm-editor, .markdown-source-view, .cm-scroller, .cm-content {
+  --caret-color: #ffffff !important;
+  --cursor-color: #ffffff !important;
+  caret-color: #ffffff !important;
+}
+
+.cm-editor .cm-cursor,
+.cm-editor .cm-cursorLayer .cm-cursor,
+.cm-cursor,
+.cm-cursor-primary,
+.cm-cursor-secondary {
+  border-left-color: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  transition: none !important;
+}
+
+input, textarea, [contenteditable] {
+  caret-color: #ffffff !important;
+}
+
+/* ==============================================================================
+   Code Block Customizer: Solid Header & Clean Folding
+   ============================================================================== */
+
+/* 1. Make the header completely solid & opaque */
+.codeblock-customizer-header-container,
+.codeblock-customizer-header-container-specific,
+.codeblock-customizer-header-group-container {
+  background-color: #181825 !important;
+  background: #181825 !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #313244 !important;
+  border-bottom: 1px solid #313244 !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45) !important;
+  padding: 6px 12px !important;
+}
+
+/* 2. Hide language name text (keep language icon only) */
+.codeblock-customizer-header-language-tag {
+  display: none !important;
+}
+
+/* 3. Icon styling */
+.codeblock-customizer-icon-container {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px !important;
+}
+
+.codeblock-customizer-icon-container img,
+.codeblock-customizer-icon {
+  width: 18px !important;
+  height: 18px !important;
+  opacity: 1 !important;
+}
+
+/* 4. File name / title text in header */
+.codeblock-customizer-header-text {
+  font-family: var(--font-monospace) !important;
+  font-weight: 600 !important;
+  font-size: 0.88em !important;
+  color: #cdd6f4 !important;
+  letter-spacing: 0.02em;
+}
+
+/* 5. Collapse toggle icon */
+.codeblock-customizer-collapse-icon {
+  color: #a6adc8 !important;
+  transition: transform 0.15s ease-in-out !important;
+}
+
+.codeblock-customizer-collapse-icon:hover {
+  color: #cdd6f4 !important;
+}
+
+/* 6. Fully collapsed code block: entire block body disappears except header */
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
+  padding: 0 !important;
+  margin-bottom: 1em !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-gutter,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-line-number,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line0,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line1,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line2,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line3,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-uncollapse-code {
+  display: none !important;
+}
+
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container-specific {
+  border-radius: 8px !important;
+  border-bottom: 1px solid #313244 !important;
+}
+
+

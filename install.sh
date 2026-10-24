@@ -126,6 +126,12 @@ try:
             if os.path.isdir(src_dir):
                 for f in os.listdir(src_dir):
                     shutil.copy2(os.path.join(src_dir, f), os.path.join(plugin_dir, f))
+            snip_dir = os.path.join(vpath, ".obsidian", "snippets")
+            os.makedirs(snip_dir, exist_ok=True)
+            src_snip = os.path.expanduser("'"$SCRIPT_DIR"'/config/obsidian/snippets")
+            if os.path.isdir(src_snip):
+                for f in os.listdir(src_snip):
+                    shutil.copy2(os.path.join(src_snip, f), os.path.join(snip_dir, f))
             cp_path = os.path.join(vpath, ".obsidian", "community-plugins.json")
             cp_list = []
             if os.path.exists(cp_path):

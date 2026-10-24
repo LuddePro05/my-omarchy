@@ -38,7 +38,7 @@
       "textSeparator": ""
     },
     "semiFold": {
-      "enableSemiFold": true,
+      "enableSemiFold": false,
       "visibleLines": 5,
       "showAdditionalUncollapseButon": true,
       "autoFoldLongCodeblocks": false,
@@ -53,9 +53,9 @@
       "collapsedCodeText": "",
       "codeblockLangBoldText": true,
       "codeblockLangItalicText": false,
-      "alwaysDisplayCodeblockLang": true,
+      "alwaysDisplayCodeblockLang": false,
       "alwaysDisplayCodeblockIcon": true,
-      "displayCodeBlockLanguage": true,
+      "displayCodeBlockLanguage": false,
       "displayCodeBlockIcon": true,
       "disableFoldUnlessSpecified": false
     },
