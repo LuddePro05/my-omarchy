@@ -100,8 +100,7 @@ local function toggle_fullscreen_inflate()
         local shift = shift_info.shift or 960
         hl.dispatch(hl.dsp.layout(string.format("move +%d", shift * 2)))
       else
-        local shift = shift_info.shift or mon_width
-        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+        hl.dispatch(hl.dsp.layout("move -col"))
       end
     elseif shift_info and shift_info.state == "half" then
       local shift = (shift_info and shift_info.shift) or 960
@@ -323,25 +322,23 @@ navigate_focus = function(dir)
     elseif shift_info and shift_info.state == "half" then
       -- Transition from half-shifted to full-shifted:
       -- User was at "half app half screen", swiped right again -> go an entire window to the right!
-      local shift = shift_info.shift or math.floor(mon_width * 0.5)
-      hl.dispatch(hl.dsp.layout(string.format("move -%d", shift)))
+      hl.dispatch(hl.dsp.layout("move +col"))
       if cur_ws_id and rightmost_win then
         ws_extra_shift[cur_ws_id] = {
           state = "full",
           was_half = true,
-          shift = shift,
+          shift = shift_info.shift or math.floor(mon_width * 0.5),
           address = rightmost_win.address,
         }
       end
     elseif #ws_windows > 0 and info.cur_idx >= #ws_windows then
       -- At rightmost window, take extra step right
       if is_fs then
-        hl.dispatch(hl.dsp.layout(string.format("move -%d", mon_width)))
+        hl.dispatch(hl.dsp.layout("move +col"))
         if cur_ws_id and rightmost_win then
           ws_extra_shift[cur_ws_id] = {
             state = "full",
             was_half = false,
-            shift = mon_width,
             address = rightmost_win.address,
           }
         end
@@ -379,8 +376,7 @@ navigate_focus = function(dir)
         end
       else
         -- Was fullscreen: return from full to normal
-        local shift = shift_info.shift or mon_width
-        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+        hl.dispatch(hl.dsp.layout("move -col"))
         ws_extra_shift[cur_ws_id] = nil
         if rightmost_win and rightmost_win.address then
           hl.dispatch(hl.dsp.focus({ window = "address:" .. rightmost_win.address }))
