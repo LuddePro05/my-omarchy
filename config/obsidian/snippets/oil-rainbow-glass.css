@@ -874,23 +874,21 @@ input, textarea, [contenteditable] {
 }
 
 /* ==============================================================================
-   Code Block Customizer: Solid Header & Clean Folding
+   Code Block Customizer: Smoked Glass Header & Clean Full Folding
    ============================================================================== */
 
-/* 1. Make the header completely solid & opaque */
+/* 1. Header: Frosted Smoked Glass matching the theme */
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific,
 .codeblock-customizer-header-group-container {
-  background-color: #181825 !important;
-  background: #181825 !important;
-  opacity: 1 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid #313244 !important;
-  border-bottom: 1px solid #313244 !important;
+  background: rgba(17, 17, 27, 0.70) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.40) !important;
   padding: 6px 12px !important;
 }
 
@@ -934,7 +932,8 @@ input, textarea, [contenteditable] {
 }
 
 /* 6. Fully collapsed code block: entire block body disappears except header */
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed {
   padding: 0 !important;
   margin-bottom: 1em !important;
   border: none !important;
@@ -943,20 +942,25 @@ input, textarea, [contenteditable] {
 }
 
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed code,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-gutter,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-gutter,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-line-number,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line0,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line1,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line2,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-fade-out-line3,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-uncollapse-code {
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-line-number,
+.codeblock-customizer-fade-out-line0,
+.codeblock-customizer-fade-out-line1,
+.codeblock-customizer-fade-out-line2,
+.codeblock-customizer-fade-out-line3,
+.codeblock-customizer-uncollapse-code {
   display: none !important;
 }
 
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container,
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container-specific {
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container-specific,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container,
+.codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container-specific {
   border-radius: 8px !important;
-  border-bottom: 1px solid #313244 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 

@@ -39,7 +39,7 @@
     },
     "semiFold": {
       "enableSemiFold": false,
-      "visibleLines": 5,
+      "visibleLines": 0,
       "showAdditionalUncollapseButon": true,
       "autoFoldLongCodeblocks": false,
       "longCodeBlockLines": 30,
