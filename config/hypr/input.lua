@@ -99,7 +99,7 @@ local function toggle_fullscreen_inflate()
       if shift_info.was_half then
         hl.dispatch(hl.dsp.layout("move -col"))
         local shift = shift_info.shift or 960
-        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+        hl.dispatch(hl.dsp.layout(string.format("move +%d", math.floor(shift * 0.5))))
       else
         hl.dispatch(hl.dsp.layout("move -col"))
       end
@@ -372,6 +372,11 @@ navigate_focus = function(dir)
       if shift_info.was_half then
         -- Return from full to half!
         hl.dispatch(hl.dsp.layout("move -col"))
+        local win_w = (rightmost_win and rightmost_win.size and rightmost_win.size.x) or math.floor(mon_width * 0.5)
+        local center_offset = math.floor((mon_width - win_w) * 0.5)
+        if center_offset > 0 then
+          hl.dispatch(hl.dsp.layout(string.format("move -%d", center_offset)))
+        end
         local shift = shift_info.shift or math.floor(mon_width * 0.5)
         ws_extra_shift[cur_ws_id] = {
           state = "half",
