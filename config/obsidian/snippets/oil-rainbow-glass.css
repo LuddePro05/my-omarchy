@@ -481,10 +481,12 @@ a.tag:hover {
 }
 
 .markdown-rendered pre {
-  background: rgba(17, 17, 27, 0.70) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(17, 17, 27, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.78), 0 6px 18px -2px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 1.5em !important;
 }
 
 /* Task Checkboxes (Prismatic Checked State) */
@@ -874,35 +876,84 @@ input, textarea, [contenteditable] {
 }
 
 /* ==============================================================================
-   Code Block Customizer: Smoked Glass Header & Clean Full Folding
+   Code Block Customizer: Floating Elevated Blocks & Glowing Transparent Header
    ============================================================================== */
 
-/* 1. Header: Frosted Smoked Glass matching the theme */
+/* 1. Elevated Drop Shadow for Code Block (Reading Mode) */
+.markdown-rendered pre.codeblock-customizer-pre,
+.markdown-rendered .codeblock-customizer-pre-parent > pre.codeblock-customizer-pre,
+.markdown-rendered pre:has(.codeblock-customizer-header-container) {
+  background: rgba(17, 17, 27, 0.78) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.78), 0 6px 18px -2px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 1.5em !important;
+  position: relative;
+}
+
+/* 2. Elevated Drop Shadow for Code Block (Live Preview / Source View) */
+.markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line] {
+  background-color: rgba(17, 17, 27, 0.78) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: -14px 0 24px -6px rgba(0, 0, 0, 0.45), 14px 0 24px -6px rgba(0, 0, 0, 0.45) !important;
+}
+
+.markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-end {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  box-shadow: -14px 0 24px -6px rgba(0, 0, 0, 0.45), 14px 0 24px -6px rgba(0, 0, 0, 0.45), 0 18px 42px -4px rgba(0, 0, 0, 0.78) !important;
+  margin-bottom: 1.4em !important;
+}
+
+/* 3. Header: Transparent with Ambient Neon Glow */
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific,
 .codeblock-customizer-header-group-container {
-  background: rgba(17, 17, 27, 0.70) !important;
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid rgba(0, 245, 212, 0.40) !important;
+  border-bottom: 1px solid rgba(0, 245, 212, 0.60) !important;
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.40) !important;
+  box-shadow: 0 0 14px rgba(0, 245, 212, 0.25), inset 0 0 10px rgba(0, 245, 212, 0.08), 0 -6px 16px -2px rgba(0, 0, 0, 0.45), -12px 0 20px -4px rgba(0, 0, 0, 0.35), 12px 0 20px -4px rgba(0, 0, 0, 0.35) !important;
   padding: 6px 12px !important;
+  position: relative;
+  z-index: 2;
+  margin-top: 1.2em !important;
 }
 
-/* 2. Hide language name text (keep language icon only) */
+/* Reading View header inside pre */
+.markdown-rendered pre.codeblock-customizer-pre .codeblock-customizer-header-container,
+.markdown-rendered pre.codeblock-customizer-pre .codeblock-customizer-header-container-specific,
+.markdown-rendered pre.codeblock-customizer-pre .codeblock-customizer-header-group-container {
+  margin-top: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: 1px solid rgba(0, 245, 212, 0.55) !important;
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  box-shadow: 0 1px 12px rgba(0, 245, 212, 0.25), inset 0 0 10px rgba(0, 245, 212, 0.08) !important;
+}
+
+/* 4. Hide language name text (keep language icon only) */
 .codeblock-customizer-header-language-tag {
   display: none !important;
 }
 
-/* 3. Icon styling */
+/* 5. Glowing Icon styling */
 .codeblock-customizer-icon-container {
   display: flex !important;
   align-items: center;
   justify-content: center;
   margin-right: 8px !important;
+  filter: drop-shadow(0 0 6px rgba(0, 245, 212, 0.6)) !important;
 }
 
 .codeblock-customizer-icon-container img,
@@ -912,30 +963,34 @@ input, textarea, [contenteditable] {
   opacity: 1 !important;
 }
 
-/* 4. File name / title text in header */
+/* 6. Glowing File name / title text in header */
 .codeblock-customizer-header-text {
   font-family: var(--font-monospace) !important;
   font-weight: 600 !important;
   font-size: 0.88em !important;
-  color: #cdd6f4 !important;
-  letter-spacing: 0.02em;
+  color: #00f5d4 !important;
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.6), 0 0 18px rgba(0, 245, 212, 0.3) !important;
+  letter-spacing: 0.03em !important;
 }
 
-/* 5. Collapse toggle icon */
+/* 7. Glowing Collapse toggle icon */
 .codeblock-customizer-collapse-icon {
-  color: #a6adc8 !important;
-  transition: transform 0.15s ease-in-out !important;
+  color: #00f5d4 !important;
+  filter: drop-shadow(0 0 6px rgba(0, 245, 212, 0.6)) !important;
+  transition: transform 0.2s ease, filter 0.2s ease, color 0.2s ease !important;
 }
 
 .codeblock-customizer-collapse-icon:hover {
-  color: #cdd6f4 !important;
+  color: #ffffff !important;
+  filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.95)) !important;
 }
 
-/* 6. Fully collapsed code block: entire block body disappears except header */
+/* 8. Fully collapsed code block: entire block body disappears except header */
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed {
   padding: 0 !important;
-  margin-bottom: 1em !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 1.4em !important;
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
@@ -955,12 +1010,47 @@ input, textarea, [contenteditable] {
   display: none !important;
 }
 
+/* Reading View collapsed header pill */
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed .codeblock-customizer-header-container-specific,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container-specific {
   border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(0, 245, 212, 0.50) !important;
+  background: transparent !important;
+  box-shadow: 0 12px 32px -2px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 245, 212, 0.35), inset 0 0 10px rgba(0, 245, 212, 0.08) !important;
+}
+
+/* Live Preview collapsed header pill */
+.markdown-source-view .codeblock-customizer-header-container.collapsed,
+.markdown-source-view .codeblock-customizer-header-container-specific.collapsed,
+.markdown-source-view .codeblock-customizer-header-group-container.collapsed {
+  border-radius: 8px !important;
+  border: 1px solid rgba(0, 245, 212, 0.50) !important;
+  background: transparent !important;
+  box-shadow: 0 12px 32px -2px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 245, 212, 0.35), inset 0 0 10px rgba(0, 245, 212, 0.08) !important;
+  margin-bottom: 1.4em !important;
+}
+
+/* 9. Gutter & Line numbers styling */
+.codeblock-customizer-gutter,
+.codeblock-customizer-line-number,
+.codeblock-customizer-line-number-specific {
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* 10. Copy buttons styling */
+.codeblock-customizer-copy-code,
+.codeblock-customizer-copy-code-button {
+  color: #a6adc8 !important;
+  transition: color 0.15s ease, filter 0.15s ease !important;
+}
+
+.codeblock-customizer-copy-code:hover,
+.codeblock-customizer-copy-code-button:hover {
+  color: #00f5d4 !important;
+  filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.7)) !important;
 }
 
 
