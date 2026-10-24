@@ -96,7 +96,13 @@ if [ -f "$HOME/.config/starship-powerline-dir.c" ]; then
   fi
 fi
 
-# 7. Shell rc files
+# 7. VS Code cursor trail setup
+if [ -d "/usr/share/code" ]; then
+  echo "✨ Deploying VS Code cursor trail..."
+  python3 "$SCRIPT_DIR/config/Code/install-cursor-trail.py" || true
+fi
+
+# 8. Shell rc files
 echo "🐚 Deploying shell profiles (.zshrc, .bashrc)..."
 cp -a "$SCRIPT_DIR/shell/.zshrc" "$HOME/.zshrc"
 cp -a "$SCRIPT_DIR/shell/.bashrc" "$HOME/.bashrc"
