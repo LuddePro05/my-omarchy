@@ -70,12 +70,18 @@ hl.config({
   }
 })
 
--- Navigate focus between windows on the active workspace without wrap-around
-local function navigate_focus(dir)
-  hl.dispatch(hl.dsp.focus({ direction = dir }))
+-- Navigate focus between windows on the active workspace with extra right shift support
+local ws_extra_shift = {}
+local navigate_focus
+local function navigate_focus_dispatch(dir)
+  if navigate_focus then
+    navigate_focus(dir)
+  else
+    hl.dispatch(hl.dsp.focus({ direction = dir }))
+  end
 end
 
-_G.navigate_focus = navigate_focus
+_G.navigate_focus = navigate_focus_dispatch
 
 -- Toggle window between normal column width and fullscreen width (1.0),
 -- inflating to push adjacent windows aside in scrolling layout instead of hiding them.
@@ -84,6 +90,19 @@ local previous_window_states = {}
 local function toggle_fullscreen_inflate()
   local win = hl.get_active_window()
   if not win then return end
+
+  -- If in extra-shifted state, un-shift first
+  local cur_ws_id = win.workspace and win.workspace.id
+  if cur_ws_id and ws_extra_shift[cur_ws_id] then
+    local shift_info = ws_extra_shift[cur_ws_id]
+    if shift_info and shift_info.is_fullscreen then
+      hl.dispatch(hl.dsp.layout("move -col"))
+    else
+      local shift = (shift_info and shift_info.shift) or 960
+      hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+    end
+    ws_extra_shift[cur_ws_id] = nil
+  end
 
   -- If floating or in native fullscreen, use normal fullscreen toggle
   if win.floating or (win.fullscreen and win.fullscreen ~= 0) then
@@ -156,6 +175,25 @@ local NOISE_DEADZONE = 15
 local MIN_STEP_INTERVAL_MS = 75
 local MOMENTUM_INTERVAL_MS = 85
 
+local function get_window_is_fullscreen(win, mon_width)
+  if not win then return false end
+  if win.fullscreen and win.fullscreen ~= 0 then return true end
+  if win.size and win.size.x and mon_width and mon_width > 0 then
+    if win.size.x >= mon_width * 0.85 then
+      return true
+    end
+  end
+  return false
+end
+
+local function get_extra_shift_amount(win, mon_width)
+  if get_window_is_fullscreen(win, mon_width) then
+    return mon_width -- fullscreen: go an entire window to the right
+  else
+    return math.floor(mon_width * 0.5) -- two halves: go a half extra to the right
+  end
+end
+
 local function get_layout_info()
   local cur = hl.get_active_window()
   local cur_ws_id = cur and cur.workspace and cur.workspace.id
@@ -183,7 +221,22 @@ local function get_layout_info()
     return ay < by
   end)
 
-  local cur_idx = 1
+  local mon = hl.get_active_monitor()
+  local mon_width = (mon and mon.width) or 1920
+
+  -- Check if workspace is currently extra-shifted to the right:
+  local is_shifted = false
+  local shift_info = cur_ws_id and ws_extra_shift[cur_ws_id]
+  if shift_info and #ws_windows > 0 then
+    local rightmost = ws_windows[#ws_windows]
+    if rightmost and rightmost.address == shift_info.address then
+      is_shifted = true
+    else
+      ws_extra_shift[cur_ws_id] = nil
+    end
+  end
+
+  local cur_idx = is_shifted and #ws_windows or 1
   if cur then
     for i, w in ipairs(ws_windows) do
       if w.address == cur.address then
@@ -211,13 +264,88 @@ local function get_layout_info()
   local ws_count = max_active_ws - base
   local total_items = math.max(#ws_windows, ws_count, 2)
 
+  local steps_left = (cur_idx - 1) + (is_shifted and 1 or 0)
+  local steps_right = math.max(0, #ws_windows - cur_idx) + (is_shifted and 0 or (#ws_windows > 0 and 1 or 0))
+
   return {
     cur_idx = cur_idx,
     total_windows = #ws_windows,
     total_items = total_items,
-    steps_left = cur_idx - 1,
-    steps_right = math.max(0, #ws_windows - cur_idx),
+    steps_left = steps_left,
+    steps_right = steps_right,
+    ws_id = cur_ws_id,
+    ws_windows = ws_windows,
+    cur_win = cur,
+    mon_width = mon_width,
+    is_shifted = is_shifted,
   }
+end
+
+navigate_focus = function(dir)
+  local info = get_layout_info()
+  local cur_ws_id = info.ws_id
+  local ws_windows = info.ws_windows or {}
+  local mon_width = info.mon_width or 1920
+
+  if dir == "r" then
+    if info.is_shifted then
+      -- Already extra shifted to the right; boundary reached
+      return
+    end
+
+    if #ws_windows > 0 and info.cur_idx >= #ws_windows then
+      -- At the rightmost window: take the extra step to the right!
+      local rightmost_win = ws_windows[#ws_windows] or info.cur_win
+      local is_fs = get_window_is_fullscreen(rightmost_win, mon_width)
+      if is_fs then
+        hl.dispatch(hl.dsp.layout("move +col"))
+        if cur_ws_id and rightmost_win then
+          ws_extra_shift[cur_ws_id] = {
+            is_fullscreen = true,
+            address = rightmost_win.address,
+          }
+        end
+      else
+        local shift = math.floor(mon_width * 0.5)
+        hl.dispatch(hl.dsp.layout(string.format("move -%d", shift)))
+        if cur_ws_id and rightmost_win then
+          ws_extra_shift[cur_ws_id] = {
+            is_fullscreen = false,
+            shift = shift,
+            address = rightmost_win.address,
+          }
+        end
+      end
+    else
+      -- Move focus right to the next window
+      hl.dispatch(hl.dsp.focus({ direction = "r" }))
+    end
+
+  elseif dir == "l" then
+    if info.is_shifted and cur_ws_id then
+      -- Undo the extra shift!
+      local shift_info = ws_extra_shift[cur_ws_id]
+      if shift_info and shift_info.is_fullscreen then
+        hl.dispatch(hl.dsp.layout("move -col"))
+      else
+        local shift = (shift_info and shift_info.shift) or math.floor(mon_width * 0.5)
+        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
+      end
+      ws_extra_shift[cur_ws_id] = nil
+      if #ws_windows > 0 then
+        local rightmost_win = ws_windows[#ws_windows]
+        if rightmost_win and rightmost_win.address then
+          hl.dispatch(hl.dsp.focus({ window = "address:" .. rightmost_win.address }))
+        end
+      end
+    elseif info.cur_idx > 1 then
+      -- Move focus left
+      hl.dispatch(hl.dsp.focus({ direction = "l" }))
+    else
+      -- At the leftmost window: do not wrap around
+      return
+    end
+  end
 end
 
 local function handle_stroke_end()
