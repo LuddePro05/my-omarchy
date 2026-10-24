@@ -6,18 +6,27 @@ background-alpha = 0.88
 
 [popups]
 background-alpha = 0.82
-border-width     = 1
-border-alpha     = 0.5
+border-width     = 0
+border-alpha     = 0.0
 
 [notifications]
 background-alpha = 0.5
-border-width     = 1
-border-alpha     = 0.5
+border-width     = 0
+border-alpha     = 0.0
+countdown        = "#fab387"
 
 [menu]
 background-alpha          = 0.82
-border-width              = 1
-border-alpha              = 0.5
-scrim-alpha               = 0
+border-width              = 0
+border-alpha              = 0.0
+scrim-alpha               = 0.25
 selected-background-alpha = 0.08
 selected-border-alpha     = 0.25
+selected-text             = "#cba6f7"
+
+[controls]
+normal-border-alpha       = 0.35
+hover-cursor-border-alpha = 0.45
+hover-cursor-fill-alpha   = 0.12
+selected-fill-alpha       = 0.22
+selected-border-alpha     = 1.0

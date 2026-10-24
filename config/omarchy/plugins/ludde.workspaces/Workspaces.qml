@@ -1,9 +1,11 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 BarWidget {
@@ -242,6 +244,15 @@ BarWidget {
           height: root.vertical ? Style.space(12) : Style.space(2)
           radius: Math.min(width, height) / 2
           color: Commons.Color.accent
+
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.9)
+            shadowBlur: 0.15
+            shadowVerticalOffset: 1
+            shadowHorizontalOffset: 0
+          }
         }
       }
     }

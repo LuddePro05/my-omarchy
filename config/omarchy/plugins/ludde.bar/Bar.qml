@@ -3,6 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQml.Models
 import qs.Commons
@@ -1880,6 +1881,15 @@ Item {
           font.pixelSize: Style.font.body
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
+
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.95)
+            shadowBlur: 0.15
+            shadowVerticalOffset: 1
+            shadowHorizontalOffset: 0
+          }
         }
       }
     }
@@ -2705,6 +2715,131 @@ Item {
       var point = slot.mapToItem(area, x, y)
       return point.x >= 0 && point.y >= 0 && point.x <= area.width && point.y <= area.height
     }
+    readonly property color semanticColor: {
+      if (!activeItem) return root.barForeground
+
+      // Bluetooth: Blue when connected, muted dim when disabled
+      if (moduleName === "omarchy.bluetooth") {
+        if ("adapter" in activeItem && activeItem.adapter && !activeItem.adapter.enabled) {
+          return Qt.color("#6c7086")
+        }
+        if ("connectedDevices" in activeItem && activeItem.connectedDevices && activeItem.connectedDevices.length > 0) {
+          return Qt.color("#89b4fa")
+        }
+        return Qt.color("#b4befe")
+      }
+
+      // Power / Battery: Green when full/high, teal charging, yellow medium, peach/red low
+      if (moduleName === "omarchy.power") {
+        if ("batteryPresent" in activeItem && !activeItem.batteryPresent) {
+          return root.barForeground
+        }
+        var charging = ("charging" in activeItem) && activeItem.charging
+        var frac = ("batteryFraction" in activeItem) ? activeItem.batteryFraction : 1.0
+        if (charging) return Qt.color("#94e2d5")
+        if (frac >= 0.70) return Qt.color("#a6e3a1")
+        if (frac >= 0.35) return Qt.color("#89dceb")
+        if (frac >= 0.20) return Qt.color("#f9e2af")
+        return Qt.color("#f38ba8")
+      }
+
+      // Network: Aqua/Teal when connected, yellow when portal/limited, muted when none
+      if (moduleName === "omarchy.network") {
+        var conn = ("connectivity" in activeItem) ? String(activeItem.connectivity) : "full"
+        if (conn === "full") return Qt.color("#94e2d5")
+        if (conn === "limited" || conn === "portal") return Qt.color("#f9e2af")
+        if (conn === "none" || ("networkEnabled" in activeItem && !activeItem.networkEnabled)) return Qt.color("#6c7086")
+        return Qt.color("#94e2d5")
+      }
+
+      // Audio: Red when muted; dynamic volume gradient from Sapphire -> Lavender -> Mauve when active
+      if (moduleName === "omarchy.audio") {
+        var muted = ("outputMuted" in activeItem && activeItem.outputMuted) ||
+                    ("allMuted" in activeItem && activeItem.allMuted) ||
+                    ("sink" in activeItem && activeItem.sink && activeItem.sink.audio && activeItem.sink.audio.muted)
+        if (muted) return Qt.color("#f38ba8")
+
+        var vol = ("outputVolume" in activeItem) ? Number(activeItem.outputVolume) : 0.5
+        if (vol <= 0.01) return Qt.color("#6c7086") // 0% / silent: muted gray
+        if (vol <= 0.35) {
+          // Sapphire (#74c7ec) to Sky (#89dceb)
+          var t1 = vol / 0.35
+          return Qt.rgba(
+            0.455 + (0.537 - 0.455) * t1,
+            0.780 + (0.863 - 0.780) * t1,
+            0.925 + (0.922 - 0.925) * t1,
+            1.0
+          )
+        }
+        if (vol <= 0.70) {
+          // Sky (#89dceb) to Lavender (#b4befe)
+          var t2 = (vol - 0.35) / 0.35
+          return Qt.rgba(
+            0.537 + (0.706 - 0.537) * t2,
+            0.863 + (0.745 - 0.863) * t2,
+            0.922 + (0.996 - 0.922) * t2,
+            1.0
+          )
+        }
+        if (vol <= 1.0) {
+          // Lavender (#b4befe) to Mauve (#cba6f7)
+          var t3 = (vol - 0.70) / 0.30
+          return Qt.rgba(
+            0.706 + (0.796 - 0.706) * t3,
+            0.745 + (0.651 - 0.745) * t3,
+            0.996 + (0.969 - 0.996) * t3,
+            1.0
+          )
+        }
+        // Boosted (>100%): Mauve (#cba6f7) to Flamingo/Pink (#f5c2e7)
+        var t4 = Math.min(1.0, (vol - 1.0) / 0.5)
+        return Qt.rgba(
+          0.796 + (0.961 - 0.796) * t4,
+          0.651 + (0.761 - 0.651) * t4,
+          0.969 + (0.906 - 0.969) * t4,
+          1.0
+        )
+      }
+
+      // System updates: Peach when updates pending
+      if (moduleName === "omarchy.system-update") {
+        return Qt.color("#fab387")
+      }
+
+      // Microphone: Amber/Peach when in use / active, dim muted gray when muted, ready green when unmuted
+      if (moduleName === "omarchy.microphone") {
+        var micMuted = ("muted" in activeItem && activeItem.muted)
+        if (micMuted) return Qt.color("#6c7086")
+        var micInUse = ("inUse" in activeItem && activeItem.inUse)
+        if (micInUse) return Qt.color("#fab387")
+        return Qt.color("#a6e3a1")
+      }
+
+      return root.barForeground
+    }
+
+    readonly property bool hasSemanticTint: {
+      return moduleName === "omarchy.bluetooth" ||
+             moduleName === "omarchy.power" ||
+             moduleName === "omarchy.network" ||
+             moduleName === "omarchy.audio" ||
+             moduleName === "omarchy.system-update" ||
+             moduleName === "omarchy.microphone"
+    }
+
+    readonly property bool shouldBreathe: {
+      if (!activeItem) return false
+      if (moduleName === "omarchy.system-update") {
+        return ("updateAvailable" in activeItem) && !!activeItem.updateAvailable
+      }
+      if (moduleName === "omarchy.power") {
+        var charging = ("charging" in activeItem) && activeItem.charging
+        var frac = ("batteryFraction" in activeItem) ? activeItem.batteryFraction : 1.0
+        return !charging && frac < 0.20
+      }
+      return false
+    }
+
     readonly property real widgetWidth: host ? host.widgetWidth : 0
     readonly property real widgetHeight: host ? host.widgetHeight : 0
     // Its length along the bar. The dragged widget keeps its place's share
@@ -2754,6 +2889,15 @@ Item {
 
       RoomOutline { visible: slot.dragSource }
 
+      property real breathingOpacity: 1.0
+
+      SequentialAnimation on breathingOpacity {
+        running: slot.shouldBreathe
+        loops: Animation.Infinite
+        NumberAnimation { to: 0.65; duration: 1250; easing.type: Easing.InOutSine }
+        NumberAnimation { to: 1.0; duration: 1250; easing.type: Easing.InOutSine }
+      }
+
       // Folding away under a drag, the slot keeps the widget centred, like
       // the copy in the room it opens (DragSpacer).
       Item {
@@ -2761,6 +2905,22 @@ Item {
         anchors.centerIn: parent
         width: slot.widgetWidth
         height: slot.widgetHeight
+        opacity: slot.shouldBreathe ? widgetArea.breathingOpacity : 1.0
+
+        layer.enabled: width > 0 && height > 0
+        layer.effect: MultiEffect {
+          colorization: slot.hasSemanticTint ? 1.0 : 0.0
+          colorizationColor: slot.semanticColor
+          shadowEnabled: true
+          shadowColor: Qt.rgba(0, 0, 0, 0.95)
+          shadowBlur: 0.15
+          shadowVerticalOffset: 1
+          shadowHorizontalOffset: 0
+
+          Behavior on colorizationColor {
+            ColorAnimation { duration: 150 }
+          }
+        }
       }
 
       // The tray section's outline, as the center box's: around what it
@@ -2789,6 +2949,15 @@ Item {
         radius: Math.min(width, height) / 2
         width: root.vertical ? Style.space(2) : slot.panelIndicatorExtent
         height: root.vertical ? slot.panelIndicatorExtent : Style.space(2)
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+          shadowEnabled: true
+          shadowColor: Qt.rgba(0, 0, 0, 0.9)
+          shadowBlur: 0.15
+          shadowVerticalOffset: 1
+          shadowHorizontalOffset: 0
+        }
         // The mark sits on the module's inner edge — the one facing the
         // desktop — so it underlines a top bar, overlines a bottom one, and
         // points inward from a left or right one. It reads as pointing at the

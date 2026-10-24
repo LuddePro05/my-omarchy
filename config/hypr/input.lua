@@ -97,8 +97,9 @@ local function toggle_fullscreen_inflate()
     local shift_info = ws_extra_shift[cur_ws_id]
     if shift_info and shift_info.state == "full" then
       if shift_info.was_half then
+        hl.dispatch(hl.dsp.layout("move -col"))
         local shift = shift_info.shift or 960
-        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift * 2)))
+        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
       else
         hl.dispatch(hl.dsp.layout("move -col"))
       end
@@ -370,8 +371,8 @@ navigate_focus = function(dir)
     if shift_info and shift_info.state == "full" then
       if shift_info.was_half then
         -- Return from full to half!
+        hl.dispatch(hl.dsp.layout("move -col"))
         local shift = shift_info.shift or math.floor(mon_width * 0.5)
-        hl.dispatch(hl.dsp.layout(string.format("move +%d", shift)))
         ws_extra_shift[cur_ws_id] = {
           state = "half",
           was_half = true,
@@ -725,11 +726,15 @@ local function handle_window_spawned(win)
   local target_ratio = nil
   local fit_method = "fit active"
   local prev_win_addr = nil
+  local prev_win_target_ratio = nil
 
   if shift_info and shift_info.state == "full" then
     target_ratio = 1.0
     fit_method = "fit active"
-    prev_win_addr = shift_info.address
+    if not shift_info.was_half then
+      prev_win_addr = shift_info.address
+      prev_win_target_ratio = 1.0
+    end
   elseif shift_info and shift_info.state == "half" then
     target_ratio = 0.5
     fit_method = "fit toend"
@@ -753,14 +758,12 @@ local function handle_window_spawned(win)
       target_ratio = 1.0
       fit_method = "fit active"
     else
+      target_ratio = 0.5
+      fit_method = "fit toend"
       local last_w = ws_windows[#ws_windows]
       if get_window_is_fullscreen(last_w, mon_width) then
-        target_ratio = 1.0
-        fit_method = "fit active"
         prev_win_addr = last_w.address
-      else
-        target_ratio = 0.5
-        fit_method = "fit toend"
+        prev_win_target_ratio = 0.5
       end
     end
   end
@@ -772,13 +775,13 @@ local function handle_window_spawned(win)
   if target_ratio then
     local win_addr = win.address
     local function apply_resize()
-      if prev_win_addr then
+      if prev_win_addr and prev_win_target_ratio then
         local pw = hl.get_window("address:" .. prev_win_addr)
         if pw and not pw.floating then
           local p_ratio = (pw.size and pw.size.x and mon_width > 0) and (pw.size.x / mon_width) or 0
-          if math.abs(p_ratio - 1.0) > 0.08 then
+          if math.abs(p_ratio - prev_win_target_ratio) > 0.08 then
             hl.dispatch(hl.dsp.focus({ window = "address:" .. prev_win_addr }))
-            hl.dispatch(hl.dsp.layout("colresize 1.00"))
+            hl.dispatch(hl.dsp.layout(string.format("colresize %.2f", prev_win_target_ratio)))
           end
         end
       end

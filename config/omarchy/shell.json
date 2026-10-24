@@ -7,7 +7,7 @@
         {
           "format": "dddd HH:mm:ss",
           "formatAlt": "d MMMM 'W'ww yyyy",
-          "id": "omarchy.clock",
+          "id": "ludde.clock",
           "verticalFormat": "HH\n—\nmm"
         }
       ],
@@ -104,7 +104,16 @@
   "plugins": [
     {
       "id": "nosignal.omasend"
+    },
+    {
+      "id": "ludde.osd"
     }
   ],
-  "version": 1
+  "version": 1,
+  "disabledPlugins": [
+    "omarchy.osd"
+  ],
+  "cloneSourceRestores": [
+    "ludde.osd"
+  ]
 }
