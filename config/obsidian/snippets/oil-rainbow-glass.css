@@ -943,8 +943,14 @@ input, textarea, [contenteditable] {
 }
 
 /* 4. Hide language name text (keep language icon only) */
+body .codeblock-customizer-header-language-tag,
+body.codeblock-customizer .codeblock-customizer-header-language-tag,
+body div.codeblock-customizer-header-language-tag,
+.codeblock-customizer-header-container .codeblock-customizer-header-language-tag,
+.codeblock-customizer-header-container-specific .codeblock-customizer-header-language-tag,
 .codeblock-customizer-header-language-tag {
   display: none !important;
+  visibility: hidden !important;
 }
 
 /* 5. Glowing Icon styling */
