@@ -919,8 +919,8 @@ input, textarea, [contenteditable] {
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-begin {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
-  box-shadow: 0 -8px 20px -2px rgba(0, 0, 0, 0.35), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
-  clip-path: inset(-35px -35px 0 -35px);
+  box-shadow: -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
+  clip-path: inset(0 -35px 0 -35px);
 }
 
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-end {
@@ -933,12 +933,12 @@ input, textarea, [contenteditable] {
 
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-begin.HyperMD-codeblock-end {
   border-radius: 8px !important;
-  box-shadow: 0 0 22px 2px rgba(0, 0, 0, 0.40), 0 8px 24px -2px rgba(0, 0, 0, 0.45) !important;
-  clip-path: inset(-35px -35px -35px -35px);
+  box-shadow: 0 14px 24px -2px rgba(0, 0, 0, 0.45), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
+  clip-path: inset(0 -35px -35px -35px);
   margin-bottom: 1.4em !important;
 }
 
-/* 3. Header: Transparent with Clean Border Line (No glow) */
+/* 3. Header: Transparent with Clean Border Line (No downward shadow towards code block) */
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific,
 .codeblock-customizer-header-group-container {
@@ -946,7 +946,8 @@ input, textarea, [contenteditable] {
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   outline: none !important;
   border-radius: 8px !important;
-  box-shadow: 0 0 14px 1px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.30) !important;
+  box-shadow: 0 -8px 18px -2px rgba(0, 0, 0, 0.35), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
+  clip-path: inset(-35px -35px 0 -35px);
   padding: 6px 12px !important;
   position: relative;
   z-index: 2;
@@ -962,6 +963,7 @@ input, textarea, [contenteditable] {
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 8px !important;
   box-shadow: none !important;
+  clip-path: none !important;
 }
 
 /* 4. Hide language name text (keep language icon only) */
@@ -1057,6 +1059,7 @@ body div.codeblock-customizer-header-language-tag,
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   background: transparent !important;
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.40) !important;
+  clip-path: inset(-35px -35px -35px -35px) !important;
   margin-bottom: 1.4em !important;
 }
 
