@@ -1,0 +1,21 @@
+#!/bin/bash
+# Shell wrapper for Herdr panes
+# In Herdr, the root pane of a workspace (:p1) automatically starts the default agent
+# (Antigravity running Gemini). When Antigravity exits, it drops into the interactive shell.
+# Additional/split panes (:p2, :p3, etc.) open as normal interactive shells.
+
+# Ensure Antigravity and tool paths are present
+if ! command -v agy >/dev/null 2>&1; then
+  export PATH="$HOME/.local/share/mise/installs/antigravity-cli/latest:$HOME/.local/share/mise/shims:$PATH"
+fi
+
+if [[ "$HERDR_PANE_ID" =~ :p1$ ]] && [[ -z "${HERDR_NO_AUTO_AGENT:-}" ]]; then
+  if command -v agy >/dev/null 2>&1; then
+    export HERDR_NO_AUTO_AGENT=1
+    printf '\033[2J\033[3J\033[H'
+    agy
+    exec "${SHELL:-/usr/bin/zsh}"
+  fi
+fi
+
+exec "${SHELL:-/usr/bin/zsh}" "$@"

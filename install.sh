@@ -24,7 +24,7 @@ if command -v omarchy-pkg-add &>/dev/null; then
   omarchy-pkg-add kitty 2>/dev/null || sudo pacman -S --noconfirm --needed kitty 2>/dev/null || true
 fi
 
-for item in hypr omarchy alacritty kitty ghostty fontconfig gtk-4.0 fastfetch walker waybar chromium-flags.conf brave-flags.conf starship.toml Code Typora nvim; do
+for item in hypr omarchy herdr alacritty kitty ghostty fontconfig gtk-4.0 fastfetch walker waybar chromium-flags.conf brave-flags.conf starship.toml Code Typora nvim; do
   if [ -e "$HOME/.config/$item" ]; then
     cp -a "$HOME/.config/$item" "$BACKUP_DIR/"
   fi
@@ -52,6 +52,7 @@ fi
 
 # 3. Ensure executable permissions on scripts & hooks
 echo "🔧 Setting executable permissions on scripts and hooks..."
+chmod +x "$HOME/.config/herdr/shell" 2>/dev/null || true
 chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.py" 2>/dev/null || true
 if [ -d "$HOME/.config/omarchy/hooks" ]; then
   find "$HOME/.config/omarchy/hooks" -type f -name "*.hook" -exec chmod +x {} + 2>/dev/null || true
@@ -61,6 +62,11 @@ fi
 # 4. Clone third-party Omarchy shell plugins if missing
 echo "🔌 Ensuring shell plugins are present..."
 mkdir -p "$HOME/.config/omarchy/plugins"
+
+if [ ! -d "$HOME/.config/omarchy/plugins/jankeesvw.herdr" ]; then
+  echo "  - Cloning omarchy-herdr plugin..."
+  git clone https://github.com/jankeesvw/omarchy-herdr.git "$HOME/.config/omarchy/plugins/jankeesvw.herdr"
+fi
 
 if [ ! -d "$HOME/.config/omarchy/plugins/omaplug" ]; then
   echo "  - Cloning omaplug..."
@@ -127,7 +133,14 @@ if command -v omarchy &>/dev/null; then
   fi
 fi
 
-# 11. Reload Hyprland and Omarchy Shell
+# 11. Ensure Herdr integration and agent setup
+if command -v herdr &>/dev/null; then
+  echo "🤖 Ensuring Herdr Antigravity CLI integration..."
+  herdr integration install antigravity-cli 2>/dev/null || true
+  herdr server reload-config 2>/dev/null || true
+fi
+
+# 12. Reload Hyprland and Omarchy Shell
 echo "🔄 Reloading Hyprland and restarting Omarchy Shell..."
 if command -v hyprctl &>/dev/null; then
   hyprctl reload || true

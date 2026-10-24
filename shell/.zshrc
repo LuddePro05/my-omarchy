@@ -46,6 +46,38 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias mkdir='mkdir -p'
 
+# --- Herdr & AI Agent Helpers ---
+alias h='herdr'
+alias a='omarchy-agent --inline'
+alias antigravity='agy'
+
+# Herdr Dev Layout with editor, AI (defaults to Antigravity/Gemini), and terminal
+hdl() {
+  [[ -z $HERDR_PANE_ID ]] && { echo "You must be inside a Herdr pane to use hdl."; return 1; }
+
+  local current_dir="${PWD}"
+  local editor_pane ai_pane ai2_pane
+  local ai="${1:-agy}"
+  local ai2="${2:-}"
+
+  editor_pane="$HERDR_PANE_ID"
+  herdr tab rename "$HERDR_TAB_ID" "$(basename "$current_dir")" >/dev/null
+
+  # Split tab vertically - top 85%, bottom 15%
+  herdr pane split "$editor_pane" --direction down --ratio 0.85 --cwd "$current_dir" --no-focus >/dev/null
+
+  # Split editor pane horizontally - AI on right 30%
+  ai_pane=$(herdr pane split "$editor_pane" --direction right --ratio 0.7 --cwd "$current_dir" --no-focus | jq -r '.result.pane.pane_id')
+
+  if [[ -n $ai2 ]]; then
+    ai2_pane=$(herdr pane split "$ai_pane" --direction down --ratio 0.5 --cwd "$current_dir" --no-focus | jq -r '.result.pane.pane_id')
+    herdr pane run "$ai2_pane" "$ai2" >/dev/null
+  fi
+
+  herdr pane run "$ai_pane" "$ai" >/dev/null
+  herdr pane run "$editor_pane" "${EDITOR:-nvim} ." >/dev/null
+}
+
 # --- Prompt (Optional: Starship) ---
 # If using starship prompt:
 if command -v starship &> /dev/null; then
