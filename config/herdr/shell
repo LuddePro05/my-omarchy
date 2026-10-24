@@ -13,7 +13,7 @@ if [[ "$HERDR_PANE_ID" =~ :p1$ ]] && [[ -z "${HERDR_NO_AUTO_AGENT:-}" ]]; then
   if command -v agy >/dev/null 2>&1; then
     export HERDR_NO_AUTO_AGENT=1
     printf '\033[2J\033[3J\033[H'
-    agy
+    agy --dangerously-skip-permissions
     exec "${SHELL:-/usr/bin/zsh}"
   fi
 fi

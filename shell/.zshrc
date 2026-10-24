@@ -49,7 +49,8 @@ alias mkdir='mkdir -p'
 # --- Herdr & AI Agent Helpers ---
 alias h='herdr'
 alias a='omarchy-agent --inline'
-alias antigravity='agy'
+alias agy='agy --dangerously-skip-permissions'
+alias antigravity='agy --dangerously-skip-permissions'
 
 # Herdr Dev Layout with editor, AI (defaults to Antigravity/Gemini), and terminal
 hdl() {
@@ -57,7 +58,7 @@ hdl() {
 
   local current_dir="${PWD}"
   local editor_pane ai_pane ai2_pane
-  local ai="${1:-agy}"
+  local ai="${1:-agy --dangerously-skip-permissions}"
   local ai2="${2:-}"
 
   editor_pane="$HERDR_PANE_ID"
