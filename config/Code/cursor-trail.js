@@ -3,7 +3,7 @@
   'use strict';
 
   const DURATION = 170; // ms - silky smooth glide speed
-  const COLOR = '137, 180, 250'; // #89b4fa (Catppuccin Mocha Lavender/Blue)
+  const COLOR = '255, 255, 255'; // #ffffff (Pure White to match cursor)
   const MAX_DIST = 700; // px - ignore huge jumps across tabs / large splits
   const MIN_DIST = 4.0; // px - ignore subpixel jitters
   const MAX_TRAIL_LEN = 95; // px - pronounced, balanced comet trail
