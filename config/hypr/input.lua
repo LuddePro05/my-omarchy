@@ -334,6 +334,9 @@ navigate_focus = function(dir)
     elseif #ws_windows > 0 and info.cur_idx >= #ws_windows then
       -- At rightmost window, take extra step right
       if is_fs then
+        -- Explicitly lock rightmost window's column width to 1.0 before moving right into empty space.
+        -- This guarantees Hyprland will not collapse it to default 0.5 when a new app is spawned.
+        hl.dispatch(hl.dsp.layout("colresize 1.00"))
         hl.dispatch(hl.dsp.layout("move +col"))
         if cur_ws_id and rightmost_win then
           ws_extra_shift[cur_ws_id] = {
@@ -357,6 +360,10 @@ navigate_focus = function(dir)
     else
       -- Normal move focus right
       hl.dispatch(hl.dsp.focus({ direction = "r" }))
+      local next_win = ws_windows[info.cur_idx + 1]
+      if next_win and get_window_is_fullscreen(next_win, mon_width) then
+        hl.dispatch(hl.dsp.layout("fit active"))
+      end
     end
 
   elseif dir == "l" then
@@ -393,6 +400,10 @@ navigate_focus = function(dir)
     elseif info.cur_idx > 1 then
       -- Move focus left
       hl.dispatch(hl.dsp.focus({ direction = "l" }))
+      local prev_win = ws_windows[info.cur_idx - 1]
+      if prev_win and get_window_is_fullscreen(prev_win, mon_width) then
+        hl.dispatch(hl.dsp.layout("fit active"))
+      end
     else
       -- At leftmost window: do not wrap around
       return
@@ -713,10 +724,12 @@ local function handle_window_spawned(win)
 
   local target_ratio = nil
   local fit_method = "fit active"
+  local prev_win_addr = nil
 
   if shift_info and shift_info.state == "full" then
     target_ratio = 1.0
     fit_method = "fit active"
+    prev_win_addr = shift_info.address
   elseif shift_info and shift_info.state == "half" then
     target_ratio = 0.5
     fit_method = "fit toend"
@@ -744,6 +757,7 @@ local function handle_window_spawned(win)
       if get_window_is_fullscreen(last_w, mon_width) then
         target_ratio = 1.0
         fit_method = "fit active"
+        prev_win_addr = last_w.address
       else
         target_ratio = 0.5
         fit_method = "fit toend"
@@ -758,13 +772,23 @@ local function handle_window_spawned(win)
   if target_ratio then
     local win_addr = win.address
     local function apply_resize()
+      if prev_win_addr then
+        local pw = hl.get_window("address:" .. prev_win_addr)
+        if pw and not pw.floating then
+          local p_ratio = (pw.size and pw.size.x and mon_width > 0) and (pw.size.x / mon_width) or 0
+          if math.abs(p_ratio - 1.0) > 0.08 then
+            hl.dispatch(hl.dsp.focus({ window = "address:" .. prev_win_addr }))
+            hl.dispatch(hl.dsp.layout("colresize 1.00"))
+          end
+        end
+      end
+
       if win_addr then
         local w = hl.get_window("address:" .. win_addr)
         if w and not w.floating then
-          local mon = hl.get_active_monitor()
-          local mon_w = (mon and mon.width) or 1920
+          local mon_w = mon_width
           local cur_ratio = (w.size and w.size.x and mon_w > 0) and (w.size.x / mon_w) or 0
-          if math.abs(cur_ratio - target_ratio) > 0.08 then
+          if target_ratio == 1.0 or math.abs(cur_ratio - target_ratio) > 0.08 then
             hl.dispatch(hl.dsp.focus({ window = "address:" .. win_addr }))
             hl.dispatch(hl.dsp.layout(string.format("colresize %.2f", target_ratio)))
             hl.dispatch(hl.dsp.layout(fit_method))
