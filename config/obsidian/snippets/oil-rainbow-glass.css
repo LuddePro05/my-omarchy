@@ -486,12 +486,12 @@ a.tag:hover {
 }
 
 .markdown-rendered pre {
-  background: color-mix(in srgb, var(--background-primary) 92%, #ffffff 8%) !important;
+  background: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   border: none !important;
   border-radius: 10px;
-  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.40), 0 4px 10px -2px rgba(0, 0, 0, 0.20) !important;
   margin-top: 1.2em !important;
   margin-bottom: 1.5em !important;
 }
@@ -883,14 +883,14 @@ input, textarea, [contenteditable] {
 }
 
 /* ==============================================================================
-   Code Block Customizer: Lifted Blocks & Short Strong White Glowing Header
+   Code Block Customizer: Lifted Blocks & Subtle White Glowing Header
    ============================================================================== */
 
-/* 1. Lifted Code Block (Reading Mode): matches file color + tad brighter + shadow */
+/* 1. Lifted Code Block (Reading Mode): matches file color + 1% brighter + shadow */
 .markdown-rendered pre.codeblock-customizer-pre,
 .markdown-rendered .codeblock-customizer-pre-parent > pre.codeblock-customizer-pre,
 .markdown-rendered pre:has(.codeblock-customizer-header-container) {
-  background: color-mix(in srgb, var(--background-primary) 92%, #ffffff 8%) !important;
+  background: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   border: none !important;
@@ -901,11 +901,18 @@ input, textarea, [contenteditable] {
   position: relative;
 }
 
-/* 2. Lifted Code Block (Live Preview / Source View): matches file color + tad brighter + shadow */
+/* 2. Lifted Code Block (Live Preview / Source View): matches file color + 1% brighter + seamless lines */
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line] {
-  background-color: color-mix(in srgb, var(--background-primary) 92%, #ffffff 8%) !important;
+  background-color: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
   border: none !important;
-  box-shadow: -10px 0 18px -4px rgba(0, 0, 0, 0.25), 10px 0 18px -4px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line] * {
+  box-shadow: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
 }
 
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-begin {
@@ -916,11 +923,12 @@ input, textarea, [contenteditable] {
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-end {
   border-bottom-left-radius: 8px !important;
   border-bottom-right-radius: 8px !important;
-  box-shadow: -10px 0 18px -4px rgba(0, 0, 0, 0.25), 10px 0 18px -4px rgba(0, 0, 0, 0.25), 0 14px 30px -4px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 14px 20px -6px rgba(0, 0, 0, 0.45) !important;
+  clip-path: inset(0 -30px -30px -30px);
   margin-bottom: 1.4em !important;
 }
 
-/* 3. Header: Transparent with Short, Strong White Glow (No physical line) */
+/* 3. Header: Transparent with Subtle White Glow (No physical line) */
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific,
 .codeblock-customizer-header-group-container {
@@ -928,7 +936,7 @@ input, textarea, [contenteditable] {
   border: none !important;
   outline: none !important;
   border-radius: 8px !important;
-  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.75), 0 0 2px 0px rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.18), 0 0 1px 0px rgba(255, 255, 255, 0.30) !important;
   padding: 6px 12px !important;
   position: relative;
   z-index: 2;
@@ -943,7 +951,7 @@ input, textarea, [contenteditable] {
   margin: 6px 8px 6px 8px !important;
   border: none !important;
   border-radius: 8px !important;
-  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.75), 0 0 2px 0px rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.18), 0 0 1px 0px rgba(255, 255, 255, 0.30) !important;
 }
 
 /* 4. Hide language name text (keep language icon only) */
@@ -957,13 +965,13 @@ body div.codeblock-customizer-header-language-tag,
   visibility: hidden !important;
 }
 
-/* 5. Glowing Icon styling */
+/* 5. Subtle Glowing Icon styling */
 .codeblock-customizer-icon-container {
   display: flex !important;
   align-items: center;
   justify-content: center;
   margin-right: 8px !important;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8)) !important;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.30)) !important;
 }
 
 .codeblock-customizer-icon-container img,
@@ -973,26 +981,26 @@ body div.codeblock-customizer-header-language-tag,
   opacity: 1 !important;
 }
 
-/* 6. Glowing File name / title text in header (White glow) */
+/* 6. Subtle Glowing File name / title text in header (White glow) */
 .codeblock-customizer-header-text {
   font-family: var(--font-monospace) !important;
   font-weight: 600 !important;
   font-size: 0.88em !important;
   color: #ffffff !important;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.80), 0 0 12px rgba(255, 255, 255, 0.40) !important;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.25) !important;
   letter-spacing: 0.03em !important;
 }
 
-/* 7. Glowing Collapse toggle icon (White glow) */
+/* 7. Subtle Glowing Collapse toggle icon (White glow) */
 .codeblock-customizer-collapse-icon {
   color: #ffffff !important;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.75)) !important;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.30)) !important;
   transition: transform 0.2s ease, filter 0.2s ease, color 0.2s ease !important;
 }
 
 .codeblock-customizer-collapse-icon:hover {
   color: #ffffff !important;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) !important;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.70)) !important;
 }
 
 /* 8. Fully collapsed code block: entire block body disappears except header */
@@ -1028,7 +1036,7 @@ body div.codeblock-customizer-header-language-tag,
   border-radius: 8px !important;
   border: none !important;
   background: transparent !important;
-  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.80), 0 0 2px 0px rgba(255, 255, 255, 0.95), 0 10px 24px -2px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.18), 0 0 1px 0px rgba(255, 255, 255, 0.30), 0 10px 24px -2px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* Live Preview collapsed header pill */
@@ -1038,30 +1046,34 @@ body div.codeblock-customizer-header-language-tag,
   border-radius: 8px !important;
   border: none !important;
   background: transparent !important;
-  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.80), 0 0 2px 0px rgba(255, 255, 255, 0.95), 0 10px 24px -2px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.18), 0 0 1px 0px rgba(255, 255, 255, 0.30), 0 10px 24px -2px rgba(0, 0, 0, 0.45) !important;
   margin-bottom: 1.4em !important;
 }
 
-/* 9. Gutter & Line numbers styling */
+/* 9. Gutter & Line numbers styling (seamless, no line artifacts) */
 .codeblock-customizer-gutter,
 .codeblock-customizer-line-number,
 .codeblock-customizer-line-number-specific {
   background: transparent !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  box-shadow: none !important;
 }
 
 /* 10. Copy buttons styling */
 .codeblock-customizer-copy-code,
 .codeblock-customizer-copy-code-button {
   color: #ffffff !important;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) !important;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.25)) !important;
   transition: color 0.15s ease, filter 0.15s ease !important;
 }
 
 .codeblock-customizer-copy-code:hover,
 .codeblock-customizer-copy-code-button:hover {
   color: #ffffff !important;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) !important;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.65)) !important;
 }
 
 
