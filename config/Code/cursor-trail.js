@@ -166,10 +166,11 @@
           // ALWAYS animate line changes!
           const isLineJump = Math.abs(dy) >= 4;
 
-          // Suppress only same-line typing advance or same-line backspace
-          const isSameLineTyping = Math.abs(dy) < 4 && (isTyping || (dx > 0 && dx <= 14));
+          // Suppress single-character arrow steps (left/right) through text on the same line, but animate line jumps and word jumps
+          const isSingleCharStep = Math.abs(dy) < 4 && Math.abs(dx) <= 24;
+          const isSameLineStep = Math.abs(dy) < 4 && (isTyping || isSingleCharStep);
 
-          if (!isLineJump && isSameLineTyping) {
+          if (!isLineJump && isSameLineStep) {
             cursorMap.set(cur.id, { ...cur });
             continue;
           }
