@@ -917,8 +917,8 @@ input, textarea, [contenteditable] {
 }
 
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-begin {
-  border-top-left-radius: 8px !important;
-  border-top-right-radius: 8px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
   box-shadow: -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
   clip-path: inset(0 -35px 0 -35px);
 }
@@ -932,27 +932,34 @@ input, textarea, [contenteditable] {
 }
 
 .markdown-source-view .HyperMD-codeblock[class*=codeblock-customizer-line].HyperMD-codeblock-begin.HyperMD-codeblock-end {
-  border-radius: 8px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
   box-shadow: 0 14px 24px -2px rgba(0, 0, 0, 0.45), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
   clip-path: inset(0 -35px -35px -35px);
   margin-bottom: 1.4em !important;
 }
 
-/* 3. Header: Transparent with Clean Border Line (No downward shadow towards code block) */
+/* 3. Header: Seamless with Code Block when expanded, standalone pill when collapsed */
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific,
 .codeblock-customizer-header-group-container {
-  background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
+  background-image: none !important;
+  border: none !important;
   outline: none !important;
-  border-radius: 8px !important;
-  box-shadow: 0 -8px 18px -2px rgba(0, 0, 0, 0.35), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  box-shadow: 0 -8px 20px -2px rgba(0, 0, 0, 0.35), -14px 0 20px -4px rgba(0, 0, 0, 0.40), 14px 0 20px -4px rgba(0, 0, 0, 0.40) !important;
   clip-path: inset(-35px -35px 0 -35px);
   padding: 6px 12px !important;
   position: relative;
   z-index: 2;
   margin-top: 1.2em !important;
-  margin-bottom: 4px !important;
+  margin-bottom: 0 !important;
 }
 
 /* Reading View header inside pre */
@@ -960,8 +967,9 @@ input, textarea, [contenteditable] {
 .markdown-rendered pre.codeblock-customizer-pre .codeblock-customizer-header-container-specific,
 .markdown-rendered pre.codeblock-customizer-pre .codeblock-customizer-header-group-container {
   margin: 6px 8px 6px 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  border-radius: 8px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   box-shadow: none !important;
   clip-path: none !important;
 }
@@ -1046,9 +1054,10 @@ body div.codeblock-customizer-header-language-tag,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container,
 .codeblock-customizer-pre.codeblock-customizer-codeblock-semi-collapsed .codeblock-customizer-header-container-specific {
   border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  background: transparent !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.40) !important;
+  border: none !important;
+  background: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
+  box-shadow: 0 0 22px 2px rgba(0, 0, 0, 0.40), 0 8px 24px -2px rgba(0, 0, 0, 0.45) !important;
+  clip-path: none !important;
 }
 
 /* Live Preview collapsed header pill */
@@ -1056,9 +1065,10 @@ body div.codeblock-customizer-header-language-tag,
 .markdown-source-view .codeblock-customizer-header-container-specific.collapsed,
 .markdown-source-view .codeblock-customizer-header-group-container.collapsed {
   border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  background: transparent !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.40) !important;
+  border: none !important;
+  background: color-mix(in srgb, var(--background-primary) 99%, #ffffff 1%) !important;
+  background-image: none !important;
+  box-shadow: 0 0 22px 2px rgba(0, 0, 0, 0.40), 0 8px 24px -2px rgba(0, 0, 0, 0.45) !important;
   clip-path: inset(-35px -35px -35px -35px) !important;
   margin-bottom: 1.4em !important;
 }
