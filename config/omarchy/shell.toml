@@ -5,7 +5,7 @@ base-size = 11
 background-alpha = 0.88
 
 [popups]
-background-alpha = 0.5
+background-alpha = 0.82
 border-width     = 1
 border-alpha     = 0.5
 

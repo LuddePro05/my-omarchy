@@ -1583,13 +1583,8 @@ Item {
             root.activeWindowTitle = String(obj.title || "")
             root.activeWindowFullscreen = !!(obj.fullscreen && obj.fullscreen > 0)
             root.activeWindowFloating = !!obj.floating
-          } else {
-            root.activeWindowClass = ""
-            root.activeWindowTitle = ""
-            root.activeWindowFullscreen = false
-            root.activeWindowFloating = false
+            root.recomputeTargetAlpha()
           }
-          root.recomputeTargetAlpha()
         } catch (e) {
           // ignore
         }
@@ -2347,10 +2342,7 @@ Item {
         suppressClick = false
         return
       }
-      if (mouse.button === Qt.LeftButton) {
-        root.cycleBackground()
-        mouse.accepted = true
-      }
+      mouse.accepted = true
     }
   }
 

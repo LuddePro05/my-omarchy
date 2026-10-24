@@ -102,12 +102,19 @@ if [ -d "/usr/share/code" ]; then
   python3 "$SCRIPT_DIR/config/Code/install-cursor-trail.py" || true
 fi
 
-# 8. Shell rc files
+# 8. Omarchy shell shadow patch
+OMARCHY_DIR="${OMARCHY_PATH:-$HOME/.local/share/omarchy}"
+if [ -d "$OMARCHY_DIR/.git" ] && [ -f "$SCRIPT_DIR/patches/omarchy-shell-shadow.patch" ]; then
+  echo "✨ Applying Omarchy shell popup drop shadows..."
+  git -C "$OMARCHY_DIR" apply "$SCRIPT_DIR/patches/omarchy-shell-shadow.patch" 2>/dev/null || true
+fi
+
+# 9. Shell rc files
 echo "🐚 Deploying shell profiles (.zshrc, .bashrc)..."
 cp -a "$SCRIPT_DIR/shell/.zshrc" "$HOME/.zshrc"
 cp -a "$SCRIPT_DIR/shell/.bashrc" "$HOME/.bashrc"
 
-# 8. Set Catppuccin theme and custom background
+# 10. Set Catppuccin theme and custom background
 echo "🎨 Applying Catppuccin theme and custom rainbow background..."
 if command -v omarchy &>/dev/null; then
   omarchy theme set catppuccin || true
@@ -120,7 +127,7 @@ if command -v omarchy &>/dev/null; then
   fi
 fi
 
-# 9. Reload Hyprland and Omarchy Shell
+# 11. Reload Hyprland and Omarchy Shell
 echo "🔄 Reloading Hyprland and restarting Omarchy Shell..."
 if command -v hyprctl &>/dev/null; then
   hyprctl reload || true

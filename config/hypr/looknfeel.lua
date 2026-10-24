@@ -76,6 +76,7 @@ hl.config({
 
     dim_inactive = true,
     dim_strength = 0.15,
+    dim_around = 0.15,
 
     shadow = {
       enabled = true,
@@ -168,12 +169,11 @@ hl.window_rule({
   opacity = "0.78 0.72 1.0",
 })
 
--- Blur layer-shell surfaces
+-- Blur and focus layer-shell surfaces
 hl.layer_rule({ match = { namespace = "omarchy-osd" }, blur = true, ignore_alpha = 0.3 })
 hl.layer_rule({ match = { namespace = "omarchy-notifications" }, blur = true, ignore_alpha = 0.3 })
 hl.layer_rule({ match = { namespace = "omarchy-bar" }, blur = true, blur_popups = true, ignore_alpha = 0.3 })
-hl.layer_rule({ match = { namespace = "omarchy-menu" }, blur = true, ignore_alpha = 0.3 })
-hl.layer_rule({ match = { namespace = "omarchy-polkit" }, blur = true, ignore_alpha = 0.3 })
-hl.layer_rule({ match = { namespace = "^(omarchy-emojis|omarchy-clipboard|omarchy-image-selector|omarchy-keyboard-panel|omarchy-polkit|omarchy-reminders|omarchy-network-qr|omarchy-dock|omarchy-dock-apps)$" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ match = { namespace = "omarchy-dock" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ match = { namespace = "^(omarchy-menu|omarchy-keyboard-panel|omarchy-clipboard|omarchy-emojis|omarchy-image-selector|omarchy-polkit|omarchy-reminders|omarchy-network-qr|omarchy-dock-apps)$" }, blur = true, ignore_alpha = 0.3, dim_around = true })
 
 
