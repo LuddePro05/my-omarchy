@@ -488,10 +488,10 @@ BarWidget {
     readonly property bool iconActive: indicatorSource.item
       ? indicatorSource.item.effectiveActive === true : false
 
-    // The StayAwake mug's reported tight bounds sit a few pixels below the
-    // optical center of the icon canvas. Nudge the glyph (and its aura) back
-    // onto the row instead of shifting every indicator.
-    readonly property real opticalOffsetY: indicatorId === "StayAwake" ? -3 : 0
+    // The StayAwake mug's rendered ink sits a pixel low in its icon slot.
+    // Nudge the glyph (and its aura) back onto the row instead of shifting
+    // every indicator.
+    readonly property real opticalOffsetY: indicatorId === "StayAwake" ? -1 : 0
 
     // The same electric gradient the workspaces and the bar icons carry,
     // spread across the indicators in their configured order. An active
