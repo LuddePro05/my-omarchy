@@ -40,3 +40,8 @@ selected-border           = "#c040ff #00a8ff 45deg"
 selected-border-width     = 1
 selected-border-alpha     = 0.85
 selected-fill-alpha       = 0.22
+
+[tooltip]
+border           = "#c040ff #00a8ff 45deg"
+border-width     = 1
+border-alpha     = 0.85

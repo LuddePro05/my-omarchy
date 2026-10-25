@@ -234,22 +234,6 @@ BarWidget {
         }
         onWheelMoved: function(delta) { root.scrollWorkspaces(delta) }
 
-        BorderSurface {
-          id: wsHoverRing
-          anchors.centerIn: parent
-          width: parent.width - Style.space(4)
-          height: parent.height - Style.space(6)
-          radius: Math.min(width, height) / 2
-          color: "transparent"
-          borderSpec: Border.surfaceSpec("menu", "border", Commons.Color.accent, 1)
-          visible: opacity > 0
-          opacity: button.tooltipHovered && !button.focused ? 0.85 : 0.0
-
-          Behavior on opacity {
-            NumberAnimation { duration: Style.duration(120) }
-          }
-        }
-
         Rectangle {
           id: underline
           visible: button.focused

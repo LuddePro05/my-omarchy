@@ -1335,7 +1335,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       y: panel.effectiveCardTop
       color: root.background
-      borderSpec: root.borderSpec
+      borderSpec: Border.none()
       padding: root.contentMargin
 
       MouseArea { anchors.fill: parent; onClicked: {} }

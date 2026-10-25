@@ -3096,8 +3096,7 @@ Item {
 
         layer.enabled: width > 0 && height > 0
         layer.effect: MultiEffect {
-          colorization: slot.hasSemanticTint ? 1.0 : 0.0
-          colorizationColor: slot.semanticColor
+          colorization: 0.0
           shadowEnabled: true
           shadowColor: slot.hasSemanticTint
             ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3106,30 +3105,9 @@ Item {
           shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
           shadowHorizontalOffset: 0
 
-          Behavior on colorizationColor {
-            ColorAnimation { duration: 150 }
-          }
           Behavior on shadowColor {
             ColorAnimation { duration: 150 }
           }
-        }
-      }
-
-      // Hover gradient outline around the active slot
-      BorderSurface {
-        id: hoverOutline
-        anchors.centerIn: parent
-        width: Math.round(slot.widgetWidth + Style.space(8))
-        height: Math.round(widgetArea.height - Style.space(4))
-        radius: Math.min(width, height) / 2
-        color: "transparent"
-        borderSpec: Border.surfaceSpec("menu", "border", Commons.Color.accent, 1)
-        visible: opacity > 0
-        opacity: slot.hovered && !slot.dragSource ? 0.90 : 0.0
-        z: 50
-
-        Behavior on opacity {
-          NumberAnimation { duration: Style.duration(140); easing.type: Easing.OutCubic }
         }
       }
 
