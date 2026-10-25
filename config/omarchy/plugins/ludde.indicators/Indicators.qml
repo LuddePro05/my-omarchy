@@ -483,11 +483,21 @@ BarWidget {
     readonly property var indicatorSettings: root.entrySettings(entry)
     readonly property var barRef: root.bar
 
+    // True only for an active icon. Inactive icons keep a single soft pass so
+    // their dimmed aura does not stack back up to active brightness.
+    readonly property bool iconActive: indicatorSource.item
+      ? indicatorSource.item.effectiveActive === true : false
+
+    // The StayAwake mug's reported tight bounds sit a few pixels below the
+    // optical center of the icon canvas. Nudge the glyph (and its aura) back
+    // onto the row instead of shifting every indicator.
+    readonly property real opticalOffsetY: indicatorId === "StayAwake" ? -3 : 0
+
     // The same electric gradient the workspaces and the bar icons carry,
-    // spread across the indicators in their configured order. An indicator
-    // keeps its hue wherever it sits: in the active block, or among the
-    // inactive ones a hover reveals.
-    readonly property color glowColor: {
+    // spread across the indicators in their configured order. An active
+    // indicator keeps its hue; a revealed inactive one uses a neutral gray
+    // so the hidden strip reads as dormant rather than another active row.
+    readonly property color activeGlowColor: {
       var list = root.indicatorEntries
       var total = list.length
       var index = 0
@@ -508,10 +518,8 @@ BarWidget {
       )
     }
 
-    // True only for an active icon. Inactive icons keep a single soft pass so
-    // their dimmed aura does not stack back up to active brightness.
-    readonly property bool iconActive: indicatorSource.item
-      ? indicatorSource.item.effectiveActive === true : false
+    readonly property color inactiveGlowColor: Qt.rgba(0.88, 0.90, 0.93, 1.0)
+    readonly property color glowColor: iconActive ? activeGlowColor : inactiveGlowColor
 
     implicitWidth: indicatorSource.item && indicatorSource.item.visible ? indicatorSource.item.implicitWidth : 0
     implicitHeight: indicatorSource.item && indicatorSource.item.visible ? indicatorSource.item.implicitHeight : 0
@@ -536,10 +544,11 @@ BarWidget {
 
       anchors.fill: parent
       source: indicatorSlot.indicatorId ? Qt.resolvedUrl("indicators/" + indicatorSlot.indicatorId + ".qml") : ""
+      transform: Translate { y: indicatorSlot.opticalOffsetY }
 
-      // The aura rides the icon's own opacity, so an inactive indicator's
-      // glow is dimmed to 0.45 with its glyph while an active one burns at
-      // full strength.
+      // The aura rides the icon's own opacity: active icons burn with their
+      // gradient hue, while revealed inactive icons get a single neutral-gray
+      // pass so they read as dormant rather than another active row.
       layer.enabled: item !== null && item.visible
       layer.effect: Component {
         Item {
@@ -557,7 +566,7 @@ BarWidget {
             shadowScale: 1.08
             shadowVerticalOffset: 0
             shadowHorizontalOffset: 0
-            shadowOpacity: indicatorSlot.iconActive ? 1.0 : 0.65
+            shadowOpacity: 1.0
           }
 
           // Pass 2: Mid vibrant neon aura
