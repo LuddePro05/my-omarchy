@@ -3007,12 +3007,6 @@ Item {
       // A slot-level tint as well would wash the glyphs in one hue and stack
       // a second set of passes over them.
       if (moduleName === "ludde.indicators") return false
-      // Herdr's count badge is a small filled disc. The slot aura wraps the
-      // whole widget, badge included, and turns that disc into a glowing
-      // ball. While the badge is visible, keep the slot plain.
-      if (moduleName === "jankeesvw.herdr") {
-        return !(activeItem && activeItem.badgeActive)
-      }
       if (moduleName === "omarchy.bluetooth" ||
           moduleName === "omarchy.power" ||
           moduleName === "omarchy.network" ||
@@ -3078,6 +3072,16 @@ Item {
       root.unregisterModuleSlot(slot)
     }
 
+    // A widget that paints its own aura can take the same gradient colour this
+    // slot would have tinted it with. Herdr does this for its server glyph;
+    // its count badge is outside the effect.
+    Binding {
+      target: slot.activeItem
+      property: "slotGlowColor"
+      value: slot.semanticColor
+      when: slot.activeItem && "slotGlowColor" in slot.activeItem
+    }
+
     HoverHandler { id: moduleHover }
 
     // The widget at its own size. Lifted out by a drag, it folds away with
@@ -3109,7 +3113,10 @@ Item {
         height: slot.widgetHeight
         opacity: slot.shouldBreathe ? widgetArea.breathingOpacity : 1.0
 
-        layer.enabled: width > 0 && height > 0
+        // Herdr paints its own aura around the server glyph. Keeping the
+        // slot effect off lets its count badge sit outside that aura instead
+        // of glowing along with the whole widget.
+        layer.enabled: width > 0 && height > 0 && slot.moduleName !== "jankeesvw.herdr"
         layer.effect: Component {
           Item {
             id: effectRoot
