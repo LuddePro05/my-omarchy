@@ -2770,6 +2770,11 @@ Item {
         ? root : root.pluginBarApiFor(pluginApiId, moduleName, registered)
       if ("moduleName" in target) target.moduleName = moduleName
       if ("settings" in target) target.settings = moduleSettings
+      // Opt-in: a widget that declares hostShell gets the bar plugin's own
+      // service-capable facade. A plugin-scoped bar facade cannot see the
+      // first-party service proxies, so a cloned widget such as the
+      // indicators borrows the bar's read-only shell access instead.
+      if ("hostShell" in target) target.hostShell = root.shell
     }
 
     Component {
@@ -2998,6 +3003,10 @@ Item {
 
     readonly property bool hasSemanticTint: {
       if (!activeItem) return false
+      // The cloned indicators widget carries its own per-icon gradient aura.
+      // A slot-level tint as well would wash the glyphs in one hue and stack
+      // a second set of passes over them.
+      if (moduleName === "ludde.indicators") return false
       if (moduleName === "omarchy.bluetooth" ||
           moduleName === "omarchy.power" ||
           moduleName === "omarchy.network" ||
@@ -3156,6 +3165,70 @@ Item {
               shadowHorizontalOffset: 0
               shadowOpacity: 1.0
               visible: slot.hasSemanticTint
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
+
+            // Passes 4-6: Weather's glyph is a single thin sign, so the same
+            // three passes read about a third as bright as the neighbouring
+            // icons. Three weather-only passes (wide, mid and core) stack the
+            // same semantic hue back up to an equal electric presence.
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : "transparent"
+              shadowBlur: 0.85
+              shadowScale: 1.12
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
+
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : "transparent"
+              shadowBlur: 0.50
+              shadowScale: 1.06
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
+
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : "transparent"
+              shadowBlur: 0.25
+              shadowScale: 1.02
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
 
               Behavior on shadowColor {
                 ColorAnimation { duration: 150 }

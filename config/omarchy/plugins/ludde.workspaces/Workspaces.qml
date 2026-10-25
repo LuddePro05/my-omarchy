@@ -196,6 +196,23 @@ BarWidget {
 
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
 
+  // The bar's electric gradient, spread across the workspaces from the left
+  // (mauve) to the right (sapphire). Each workspace glows in the hue of its
+  // own place on the row, so the active number and its underline pill keep
+  // the same left-to-right flow as the bar's other gradient elements.
+  function workspaceGlowColor(index) {
+    var c1 = Qt.color("#c040ff") // Electric Mauve
+    var c2 = Qt.color("#00a8ff") // Electric Sapphire
+    var total = root.displayedWorkspaces.length
+    var t = total <= 1 ? 0.0 : Math.max(0.0, Math.min(1.0, index / (total - 1)))
+    return Qt.rgba(
+      c1.r + (c2.r - c1.r) * t,
+      c1.g + (c2.g - c1.g) * t,
+      c1.b + (c2.b - c1.b) * t,
+      1.0
+    )
+  }
+
   implicitWidth: grid.implicitWidth + trailingGap
   implicitHeight: grid.implicitHeight
 
@@ -217,17 +234,75 @@ BarWidget {
         readonly property var workspace: root.workspaceById(modelData)
         readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
         readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
+        readonly property int workspaceIndex: root.displayedWorkspaces.indexOf(modelData)
+        readonly property color glowColor: root.workspaceGlowColor(workspaceIndex)
 
         bar: root.bar
         text: modelData === 10 ? "0" : String(modelData)
         active: button.focused
-        activeColor: "#c040ff"
+        // The number stays pure white; its place in the row supplies the hue
+        // of the electric aura around it and its underline pill.
+        activeColor: "#ffffff"
         foreground: Commons.Color.foreground
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6
         fixedWidth: root.vertical ? root.barSize : Style.space(20)
         fixedHeight: root.barSize
+
+        // 3-pass multi-layer neon aura: wide electric halo, vibrant body, and
+        // a dense core hugging the white sign. Only the focused workspace
+        // glows, matching the active pill's place in the gradient.
+        layer.enabled: button.focused
+        layer.effect: Component {
+          Item {
+            id: workspaceGlowRoot
+            property var source
+
+            // Pass 1: wide electric aura
+            MultiEffect {
+              anchors.fill: parent
+              source: workspaceGlowRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: true
+              shadowColor: button.glowColor
+              shadowBlur: 0.95
+              shadowScale: 1.12
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+            }
+
+            // Pass 2: vibrant neon body
+            MultiEffect {
+              anchors.fill: parent
+              source: workspaceGlowRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: true
+              shadowColor: button.glowColor
+              shadowBlur: 0.50
+              shadowScale: 1.06
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+            }
+
+            // Pass 3: dense core halo hugging the white sign and pill
+            MultiEffect {
+              anchors.fill: parent
+              source: workspaceGlowRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: true
+              shadowColor: button.glowColor
+              shadowBlur: 0.20
+              shadowScale: 1.0
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+            }
+          }
+        }
+
         onPressed: function() {
           if (focused) root.cycleLayout()
           else root.focusWorkspace(modelData)
