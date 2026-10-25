@@ -550,7 +550,7 @@ BarWidget {
           MultiEffect {
             anchors.fill: parent
             source: indicatorGlowEffect.source
-            autoPaddingEnabled: true
+            autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
             shadowBlur: 0.95
@@ -565,7 +565,7 @@ BarWidget {
             anchors.fill: parent
             visible: indicatorSlot.iconActive
             source: indicatorGlowEffect.source
-            autoPaddingEnabled: true
+            autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
             shadowBlur: 0.50
@@ -580,7 +580,7 @@ BarWidget {
             anchors.fill: parent
             visible: indicatorSlot.iconActive
             source: indicatorGlowEffect.source
-            autoPaddingEnabled: true
+            autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
             shadowBlur: 0.20

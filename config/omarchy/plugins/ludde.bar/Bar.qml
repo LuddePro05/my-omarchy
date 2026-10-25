@@ -3113,7 +3113,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: true
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3133,7 +3133,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: slot.hasSemanticTint
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3154,7 +3154,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: slot.hasSemanticTint
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3178,7 +3178,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3198,7 +3198,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
@@ -3218,7 +3218,7 @@ Item {
             MultiEffect {
               anchors.fill: parent
               source: effectRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)

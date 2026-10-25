@@ -263,7 +263,7 @@ BarWidget {
             MultiEffect {
               anchors.fill: parent
               source: workspaceGlowRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: true
               shadowColor: button.glowColor
               shadowBlur: 0.95
@@ -277,7 +277,7 @@ BarWidget {
             MultiEffect {
               anchors.fill: parent
               source: workspaceGlowRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: true
               shadowColor: button.glowColor
               shadowBlur: 0.50
@@ -291,7 +291,7 @@ BarWidget {
             MultiEffect {
               anchors.fill: parent
               source: workspaceGlowRoot.source
-              autoPaddingEnabled: true
+              autoPaddingEnabled: false
               shadowEnabled: true
               shadowColor: button.glowColor
               shadowBlur: 0.20
