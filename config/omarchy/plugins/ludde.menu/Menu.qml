@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Effects
 import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
@@ -1299,6 +1300,7 @@ Item {
       anchors.fill: parent
       color: root.scrim
       opacity: panel.shown ? 1.0 : 0.0
+      z: -2
 
       Behavior on opacity {
         NumberAnimation {
@@ -1313,44 +1315,26 @@ Item {
       onClicked: root.cancel()
     }
 
-    // Static drop shadow behind card: deep, clean, instant, zero lag or animation
-    Item {
-      id: cardShadow
+    Rectangle {
+      id: shadowBox
       x: card.x
-      y: card.y + 6
+      y: card.y
       width: card.width
       height: card.height
+      radius: card.radius
+      color: "black"
+      visible: false
+    }
 
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: -18
-        radius: card.radius + 18
-        color: Qt.rgba(0, 0, 0, 0.05)
-      }
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: -12
-        radius: card.radius + 12
-        color: Qt.rgba(0, 0, 0, 0.08)
-      }
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: -7
-        radius: card.radius + 7
-        color: Qt.rgba(0, 0, 0, 0.14)
-      }
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: -3
-        radius: card.radius + 3
-        color: Qt.rgba(0, 0, 0, 0.22)
-      }
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: -1
-        radius: card.radius + 1
-        color: Qt.rgba(0, 0, 0, 0.32)
-      }
+    MultiEffect {
+      source: shadowBox
+      anchors.fill: shadowBox
+      shadowEnabled: true
+      shadowColor: Qt.rgba(0, 0, 0, 0.65)
+      shadowBlur: 0.7
+      shadowVerticalOffset: 6
+      shadowHorizontalOffset: 0
+      z: -1
     }
 
     BorderSurface {

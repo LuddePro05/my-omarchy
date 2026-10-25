@@ -209,10 +209,10 @@ hl.window_rule({
 })
 
 -- Blur and focus layer-shell surfaces
-hl.layer_rule({ match = { namespace = "omarchy-osd" }, blur = true, ignore_alpha = 0.25 })
-hl.layer_rule({ match = { namespace = "omarchy-notifications" }, blur = true, ignore_alpha = 0.25 })
-hl.layer_rule({ match = { namespace = "omarchy-bar" }, blur = true, blur_popups = true, ignore_alpha = 0.25 })
-hl.layer_rule({ match = { namespace = "omarchy-dock" }, blur = true, ignore_alpha = 0.25 })
-hl.layer_rule({ match = { namespace = "^(omarchy-menu|omarchy-keyboard-panel|omarchy-clipboard|omarchy-emojis|omarchy-image-selector|omarchy-polkit|omarchy-reminders|omarchy-network-qr|omarchy-dock-apps)$" }, blur = true, ignore_alpha = 0.25, dim_around = true })
+hl.layer_rule({ match = { namespace = "omarchy-osd" }, blur = true, ignore_alpha = 0.32 })
+hl.layer_rule({ match = { namespace = "omarchy-notifications" }, blur = true, ignore_alpha = 0.32 })
+hl.layer_rule({ match = { namespace = "omarchy-bar" }, blur = true, blur_popups = true, ignore_alpha = 0.32 })
+hl.layer_rule({ match = { namespace = "omarchy-dock" }, blur = true, ignore_alpha = 0.32 })
+hl.layer_rule({ match = { namespace = "^(omarchy-menu|omarchy-keyboard-panel|omarchy-clipboard|omarchy-emojis|omarchy-image-selector|omarchy-polkit|omarchy-reminders|omarchy-network-qr|omarchy-dock-apps)$" }, blur = true, ignore_alpha = 0.32, dim_around = true })
 
 

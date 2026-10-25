@@ -5,7 +5,7 @@ base-size = 11
 background-alpha = 0.88
 
 [popups]
-background-alpha = 0.42
+background-alpha = 0.48
 border-width     = 1
 border-alpha     = 0.22
 
@@ -16,7 +16,7 @@ border-alpha     = 0.0
 countdown        = "#fab387"
 
 [menu]
-background-alpha          = 0.42
+background-alpha          = 0.48
 border-width              = 1
 border-alpha              = 0.22
 scrim-alpha               = 0.15

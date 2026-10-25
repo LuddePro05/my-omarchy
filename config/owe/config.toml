@@ -1,0 +1,8 @@
+[pause]
+# Do not pause video when a fullscreen window is visible, so the animated
+# background shines through translucent/frosted-glass application windows.
+fullscreen = false
+occupied_workspace = false
+battery_poster = false
+battery_mode = "play"
+blocklist = []
