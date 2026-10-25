@@ -2,7 +2,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import QtQuick.Effects
 import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
@@ -1312,24 +1311,6 @@ Item {
     MouseArea {
       anchors.fill: parent
       onClicked: root.cancel()
-    }
-
-    Rectangle {
-      id: shadowBox
-      anchors.fill: card
-      radius: card.radius
-      color: "black"
-      visible: false
-    }
-
-    MultiEffect {
-      source: shadowBox
-      anchors.fill: shadowBox
-      shadowEnabled: true
-      shadowColor: Qt.rgba(0, 0, 0, 0.65)
-      shadowBlur: 0.7
-      shadowVerticalOffset: 6
-      shadowHorizontalOffset: 0
     }
 
     BorderSurface {
