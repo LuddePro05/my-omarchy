@@ -221,7 +221,7 @@ BarWidget {
         bar: root.bar
         text: modelData === 10 ? "0" : String(modelData)
         active: button.focused
-        activeColor: "#d68cff"
+        activeColor: "#c040ff"
         foreground: Commons.Color.foreground
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
@@ -233,6 +233,22 @@ BarWidget {
           else root.focusWorkspace(modelData)
         }
         onWheelMoved: function(delta) { root.scrollWorkspaces(delta) }
+
+        BorderSurface {
+          id: wsHoverRing
+          anchors.centerIn: parent
+          width: parent.width - Style.space(4)
+          height: parent.height - Style.space(6)
+          radius: Math.min(width, height) / 2
+          color: "transparent"
+          borderSpec: Border.surfaceSpec("menu", "border", Commons.Color.accent, 1)
+          visible: opacity > 0
+          opacity: button.tooltipHovered && !button.focused ? 0.85 : 0.0
+
+          Behavior on opacity {
+            NumberAnimation { duration: Style.duration(120) }
+          }
+        }
 
         Rectangle {
           id: underline
@@ -248,8 +264,8 @@ BarWidget {
           radius: Math.min(width, height) / 2
           gradient: Gradient {
             orientation: root.vertical ? Gradient.Vertical : Gradient.Horizontal
-            GradientStop { position: 0.0; color: "#d68cff" }
-            GradientStop { position: 1.0; color: "#74c7ec" }
+            GradientStop { position: 0.0; color: "#c040ff" }
+            GradientStop { position: 1.0; color: "#00a8ff" }
           }
 
           layer.enabled: true

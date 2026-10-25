@@ -2793,7 +2793,8 @@ Item {
   function rightPillGradientColor(key) {
     var all = root.layoutWidgets && root.layoutWidgets.sections && root.layoutWidgets.sections.right ? root.layoutWidgets.sections.right : []
     var uncolored = []
-    var semanticNames = [
+    var excludedFromGradient = [
+      "omarchy.tray", "omarchy.keyboard-layout",
       "omarchy.bluetooth", "omarchy.network", "omarchy.audio",
       "omarchy.power", "omarchy.microphone"
     ]
@@ -2801,7 +2802,7 @@ Item {
       var k = all[i]
       var ent = root.layoutWidgets.entries ? root.layoutWidgets.entries[k] : null
       var modId = ent ? root.entryId(ent) : ""
-      if (semanticNames.indexOf(modId) === -1) {
+      if (excludedFromGradient.indexOf(modId) === -1) {
         uncolored.push(k)
       }
     }
@@ -2819,10 +2820,18 @@ Item {
     var centerKeys = secs.center || []
     var endKeys = secs.centerEnd || []
     var all = [].concat(beginKeys, centerKeys, endKeys)
-    var idx = all.indexOf(key)
+    var visibleKeys = []
+    for (var i = 0; i < all.length; i++) {
+      var k = all[i]
+      var ent = root.layoutWidgets.entries ? root.layoutWidgets.entries[k] : null
+      var modId = ent ? root.entryId(ent) : ""
+      if (modId === "omarchy.indicators") continue
+      visibleKeys.push(k)
+    }
+    var idx = visibleKeys.indexOf(key)
     if (idx === -1) return root.barForeground
-    var total = all.length
-    var t = total <= 1 ? 0.0 : (idx / (all.length - 1))
+    var total = visibleKeys.length
+    var t = total <= 1 ? 0.0 : (idx / (total - 1))
     return root.interpolatePillGradient(t)
   }
 
@@ -3087,18 +3096,40 @@ Item {
 
         layer.enabled: width > 0 && height > 0
         layer.effect: MultiEffect {
-          colorization: 0.0
+          colorization: slot.hasSemanticTint ? 1.0 : 0.0
+          colorizationColor: slot.semanticColor
           shadowEnabled: true
           shadowColor: slot.hasSemanticTint
             ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
             : Qt.rgba(0, 0, 0, 0.70)
-          shadowBlur: slot.hasSemanticTint ? 0.38 : 0.15
+          shadowBlur: slot.hasSemanticTint ? 0.36 : 0.15
           shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
           shadowHorizontalOffset: 0
 
+          Behavior on colorizationColor {
+            ColorAnimation { duration: 150 }
+          }
           Behavior on shadowColor {
             ColorAnimation { duration: 150 }
           }
+        }
+      }
+
+      // Hover gradient outline around the active slot
+      BorderSurface {
+        id: hoverOutline
+        anchors.centerIn: parent
+        width: Math.round(slot.widgetWidth + Style.space(8))
+        height: Math.round(widgetArea.height - Style.space(4))
+        radius: Math.min(width, height) / 2
+        color: "transparent"
+        borderSpec: Border.surfaceSpec("menu", "border", Commons.Color.accent, 1)
+        visible: opacity > 0
+        opacity: slot.hovered && !slot.dragSource ? 0.90 : 0.0
+        z: 50
+
+        Behavior on opacity {
+          NumberAnimation { duration: Style.duration(140); easing.type: Easing.OutCubic }
         }
       }
 

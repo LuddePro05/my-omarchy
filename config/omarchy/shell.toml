@@ -7,36 +7,36 @@ active           = "#d68cff"
 
 [popups]
 background-alpha = 0.48
-border           = "#d68cff #74c7ec 45deg"
+border           = "#c040ff #00a8ff 45deg"
 border-width     = 1
 border-alpha     = 0.65
 
 [notifications]
 background-alpha = 0.5
-border           = "#d68cff #74c7ec 45deg"
+border           = "#c040ff #00a8ff 45deg"
 border-width     = 1
 border-alpha     = 0.65
-countdown        = "#d68cff"
+countdown        = "#c040ff"
 
 [menu]
 background-alpha          = 0.48
-border                    = "#d68cff #74c7ec 45deg"
+border                    = "#c040ff #00a8ff 45deg"
 border-width              = 1
 border-alpha              = 0.65
 scrim-alpha               = 0.15
 selected-background-alpha = 0.12
-selected-border           = "#d68cff #74c7ec 45deg"
+selected-border           = "#c040ff #00a8ff 45deg"
 selected-border-width     = 1
 selected-border-alpha     = 0.85
-selected-text             = "#d68cff"
+selected-text             = "#c040ff"
 
 [controls]
 normal-border-alpha       = 0.35
-hover-cursor-border       = "#d68cff #74c7ec 45deg"
+hover-cursor-border       = "#c040ff #00a8ff 45deg"
 hover-cursor-border-width = 1
 hover-cursor-border-alpha = 0.60
 hover-cursor-fill-alpha   = 0.12
-selected-border           = "#d68cff #74c7ec 45deg"
+selected-border           = "#c040ff #00a8ff 45deg"
 selected-border-width     = 1
 selected-border-alpha     = 0.85
 selected-fill-alpha       = 0.22
