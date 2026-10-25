@@ -2186,31 +2186,7 @@ Item {
     implicitWidth: root.vertical ? root.barSize : (hasContent ? (contentSpan + pillPadding * 2) : 0)
     implicitHeight: root.vertical ? (hasContent ? (contentSpan + pillPadding * 2) : 0) : root.barSize
 
-    // Drop shadow around the center pill, matching popup cards and menus
-    Rectangle {
-      id: centerShadowShape
-      x: centerPillSurface.x
-      y: centerPillSurface.y
-      width: centerPillSurface.width
-      height: centerPillSurface.height
-      radius: centerPillSurface.radius
-      color: "black"
-      visible: false
-    }
-
-    MultiEffect {
-      source: centerShadowShape
-      anchors.fill: centerShadowShape
-      shadowEnabled: true
-      shadowColor: Qt.rgba(0, 0, 0, 0.70)
-      shadowBlur: 0.7
-      shadowVerticalOffset: 2
-      shadowHorizontalOffset: 0
-      z: -2
-      visible: sections.hasContent
-    }
-
-    // Pill background surface matching popup styling (border removed for seamless floating look)
+    // Pill background surface matching the bar's color, with drop shadow
     Rectangle {
       id: centerPillSurface
       x: root.vertical ? sections.contentX : (sections.contentX - sections.pillPadding)
@@ -2218,9 +2194,16 @@ Item {
       width: root.vertical ? sections.pillHeight : (sections.contentSpan + sections.pillPadding * 2)
       height: root.vertical ? (sections.contentSpan + sections.pillPadding * 2) : sections.pillHeight
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
-      color: Commons.Color.popups.background
-      border.color: "transparent"
+      color: root.background
       border.width: 0
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowColor: Qt.rgba(0, 0, 0, 0.65)
+        shadowBlur: 0.7
+        shadowVerticalOffset: 2
+      }
       z: -1
       visible: sections.hasContent
     }
@@ -2549,35 +2532,21 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    // Drop shadow around the pill, matching popup cards and menus
-    Rectangle {
-      id: shadowShape
-      anchors.fill: pillSurface
-      radius: pillSurface.radius
-      color: "black"
-      visible: false
-    }
-
-    MultiEffect {
-      source: shadowShape
-      anchors.fill: shadowShape
-      shadowEnabled: true
-      shadowColor: Qt.rgba(0, 0, 0, 0.70)
-      shadowBlur: 0.7
-      shadowVerticalOffset: 2
-      shadowHorizontalOffset: 0
-      z: -1
-      visible: pillRoot.visible
-    }
-
-    // Pill background surface matching popup styling (border removed for seamless floating look)
+    // Pill background surface matching the bar's color, with drop shadow
     Rectangle {
       id: pillSurface
       anchors.fill: parent
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
-      color: Commons.Color.popups.background
-      border.color: "transparent"
+      color: root.background
       border.width: 0
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowColor: Qt.rgba(0, 0, 0, 0.65)
+        shadowBlur: 0.7
+        shadowVerticalOffset: 2
+      }
       z: 0
     }
 
