@@ -2175,8 +2175,55 @@ Item {
     property bool active: true
     property bool besideRight: false
 
-    implicitWidth: root.vertical ? root.barSize : beginList.width + centerBox.width + endList.width
-    implicitHeight: root.vertical ? beginList.height + centerBox.height + endList.height : root.barSize
+    readonly property bool hasContent: sections.active && ((root.vertical ? (beginList.height + centerBox.height + endList.height) : (beginList.width + centerBox.width + endList.width)) > 0)
+    readonly property int pillPadding: Style.space(8)
+    readonly property real pillHeight: root.barSize
+
+    readonly property real contentX: root.vertical ? Math.round((sections.width - pillHeight) / 2) : (centerBox.x - beginList.width)
+    readonly property real contentY: root.vertical ? (centerBox.y - beginList.height) : Math.round((sections.height - pillHeight) / 2)
+    readonly property real contentSpan: root.vertical ? (beginList.height + centerBox.height + endList.height) : (beginList.width + centerBox.width + endList.width)
+
+    implicitWidth: root.vertical ? root.barSize : (hasContent ? (contentSpan + pillPadding * 2) : 0)
+    implicitHeight: root.vertical ? (hasContent ? (contentSpan + pillPadding * 2) : 0) : root.barSize
+
+    // Drop shadow around the center pill, matching popup cards and menus
+    Rectangle {
+      id: centerShadowShape
+      x: centerPillSurface.x
+      y: centerPillSurface.y
+      width: centerPillSurface.width
+      height: centerPillSurface.height
+      radius: centerPillSurface.radius
+      color: "black"
+      visible: false
+    }
+
+    MultiEffect {
+      source: centerShadowShape
+      anchors.fill: centerShadowShape
+      shadowEnabled: true
+      shadowColor: Qt.rgba(0, 0, 0, 0.70)
+      shadowBlur: 0.7
+      shadowVerticalOffset: 2
+      shadowHorizontalOffset: 0
+      z: -2
+      visible: sections.hasContent
+    }
+
+    // Pill background surface & border matching popup styling
+    Rectangle {
+      id: centerPillSurface
+      x: root.vertical ? sections.contentX : (sections.contentX - sections.pillPadding)
+      y: root.vertical ? (sections.contentY - sections.pillPadding) : sections.contentY
+      width: root.vertical ? sections.pillHeight : (sections.contentSpan + sections.pillPadding * 2)
+      height: root.vertical ? (sections.contentSpan + sections.pillPadding * 2) : sections.pillHeight
+      radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
+      color: Commons.Color.popups.background
+      border.color: Commons.Color.popups.border
+      border.width: 1
+      z: -1
+      visible: sections.hasContent
+    }
 
     ModuleList {
       id: beginList
@@ -2207,7 +2254,7 @@ Item {
       active: sections.active
       fixedEdge: sections.besideRight ? "end" : "center"
       crossSize: root.vertical ? sections.width : sections.height
-      x: root.vertical ? 0 : (sections.besideRight ? beginList.width : Math.round((sections.width - width) / 2))
+      x: root.vertical ? 0 : (sections.besideRight ? (beginList.width + sections.pillPadding) : Math.round((sections.width - width) / 2))
       y: root.vertical ? Math.round((sections.height - height) / 2) : 0
     }
   }
