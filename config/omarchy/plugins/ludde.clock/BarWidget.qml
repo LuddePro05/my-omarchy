@@ -209,15 +209,6 @@ BarWidget {
       font.pixelSize: button.fontSize
       color: "#ffffff"
       text: root.displayText
-
-      layer.enabled: true
-      layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowVerticalOffset: 0
-        shadowHorizontalOffset: 0
-        shadowBlur: 0.45
-        shadowColor: Qt.rgba(0.706, 0.745, 0.996, 0.75)
-      }
     }
 
     Column {
@@ -237,15 +228,6 @@ BarWidget {
             ? button.fontSize * 0.9
             : button.fontSize
           color: "#ffffff"
-
-          layer.enabled: true
-          layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowVerticalOffset: 0
-            shadowHorizontalOffset: 0
-            shadowBlur: 0.45
-            shadowColor: Qt.rgba(0.706, 0.745, 0.996, 0.75)
-          }
         }
       }
     }

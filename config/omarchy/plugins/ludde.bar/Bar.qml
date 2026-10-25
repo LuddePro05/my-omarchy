@@ -82,9 +82,9 @@ Item {
   property string fontFamily: Style.font.family
   // Bound to the central Color singleton so the bar tracks shell.toml's
   // [bar] section. Property names kept for the rest of this file's bindings.
-  property color themeForeground: Commons.Color.bar.text
+  property color themeForeground: "#ffffff"
   property color themeContrastForeground: Commons.Color.background
-  property color transparentForeground: Commons.Color.bar.text
+  property color transparentForeground: "#ffffff"
   property color foreground: themeForeground
   property bool foregroundAnimationEnabled: true
 
@@ -2779,8 +2779,8 @@ Item {
   }
 
   function interpolatePillGradient(t) {
-    var c1 = Qt.color("#d68cff") // Mauve
-    var c2 = Qt.color("#74c7ec") // Sapphire
+    var c1 = Qt.color("#c040ff") // Rich Electric Mauve
+    var c2 = Qt.color("#00a8ff") // Rich Electric Sapphire
     var clampedT = Math.max(0.0, Math.min(1.0, t))
     return Qt.rgba(
       c1.r + (c2.r - c1.r) * clampedT,
@@ -2907,12 +2907,12 @@ Item {
       // Bluetooth: Blue when connected, muted dim when disabled
       if (moduleName === "omarchy.bluetooth") {
         if ("adapter" in activeItem && activeItem.adapter && !activeItem.adapter.enabled) {
-          return Qt.color("#6c7086")
+          return Qt.color("#585b70")
         }
         if ("connectedDevices" in activeItem && activeItem.connectedDevices && activeItem.connectedDevices.length > 0) {
-          return Qt.color("#89b4fa")
+          return Qt.color("#0088ff")
         }
-        return Qt.color("#b4befe")
+        return Qt.color("#2979ff")
       }
 
       // Power / Battery: Green when full/high, teal charging, yellow medium, peach/red low
@@ -2922,20 +2922,20 @@ Item {
         }
         var charging = ("charging" in activeItem) && activeItem.charging
         var frac = ("batteryFraction" in activeItem) ? activeItem.batteryFraction : 1.0
-        if (charging) return Qt.color("#94e2d5")
-        if (frac >= 0.70) return Qt.color("#a6e3a1")
-        if (frac >= 0.35) return Qt.color("#89dceb")
-        if (frac >= 0.20) return Qt.color("#f9e2af")
-        return Qt.color("#f38ba8")
+        if (charging) return Qt.color("#00e5ff")
+        if (frac >= 0.70) return Qt.color("#00e676")
+        if (frac >= 0.35) return Qt.color("#00b0ff")
+        if (frac >= 0.20) return Qt.color("#ffab00")
+        return Qt.color("#ff1744")
       }
 
       // Network: Aqua/Teal when connected, yellow when portal/limited, muted when none
       if (moduleName === "omarchy.network") {
         var conn = ("connectivity" in activeItem) ? String(activeItem.connectivity) : "full"
-        if (conn === "full") return Qt.color("#94e2d5")
-        if (conn === "limited" || conn === "portal") return Qt.color("#f9e2af")
-        if (conn === "none" || ("networkEnabled" in activeItem && !activeItem.networkEnabled)) return Qt.color("#6c7086")
-        return Qt.color("#94e2d5")
+        if (conn === "full") return Qt.color("#00e5ff")
+        if (conn === "limited" || conn === "portal") return Qt.color("#ffab00")
+        if (conn === "none" || ("networkEnabled" in activeItem && !activeItem.networkEnabled)) return Qt.color("#585b70")
+        return Qt.color("#00e5ff")
       }
 
       // Audio: Red when muted; dynamic volume gradient from Sapphire -> Lavender -> Mauve when active
@@ -2943,61 +2943,39 @@ Item {
         var muted = ("outputMuted" in activeItem && activeItem.outputMuted) ||
                     ("allMuted" in activeItem && activeItem.allMuted) ||
                     ("sink" in activeItem && activeItem.sink && activeItem.sink.audio && activeItem.sink.audio.muted)
-        if (muted) return Qt.color("#f38ba8")
+        if (muted) return Qt.color("#ff1744")
 
         var vol = ("outputVolume" in activeItem) ? Number(activeItem.outputVolume) : 0.5
-        if (vol <= 0.01) return Qt.color("#6c7086") // 0% / silent: muted gray
+        if (vol <= 0.01) return Qt.color("#585b70")
         if (vol <= 0.35) {
-          // Sapphire (#74c7ec) to Sky (#89dceb)
+          // Sapphire (#00a8ff) to Sky (#00d2ff)
           var t1 = vol / 0.35
-          return Qt.rgba(
-            0.455 + (0.537 - 0.455) * t1,
-            0.780 + (0.863 - 0.780) * t1,
-            0.925 + (0.922 - 0.925) * t1,
-            1.0
-          )
+          return Qt.rgba(0.0, 0.66 + (0.82 - 0.66) * t1, 1.0, 1.0)
         }
         if (vol <= 0.70) {
-          // Sky (#89dceb) to Lavender (#b4befe)
+          // Sky to Periwinkle/Lavender
           var t2 = (vol - 0.35) / 0.35
-          return Qt.rgba(
-            0.537 + (0.706 - 0.537) * t2,
-            0.863 + (0.745 - 0.863) * t2,
-            0.922 + (0.996 - 0.922) * t2,
-            1.0
-          )
+          return Qt.rgba(0.0 + 0.5 * t2, 0.82 - 0.3 * t2, 1.0, 1.0)
         }
         if (vol <= 1.0) {
-          // Lavender (#b4befe) to Mauve (#cba6f7)
+          // Lavender to Electric Mauve (#c040ff)
           var t3 = (vol - 0.70) / 0.30
-          return Qt.rgba(
-            0.706 + (0.796 - 0.706) * t3,
-            0.745 + (0.651 - 0.745) * t3,
-            0.996 + (0.969 - 0.996) * t3,
-            1.0
-          )
+          return Qt.rgba(0.5 + 0.25 * t3, 0.52 - 0.27 * t3, 1.0, 1.0)
         }
-        // Boosted (>100%): Mauve (#cba6f7) to Flamingo/Pink (#f5c2e7)
-        var t4 = Math.min(1.0, (vol - 1.0) / 0.5)
-        return Qt.rgba(
-          0.796 + (0.961 - 0.796) * t4,
-          0.651 + (0.761 - 0.651) * t4,
-          0.969 + (0.906 - 0.969) * t4,
-          1.0
-        )
+        return Qt.color("#ff007f")
       }
 
       // Microphone: Amber/Peach when in use / active, dim muted gray when muted, ready green when unmuted
       if (moduleName === "omarchy.microphone") {
         var micMuted = ("muted" in activeItem && activeItem.muted)
-        if (micMuted) return Qt.color("#6c7086")
+        if (micMuted) return Qt.color("#585b70")
         var micInUse = ("inUse" in activeItem && activeItem.inUse)
-        if (micInUse) return Qt.color("#fab387")
-        return Qt.color("#a6e3a1")
+        if (micInUse) return Qt.color("#ff9100")
+        return Qt.color("#00e676")
       }
 
-      // Middle pill items (centerBegin, centerEnd):
-      if (region === "centerBegin" || region === "centerEnd") {
+      // Middle pill items (centerBegin, center, centerEnd):
+      if (region === "centerBegin" || region === "center" || region === "centerEnd") {
         return root.centerPillGradientColor(slot.widgetKey)
       }
 
@@ -3018,7 +2996,7 @@ Item {
           moduleName === "omarchy.microphone") {
         return true
       }
-      if (region === "centerBegin" || region === "centerEnd") {
+      if (region === "centerBegin" || region === "center" || region === "centerEnd") {
         return true
       }
       if (region === "right") {
@@ -3109,19 +3087,15 @@ Item {
 
         layer.enabled: width > 0 && height > 0
         layer.effect: MultiEffect {
-          colorization: slot.hasSemanticTint ? 1.0 : 0.0
-          colorizationColor: "#ffffff"
+          colorization: 0.0
           shadowEnabled: true
           shadowColor: slot.hasSemanticTint
-            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 0.90)
+            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
             : Qt.rgba(0, 0, 0, 0.70)
-          shadowBlur: slot.hasSemanticTint ? 0.50 : 0.15
+          shadowBlur: slot.hasSemanticTint ? 0.38 : 0.15
           shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
           shadowHorizontalOffset: 0
 
-          Behavior on colorizationColor {
-            ColorAnimation { duration: 150 }
-          }
           Behavior on shadowColor {
             ColorAnimation { duration: 150 }
           }
