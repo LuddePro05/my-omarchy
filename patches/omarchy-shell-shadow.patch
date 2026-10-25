@@ -1,5 +1,5 @@
 diff --git a/shell/Ui/KeyboardPanel.qml b/shell/Ui/KeyboardPanel.qml
-index ddf922964c..8f64078bcc 100644
+index 05c8925729..c7e2be4d3d 100644
 --- a/shell/Ui/KeyboardPanel.qml
 +++ b/shell/Ui/KeyboardPanel.qml
 @@ -1,4 +1,5 @@
@@ -8,12 +8,78 @@ index ddf922964c..8f64078bcc 100644
  import Quickshell
  import Quickshell.Wayland
  import qs.Commons
-@@ -397,7 +398,31 @@ PanelWindow {
+@@ -481,7 +482,97 @@ PanelWindow {
      }
    }
  
 -  // --- card ----------------------------------------------------------------
 +  // --- card shadow & surface ------------------------------------------------
++
++  property real waveProgress: 0.0
++  readonly property real waveOriginX: root.anchorItem && root.anchorWindow && root.anchorWindow.contentItem
++    ? root.anchorWindow.contentItem.mapToItem(null, root.anchorItem.x + root.anchorItem.width / 2, 0).x
++    : (card.x + card.width / 2)
++  readonly property real waveOriginY: (root.barPos === "bottom") ? (root.screenH - root.gap) : (root.gap + (root.bar ? root.bar.height : 32))
++
++  NumberAnimation {
++    id: waveAnim
++    target: root
++    property: "waveProgress"
++    from: 0.0
++    to: 1.0
++    duration: 380
++    easing.type: Easing.OutCubic
++  }
++
++  Connections {
++    target: root
++    function onOpenChanged() {
++      if (root.open) {
++        root.waveProgress = 0.0
++        waveAnim.restart()
++      } else {
++        waveAnim.stop()
++        root.waveProgress = 0.0
++      }
++    }
++  }
++
++  Item {
++    id: waveLayer
++    anchors.fill: parent
++    clip: true
++    z: -2
++
++    // Primary luminous wavefront ring (Catppuccin Blue #89b4fa ripple)
++    Rectangle {
++      visible: root.waveProgress > 0.01 && root.waveProgress < 0.98
++      readonly property real maxRadius: Math.max(root.width, root.height) * 1.25
++      readonly property real currentR: root.waveProgress * maxRadius
++      x: root.waveOriginX - currentR
++      y: root.waveOriginY - currentR
++      width: currentR * 2
++      height: currentR * 2
++      radius: currentR
++      color: "transparent"
++      border.color: Qt.rgba(0.54, 0.71, 0.98, (1.0 - root.waveProgress) * 0.55)
++      border.width: Math.max(1.0, 3.5 * (1.0 - root.waveProgress))
++    }
++
++    // Secondary trailing echo ripple (Catppuccin Mauve #cba6f7)
++    Rectangle {
++      visible: root.waveProgress > 0.08 && root.waveProgress < 0.94
++      readonly property real maxRadius: Math.max(root.width, root.height) * 1.25
++      readonly property real currentR: Math.max(0.0, (root.waveProgress - 0.08) * maxRadius)
++      x: root.waveOriginX - currentR
++      y: root.waveOriginY - currentR
++      width: currentR * 2
++      height: currentR * 2
++      radius: currentR
++      color: "transparent"
++      border.color: Qt.rgba(0.79, 0.65, 0.97, (1.0 - root.waveProgress) * 0.35)
++      border.width: Math.max(1.0, 2.0 * (1.0 - root.waveProgress))
++    }
++  }
 +
 +  Rectangle {
 +    id: shadowBox
@@ -30,9 +96,9 @@ index ddf922964c..8f64078bcc 100644
 +    source: shadowBox
 +    anchors.fill: shadowBox
 +    shadowEnabled: true
-+    shadowColor: Qt.rgba(0, 0, 0, 0.45)
-+    shadowBlur: 0.6
-+    shadowVerticalOffset: 4
++    shadowColor: Qt.rgba(0, 0, 0, 0.65)
++    shadowBlur: 0.7
++    shadowVerticalOffset: 6
 +    shadowHorizontalOffset: 0
 +    opacity: card.opacity
 +    visible: opacity > 0
@@ -41,40 +107,3 @@ index ddf922964c..8f64078bcc 100644
  
    BorderSurface {
      id: card
-diff --git a/shell/plugins/menu/Menu.qml b/shell/plugins/menu/Menu.qml
-index 7189cce031..e3acb7b940 100644
---- a/shell/plugins/menu/Menu.qml
-+++ b/shell/plugins/menu/Menu.qml
-@@ -2,6 +2,7 @@ import Quickshell
- import Quickshell.Io
- import Quickshell.Wayland
- import QtQuick
-+import QtQuick.Effects
- import qs.Commons
- import qs.Commons as Commons
- import qs.Ui
-@@ -1304,6 +1305,24 @@ Item {
-       onClicked: root.cancel()
-     }
- 
-+    Rectangle {
-+      id: shadowBox
-+      anchors.fill: card
-+      radius: card.radius
-+      color: "black"
-+      visible: false
-+    }
-+
-+    MultiEffect {
-+      source: shadowBox
-+      anchors.fill: shadowBox
-+      shadowEnabled: true
-+      shadowColor: Qt.rgba(0, 0, 0, 0.45)
-+      shadowBlur: 0.6
-+      shadowVerticalOffset: 4
-+      shadowHorizontalOffset: 0
-+    }
-+
-     BorderSurface {
-       id: card
-       width: root.cardWidth

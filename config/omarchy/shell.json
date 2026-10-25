@@ -46,9 +46,6 @@
           "id": "omarchy.weather"
         },
         {
-          "id": "ludde.menu"
-        },
-        {
           "id": "jankeesvw.herdr"
         },
         {
@@ -110,6 +107,9 @@
     },
     {
       "id": "ludde.osd"
+    },
+    {
+      "id": "ludde.menu"
     }
   ],
   "version": 1,
