@@ -743,7 +743,7 @@ Item {
   // intentionally taller bar still wins.
   function thicknessFor(screen) {
     if (root.vertical || !screen) return root.barSize
-    return Math.max(root.barSize, BarModel.notchFloor(root.displayCutouts, root.position, screen.name, screen.width, screen.height, screen.devicePixelRatio, root.panelModeFor(screen), Style.bar.notchHeight))
+    return Math.max(root.barSize + 8, BarModel.notchFloor(root.displayCutouts, root.position, screen.name, screen.width, screen.height, screen.devicePixelRatio, root.panelModeFor(screen), Style.bar.notchHeight))
   }
 
   // Each screen's bar thickness, by screen name: barSize, or more where a notch
@@ -2137,17 +2137,7 @@ Item {
     }
   }
 
-  component LeftModules: ModuleList {
-    keys: root.layoutWidgets.sections.left
-    region: "left"
-    fixedEdge: "start"
-  }
 
-  component RightModules: ModuleList {
-    keys: root.layoutWidgets.sections.right
-    region: "right"
-    fixedEdge: "end"
-  }
 
   // The gesture area under the whole bar, with the center sections drawn over
   // it in the middle of it.
@@ -2492,6 +2482,80 @@ Item {
       keys: root.layoutWidgets.sections.tray
       region: "tray"
     }
+  }
+
+  component PillModuleContainer: Item {
+    id: pillRoot
+
+    property var window: null
+    property var pool: null
+    property var keys: []
+    property string region: ""
+    property string fixedEdge: "start"
+
+    readonly property bool hasContent: moduleList.listRows.length > 0
+    visible: hasContent
+
+    implicitWidth: hasContent ? (root.vertical ? root.barSize : (moduleList.implicitWidth + Style.space(16))) : 0
+    implicitHeight: hasContent ? (root.vertical ? (moduleList.implicitHeight + Style.space(16)) : root.barSize) : 0
+
+    width: implicitWidth
+    height: implicitHeight
+
+    // Drop shadow around the pill, matching popup cards and menus
+    Rectangle {
+      id: shadowShape
+      anchors.fill: pillSurface
+      radius: pillSurface.radius
+      color: "black"
+      visible: false
+    }
+
+    MultiEffect {
+      source: shadowShape
+      anchors.fill: shadowShape
+      shadowEnabled: true
+      shadowColor: Qt.rgba(0, 0, 0, 0.70)
+      shadowBlur: 0.7
+      shadowVerticalOffset: 2
+      shadowHorizontalOffset: 0
+      z: -1
+      visible: pillRoot.visible
+    }
+
+    // Pill background surface & border matching popup styling
+    Rectangle {
+      id: pillSurface
+      anchors.fill: parent
+      radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
+      color: Commons.Color.popups.background
+      border.color: Commons.Color.popups.border
+      border.width: 1
+      z: 0
+    }
+
+    ModuleList {
+      id: moduleList
+      window: pillRoot.window
+      pool: pillRoot.pool
+      keys: pillRoot.keys
+      region: pillRoot.region
+      fixedEdge: pillRoot.fixedEdge
+      anchors.centerIn: parent
+      z: 1
+    }
+  }
+
+  component LeftModules: PillModuleContainer {
+    keys: root.layoutWidgets.sections.left
+    region: "left"
+    fixedEdge: "start"
+  }
+
+  component RightModules: PillModuleContainer {
+    keys: root.layoutWidgets.sections.right
+    region: "right"
+    fixedEdge: "end"
   }
 
   // A bar surface's widgets: one for each entry in the layout, under the key
