@@ -1,39 +1,33 @@
 diff --git a/shell/Ui/KeyboardPanel.qml b/shell/Ui/KeyboardPanel.qml
-index 05c8925729..dd0ad3b95c 100644
+index 05c8925729..dbf0cd15fa 100644
 --- a/shell/Ui/KeyboardPanel.qml
 +++ b/shell/Ui/KeyboardPanel.qml
-@@ -1,4 +1,5 @@
- import QtQuick
-+import QtQuick.Effects
- import Quickshell
- import Quickshell.Wayland
- import qs.Commons
-@@ -481,7 +482,31 @@ PanelWindow {
+@@ -66,7 +66,7 @@ PanelWindow {
+     interval: 60
+     onTriggered: root.heightLive = root.open
+   }
+-  property var borderSpec: Border.surfaceSpec("popups", "border", Commons.Color.popups.border, Math.max(1, Style.space(2)))
++  property var borderSpec: Border.surfaceSpec("popups", "border", Commons.Color.popups.border, 0)
+   property bool centerOnBar: false
+   property bool open: false
+   property int gap: Style.gapsOut  // distance between bar edge and panel
+@@ -481,7 +481,22 @@ PanelWindow {
      }
    }
  
 -  // --- card ----------------------------------------------------------------
 +  // --- card shadow & surface ------------------------------------------------
 +
-+  Rectangle {
-+    id: shadowBox
-+    x: card.x
-+    y: card.y
-+    width: card.width
-+    height: card.height
-+    radius: card.radius
-+    color: "black"
-+    visible: false
-+  }
-+
-+  MultiEffect {
-+    source: shadowBox
-+    anchors.fill: shadowBox
-+    shadowEnabled: true
-+    shadowColor: Qt.rgba(0, 0, 0, 0.65)
-+    shadowBlur: 0.7
-+    shadowVerticalOffset: 6
-+    shadowHorizontalOffset: 0
++  BorderImage {
++    id: cardShadow
++    x: card.x - 50
++    y: card.y - 50
++    width: card.width + 100
++    height: card.height + 100
++    border { left: 55; top: 55; right: 55; bottom: 55 }
++    horizontalTileMode: BorderImage.Stretch
++    verticalTileMode: BorderImage.Stretch
++    source: Qt.resolvedUrl("../assets/card_shadow_9slice.png")
 +    opacity: card.opacity
 +    visible: opacity > 0
 +    z: -1
@@ -41,3 +35,12 @@ index 05c8925729..dd0ad3b95c 100644
  
    BorderSurface {
      id: card
+@@ -493,7 +508,7 @@ PanelWindow {
+     // crops it.
+     clip: root.morph < 1 || root.drawnHeight < root.contentHeight - 0.5
+     color: Commons.Color.popups.background
+-    borderSpec: root.borderSpec
++    borderSpec: Border.none()
+     padding: root.padding
+     radius: Style.cornerRadius
+ 

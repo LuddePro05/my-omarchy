@@ -220,6 +220,9 @@ BarWidget {
 
         bar: root.bar
         text: modelData === 10 ? "0" : String(modelData)
+        active: button.focused
+        activeColor: "#d68cff"
+        foreground: button.occupied ? Commons.Color.foreground : Style.alpha(Commons.Color.foreground, 0.5)
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6
@@ -243,7 +246,11 @@ BarWidget {
           width: root.vertical ? Style.space(2) : Style.space(12)
           height: root.vertical ? Style.space(12) : Style.space(2)
           radius: Math.min(width, height) / 2
-          color: Commons.Color.accent
+          gradient: Gradient {
+            orientation: root.vertical ? Gradient.Vertical : Gradient.Horizontal
+            GradientStop { position: 0.0; color: "#d68cff" }
+            GradientStop { position: 1.0; color: "#74c7ec" }
+          }
 
           layer.enabled: true
           layer.effect: MultiEffect {

@@ -2,7 +2,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import QtQuick.Effects
 import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
@@ -115,7 +114,7 @@ Item {
   property color background: Commons.Color.menu.background
   property color foreground: Commons.Color.menu.text
   property color border: Commons.Color.menu.border
-  property var borderSpec: Border.surfaceSpec("menu", "border", border, Math.max(1, Style.space(2)))
+  property var borderSpec: Border.surfaceSpec("menu", "border", border, 0)
   property color scrim: Commons.Color.menu.scrim
   property color selectedBackground: Commons.Color.menu.selectedBackground
   property color selectedText: Commons.Color.menu.selectedText
@@ -1315,25 +1314,16 @@ Item {
       onClicked: root.cancel()
     }
 
-    Rectangle {
-      id: shadowBox
-      x: card.x
-      y: card.y
-      width: card.width
-      height: card.height
-      radius: card.radius
-      color: "black"
-      visible: false
-    }
-
-    MultiEffect {
-      source: shadowBox
-      anchors.fill: shadowBox
-      shadowEnabled: true
-      shadowColor: Qt.rgba(0, 0, 0, 0.65)
-      shadowBlur: 0.7
-      shadowVerticalOffset: 6
-      shadowHorizontalOffset: 0
+    BorderImage {
+      id: cardShadow
+      x: card.x - 50
+      y: card.y - 50
+      width: card.width + 100
+      height: card.height + 100
+      border { left: 55; top: 55; right: 55; bottom: 55 }
+      horizontalTileMode: BorderImage.Stretch
+      verticalTileMode: BorderImage.Stretch
+      source: Qt.resolvedUrl("assets/card_shadow_9slice.png")
       z: -1
     }
 
@@ -1345,7 +1335,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       y: panel.effectiveCardTop
       color: root.background
-      borderSpec: root.borderSpec
+      borderSpec: Border.none()
       padding: root.contentMargin
 
       MouseArea { anchors.fill: parent; onClicked: {} }

@@ -6,8 +6,8 @@ background-alpha = 0.88
 
 [popups]
 background-alpha = 0.48
-border-width     = 1
-border-alpha     = 0.22
+border-width     = 0
+border-alpha     = 0.0
 
 [notifications]
 background-alpha = 0.5
@@ -17,8 +17,8 @@ countdown        = "#fab387"
 
 [menu]
 background-alpha          = 0.48
-border-width              = 1
-border-alpha              = 0.22
+border-width              = 0
+border-alpha              = 0.0
 scrim-alpha               = 0.15
 selected-background-alpha = 0.12
 selected-border-alpha     = 0.30
