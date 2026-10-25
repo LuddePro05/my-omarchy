@@ -41,9 +41,9 @@ BarWidget {
 
     var match = raw.match(/^([^\d]+)?\s*(\d{1,2}:\d{2})(:\d{2})?(\s*[A-Za-z]*)$/)
     if (match) {
-      var dayPrefix = match[1] ? ('<font color="#cba6f7">' + match[1].trim() + '</font> ') : ""
-      var timeMain = match[2]
-      var sec = match[3] ? ('<font color="#9399b2">' + match[3] + '</font>') : ""
+      var dayPrefix = match[1] ? ('<font color="#d68cff">' + match[1].trim() + '</font> ') : ""
+      var timeMain = '<font color="#b4befe">' + match[2] + '</font>'
+      var sec = match[3] ? ('<font color="#89dceb">' + match[3] + '</font>') : ""
       var ampm = match[4] || ""
       return dayPrefix + timeMain + sec + ampm
     }
@@ -53,12 +53,12 @@ BarWidget {
       var prefix = secMatch[1]
       var seconds = secMatch[2]
       var suffix = secMatch[3]
-      return prefix + '<font color="#9399b2">' + seconds + '</font>' + suffix
+      return '<font color="#b4befe">' + prefix + '</font><font color="#89dceb">' + seconds + '</font>' + suffix
     }
 
     var colonMatch = raw.match(/^(.*?\b\d{1,2})(\:)(\d{2}\b.*)$/)
     if (colonMatch) {
-      return colonMatch[1] + '<font color="#9399b2">:</font>' + colonMatch[3]
+      return '<font color="#d68cff">' + colonMatch[1] + '</font><font color="#b4befe">:</font><font color="#89dceb">' + colonMatch[3] + '</font>'
     }
 
     return raw

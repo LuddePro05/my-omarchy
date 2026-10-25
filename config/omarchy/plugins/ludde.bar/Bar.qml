@@ -2778,6 +2778,54 @@ Item {
     }
   }
 
+  function interpolatePillGradient(t) {
+    var c1 = Qt.color("#d68cff") // Mauve
+    var c2 = Qt.color("#74c7ec") // Sapphire
+    var clampedT = Math.max(0.0, Math.min(1.0, t))
+    return Qt.rgba(
+      c1.r + (c2.r - c1.r) * clampedT,
+      c1.g + (c2.g - c1.g) * clampedT,
+      c1.b + (c2.b - c1.b) * clampedT,
+      1.0
+    )
+  }
+
+  function rightPillGradientColor(key) {
+    var all = root.layoutWidgets && root.layoutWidgets.sections && root.layoutWidgets.sections.right ? root.layoutWidgets.sections.right : []
+    var uncolored = []
+    var semanticNames = [
+      "omarchy.bluetooth", "omarchy.network", "omarchy.audio",
+      "omarchy.power", "omarchy.microphone", "omarchy.monitor"
+    ]
+    for (var i = 0; i < all.length; i++) {
+      var k = all[i]
+      var ent = root.layoutWidgets.entries ? root.layoutWidgets.entries[k] : null
+      var modId = ent ? root.entryId(ent) : ""
+      if (semanticNames.indexOf(modId) === -1) {
+        uncolored.push(k)
+      }
+    }
+    var idx = uncolored.indexOf(key)
+    if (idx === -1) return root.barForeground
+    var total = uncolored.length
+    var t = total <= 1 ? 0.0 : (idx / (total - 1))
+    return root.interpolatePillGradient(t)
+  }
+
+  function centerPillGradientColor(key) {
+    var secs = root.layoutWidgets && root.layoutWidgets.sections ? root.layoutWidgets.sections : null
+    if (!secs) return root.barForeground
+    var beginKeys = secs.centerBegin || []
+    var centerKeys = secs.center || []
+    var endKeys = secs.centerEnd || []
+    var all = [].concat(beginKeys, centerKeys, endKeys)
+    var idx = all.indexOf(key)
+    if (idx === -1) return root.barForeground
+    var total = all.length
+    var t = total <= 1 ? 0.0 : (idx / (all.length - 1))
+    return root.interpolatePillGradient(t)
+  }
+
   // A widget's place in its section. It shows the widget its bar surface
   // keeps under its key, lent by the pool (WidgetPool), is sized by it, and
   // takes the pointer: clicks, the open-panel mark, and drags.
@@ -2939,11 +2987,6 @@ Item {
         )
       }
 
-      // System updates: Peach when updates pending
-      if (moduleName === "omarchy.system-update") {
-        return Qt.color("#fab387")
-      }
-
       // Microphone: Amber/Peach when in use / active, dim muted gray when muted, ready green when unmuted
       if (moduleName === "omarchy.microphone") {
         var micMuted = ("muted" in activeItem && activeItem.muted)
@@ -2953,16 +2996,35 @@ Item {
         return Qt.color("#a6e3a1")
       }
 
+      // Middle pill items (centerBegin, centerEnd):
+      if (region === "centerBegin" || region === "centerEnd") {
+        return root.centerPillGradientColor(slot.widgetKey)
+      }
+
+      // Right pill uncolored items:
+      if (region === "right") {
+        return root.rightPillGradientColor(slot.widgetKey)
+      }
+
       return root.barForeground
     }
 
     readonly property bool hasSemanticTint: {
-      return moduleName === "omarchy.bluetooth" ||
-             moduleName === "omarchy.power" ||
-             moduleName === "omarchy.network" ||
-             moduleName === "omarchy.audio" ||
-             moduleName === "omarchy.system-update" ||
-             moduleName === "omarchy.microphone"
+      if (!activeItem) return false
+      if (moduleName === "omarchy.bluetooth" ||
+          moduleName === "omarchy.power" ||
+          moduleName === "omarchy.network" ||
+          moduleName === "omarchy.audio" ||
+          moduleName === "omarchy.microphone") {
+        return true
+      }
+      if (region === "centerBegin" || region === "centerEnd") {
+        return true
+      }
+      if (region === "right" && moduleName !== "omarchy.monitor") {
+        return true
+      }
+      return false
     }
 
     readonly property bool shouldBreathe: {

@@ -65,17 +65,17 @@
           "id": "omarchy.keyboard-layout"
         },
         {
-          "id": "nosignal.omasend"
+          "id": "omarchy.agents"
         },
         {
-          "autoCheckUpdates": true,
-          "id": "omaplug"
+          "id": "nosignal.omasend"
         },
         {
           "id": "io.github.thisisgm.omapods"
         },
         {
-          "id": "omarchy.agents"
+          "autoCheckUpdates": true,
+          "id": "omaplug"
         },
         {
           "id": "omarchy.bluetooth"
@@ -90,7 +90,8 @@
           "id": "omarchy.monitor"
         },
         {
-          "id": "omarchy.power"
+          "id": "omarchy.power",
+          "showPercentage": false
         }
       ],
       "tray": []
