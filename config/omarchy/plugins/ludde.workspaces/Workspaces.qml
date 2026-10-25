@@ -222,7 +222,7 @@ BarWidget {
         text: modelData === 10 ? "0" : String(modelData)
         active: button.focused
         activeColor: "#d68cff"
-        foreground: button.occupied ? Commons.Color.foreground : Style.alpha(Commons.Color.foreground, 0.5)
+        foreground: Commons.Color.foreground
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6

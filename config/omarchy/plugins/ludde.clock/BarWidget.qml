@@ -39,12 +39,21 @@ BarWidget {
     var raw = root.displayText
     if (!raw) return ""
 
+    var match = raw.match(/^([^\d]+)?\s*(\d{1,2}:\d{2})(:\d{2})?(\s*[A-Za-z]*)$/)
+    if (match) {
+      var dayPrefix = match[1] ? ('<font color="#cba6f7">' + match[1].trim() + '</font> ') : ""
+      var timeMain = match[2]
+      var sec = match[3] ? ('<font color="#9399b2">' + match[3] + '</font>') : ""
+      var ampm = match[4] || ""
+      return dayPrefix + timeMain + sec + ampm
+    }
+
     var secMatch = raw.match(/^(.*)(\:\d{2})(\s*[A-Za-z]*)$/)
     if (secMatch) {
       var prefix = secMatch[1]
       var seconds = secMatch[2]
       var suffix = secMatch[3]
-      return prefix + '<font color="#a6adc8">' + seconds + '</font>' + suffix
+      return prefix + '<font color="#9399b2">' + seconds + '</font>' + suffix
     }
 
     var colonMatch = raw.match(/^(.*?\b\d{1,2})(\:)(\d{2}\b.*)$/)
