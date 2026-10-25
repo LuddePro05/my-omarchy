@@ -46,6 +46,9 @@
           "id": "omarchy.weather"
         },
         {
+          "id": "ludde.menu"
+        },
+        {
           "id": "jankeesvw.herdr"
         },
         {
@@ -111,9 +114,11 @@
   ],
   "version": 1,
   "disabledPlugins": [
-    "omarchy.osd"
+    "omarchy.osd",
+    "omarchy.menu"
   ],
   "cloneSourceRestores": [
-    "ludde.osd"
+    "ludde.osd",
+    "ludde.menu"
   ]
 }

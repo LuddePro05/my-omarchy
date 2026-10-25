@@ -42,6 +42,9 @@ Item {
   // killing the entire shell. Hidden panels stay mapped but park off-screen
   // without an exclusion zone; updated by the FileView watcher further down.
   property bool barHidden: false
+  property bool screensaverActive: false
+  property var screensaverWindows: ({})
+  property int screensaverWindowCount: 0
   property string home: Quickshell.env("HOME")
   property string stateHome: home + "/.local/state"
   property string omarchyConfigDir: home + "/.config/omarchy"
@@ -1545,19 +1548,50 @@ Item {
   }
 
   function handleHyprlandEvent(line) {
-    if (line.indexOf("activewindow>>") === 0) {
+    if (line.indexOf("openwindow>>") === 0) {
+      var parts = line.substring(12).split(",")
+      // format: address,workspace,class,title
+      if (parts.length >= 3 && parts[2] === "org.omarchy.screensaver") {
+        root.screensaverWindows[parts[0]] = true
+        root.screensaverWindowCount++
+        root.screensaverActive = true
+      }
+      queryActiveWindowTimer.restart()
+    } else if (line.indexOf("closewindow>>") === 0) {
+      var closeAddr = line.substring(13).trim()
+      if (root.screensaverWindows[closeAddr]) {
+        delete root.screensaverWindows[closeAddr]
+        root.screensaverWindowCount = Math.max(0, root.screensaverWindowCount - 1)
+        if (root.screensaverWindowCount === 0 && root.activeWindowClass !== "org.omarchy.screensaver") {
+          root.screensaverActive = false
+        }
+      }
+      queryActiveWindowTimer.restart()
+    } else if (line.indexOf("destroyworkspace>>special:screensaver") === 0 || line.indexOf("destroyworkspacev2>>") === 0) {
+      if (line.indexOf("screensaver") !== -1) {
+        root.screensaverWindows = ({})
+        root.screensaverWindowCount = 0
+        root.screensaverActive = false
+      }
+      queryActiveWindowTimer.restart()
+    } else if (line.indexOf("activewindow>>") === 0) {
       var payload = line.substring(14)
       var commaIdx = payload.indexOf(",")
       var winClass = commaIdx !== -1 ? payload.substring(0, commaIdx).trim() : payload.trim()
       var winTitle = commaIdx !== -1 ? payload.substring(commaIdx + 1).trim() : ""
       root.activeWindowClass = winClass
       root.activeWindowTitle = winTitle
+      if (winClass === "org.omarchy.screensaver") {
+        root.screensaverActive = true
+      } else if (winClass !== "" && root.screensaverWindowCount === 0) {
+        root.screensaverActive = false
+      }
       queryActiveWindowTimer.restart()
     } else if (line.indexOf("fullscreen>>") === 0) {
       var fsVal = line.substring(12).trim()
       root.activeWindowFullscreen = (fsVal === "1" || fsVal === "2")
       root.recomputeTargetAlpha()
-    } else if (line.indexOf("workspace>>") === 0 || line.indexOf("closewindow>>") === 0 || line.indexOf("openwindow>>") === 0 || line.indexOf("changefloatingmode>>") === 0) {
+    } else if (line.indexOf("workspace>>") === 0 || line.indexOf("changefloatingmode>>") === 0) {
       queryActiveWindowTimer.restart()
     }
   }
@@ -1584,10 +1618,30 @@ Item {
             root.activeWindowTitle = String(obj.title || "")
             root.activeWindowFullscreen = !!(obj.fullscreen && obj.fullscreen > 0)
             root.activeWindowFloating = !!obj.floating
+            if (root.activeWindowClass === "org.omarchy.screensaver") {
+              root.screensaverActive = true
+            } else if (root.screensaverWindowCount === 0 && root.activeWindowClass !== "") {
+              root.screensaverActive = false
+            }
             root.recomputeTargetAlpha()
+          } else if (obj && !obj.class && root.screensaverWindowCount === 0) {
+            root.screensaverActive = false
           }
         } catch (e) {
           // ignore
+        }
+      }
+    }
+  }
+
+  Process {
+    id: screensaverInitialProbe
+    running: true
+    command: ["bash", "-c", "pgrep -f '[o]rg.omarchy.screensaver' >/dev/null && echo yes || echo no"]
+    stdout: SplitParser {
+      onRead: function(line) {
+        if (String(line).trim() === "yes") {
+          root.screensaverActive = true
         }
       }
     }
@@ -1757,8 +1811,10 @@ Item {
     // before it maps (see BarModel.cutoutPending), so it maps at its floor
     // instead of growing once the windows are laid out. The wait ends once, for
     // good: when the mode settles it, or after two seconds without one.
-    visible: !remapGuard.remapping && (cutoutWaitOver || !cutoutPending)
-    exclusionMode: root.barHidden ? ExclusionMode.Ignore : ExclusionMode.Auto
+    readonly property bool shouldHideBar: root.barHidden || root.screensaverActive
+
+    visible: !remapGuard.remapping && (cutoutWaitOver || !cutoutPending) && !root.screensaverActive
+    exclusionMode: shouldHideBar ? ExclusionMode.Ignore : ExclusionMode.Auto
 
     ScreenMoveRemap {
       id: remapGuard
@@ -1768,10 +1824,10 @@ Item {
     // Parked by its full thickness, which a notch floor may make more than
     // barSize, so no strip of it stays on screen.
     margins {
-      top: root.barHidden && root.position === "top" ? -barWindow.thickness : 0
-      bottom: root.barHidden && root.position === "bottom" ? -barWindow.thickness : 0
-      left: root.barHidden && root.position === "left" ? -barWindow.thickness : 0
-      right: root.barHidden && root.position === "right" ? -barWindow.thickness : 0
+      top: shouldHideBar && root.position === "top" ? -barWindow.thickness : 0
+      bottom: shouldHideBar && root.position === "bottom" ? -barWindow.thickness : 0
+      left: shouldHideBar && root.position === "left" ? -barWindow.thickness : 0
+      right: shouldHideBar && root.position === "right" ? -barWindow.thickness : 0
     }
 
     anchors {
@@ -1808,6 +1864,7 @@ Item {
 
     Loader {
       anchors.fill: parent
+      opacity: root.screensaverActive ? 0.0 : 1.0
       sourceComponent: root.vertical ? verticalBar : horizontalBar
 
       // A child of the loader, not a sibling of the sections: an ancestor stays
