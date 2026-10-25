@@ -78,6 +78,9 @@
           "id": "omaplug"
         },
         {
+          "id": "omarchy.monitor"
+        },
+        {
           "id": "omarchy.bluetooth"
         },
         {
@@ -85,9 +88,6 @@
         },
         {
           "id": "omarchy.audio"
-        },
-        {
-          "id": "omarchy.monitor"
         },
         {
           "id": "omarchy.power",

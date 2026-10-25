@@ -2795,7 +2795,7 @@ Item {
     var uncolored = []
     var semanticNames = [
       "omarchy.bluetooth", "omarchy.network", "omarchy.audio",
-      "omarchy.power", "omarchy.microphone", "omarchy.monitor"
+      "omarchy.power", "omarchy.microphone"
     ]
     for (var i = 0; i < all.length; i++) {
       var k = all[i]
@@ -3021,7 +3021,7 @@ Item {
       if (region === "centerBegin" || region === "centerEnd") {
         return true
       }
-      if (region === "right" && moduleName !== "omarchy.monitor") {
+      if (region === "right") {
         return true
       }
       return false
@@ -3112,12 +3112,17 @@ Item {
           colorization: slot.hasSemanticTint ? 1.0 : 0.0
           colorizationColor: slot.semanticColor
           shadowEnabled: true
-          shadowColor: Qt.rgba(0, 0, 0, 0.95)
-          shadowBlur: 0.15
-          shadowVerticalOffset: 1
+          shadowColor: slot.hasSemanticTint
+            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 0.70)
+            : Qt.rgba(root.barForeground.r, root.barForeground.g, root.barForeground.b, 0.35)
+          shadowBlur: 0.40
+          shadowVerticalOffset: 0
           shadowHorizontalOffset: 0
 
           Behavior on colorizationColor {
+            ColorAnimation { duration: 150 }
+          }
+          Behavior on shadowColor {
             ColorAnimation { duration: 150 }
           }
         }

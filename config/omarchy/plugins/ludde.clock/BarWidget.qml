@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import qs.Commons
@@ -202,12 +203,21 @@ BarWidget {
       id: horizontalLabel
       visible: !root.vertical
       anchors.centerIn: parent
-      textFormat: Text.StyledText
+      textFormat: Text.PlainText
       renderType: Text.NativeRendering
       font.family: button.fontFamily
       font.pixelSize: button.fontSize
-      color: button.foreground
-      text: root.styledDisplayText
+      color: "#ffffff"
+      text: root.displayText
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowVerticalOffset: 0
+        shadowHorizontalOffset: 0
+        shadowBlur: 0.45
+        shadowColor: Qt.rgba(0.706, 0.745, 0.996, 0.75)
+      }
     }
 
     Column {
@@ -226,7 +236,16 @@ BarWidget {
           fontSize: modelData.length > 3
             ? button.fontSize * 0.9
             : button.fontSize
-          color: button.foreground
+          color: "#ffffff"
+
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowVerticalOffset: 0
+            shadowHorizontalOffset: 0
+            shadowBlur: 0.45
+            shadowColor: Qt.rgba(0.706, 0.745, 0.996, 0.75)
+          }
         }
       }
     }
