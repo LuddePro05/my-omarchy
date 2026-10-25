@@ -130,6 +130,44 @@ hl.animation({
   bezier = "fluent_decel",
 })
 
+-- Buttery-smooth exponential ease for backdrop dimming and layer popups (menu, clipboard, emojis, polkit, etc.)
+hl.animation({
+  leaf = "fadeDim",
+  enabled = true,
+  speed = 4,
+  bezier = "easeOutExpo",
+})
+
+hl.animation({
+  leaf = "fadeLayersIn",
+  enabled = true,
+  speed = 4,
+  bezier = "easeOutExpo",
+})
+
+hl.animation({
+  leaf = "fadeLayersOut",
+  enabled = true,
+  speed = 3,
+  bezier = "easeOutExpo",
+})
+
+hl.animation({
+  leaf = "layersIn",
+  enabled = true,
+  speed = 4,
+  bezier = "easeOutExpo",
+  style = "fade",
+})
+
+hl.animation({
+  leaf = "layersOut",
+  enabled = true,
+  speed = 3,
+  bezier = "easeOutExpo",
+  style = "fade",
+})
+
 -- Smart borders & gaps: remove outline and gaps when only one window is on the workspace
 hl.workspace_rule({ workspace = "w[tv1]s[false]", gaps_out = 0, gaps_in = 0 })
 hl.workspace_rule({ workspace = "f[1]s[false]", gaps_out = 0, gaps_in = 0 })
