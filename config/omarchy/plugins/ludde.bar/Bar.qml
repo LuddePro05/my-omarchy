@@ -3007,6 +3007,12 @@ Item {
       // A slot-level tint as well would wash the glyphs in one hue and stack
       // a second set of passes over them.
       if (moduleName === "ludde.indicators") return false
+      // Herdr's count badge is a small filled disc. The slot aura wraps the
+      // whole widget, badge included, and turns that disc into a glowing
+      // ball. While the badge is visible, keep the slot plain.
+      if (moduleName === "jankeesvw.herdr") {
+        return !(activeItem && activeItem.badgeActive)
+      }
       if (moduleName === "omarchy.bluetooth" ||
           moduleName === "omarchy.power" ||
           moduleName === "omarchy.network" ||
