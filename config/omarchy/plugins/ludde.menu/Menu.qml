@@ -1295,87 +1295,17 @@ Item {
     onShownChanged: if (!shown) { cardTop = -1; maxRowsHeight = -1 }
     onTargetScreenChanged: { cardTop = -1; maxRowsHeight = -1 }
 
-    property real waveProgress: 0.0
-    readonly property real waveOriginX: card.x + card.width / 2
-    readonly property real waveOriginY: card.y + card.height / 2
-
-    NumberAnimation {
-      id: waveAnim
-      target: panel
-      property: "waveProgress"
-      from: 0.0
-      to: 1.0
-      duration: 380
-      easing.type: Easing.OutCubic
-    }
-
-    Connections {
-      target: panel
-      function onShownChanged() {
-        if (panel.shown) {
-          panel.waveProgress = 0.0
-          waveAnim.restart()
-        } else {
-          waveAnim.stop()
-          panel.waveProgress = 0.0
-        }
-      }
-    }
-
-    Item {
-      id: waveLayer
+    Rectangle {
+      id: scrimRect
       anchors.fill: parent
-      clip: true
+      color: root.scrim
+      opacity: panel.shown ? 1.0 : 0.0
 
-      // Base backdrop dim that fills in smoothly as the wave sweeps across
-      Rectangle {
-        anchors.fill: parent
-        color: root.scrim
-        opacity: Math.min(1.0, panel.waveProgress * 1.35)
-      }
-
-      // Expanding radial wave disk (leading edge of the dim)
-      Rectangle {
-        visible: panel.waveProgress > 0.0 && panel.waveProgress < 1.0
-        readonly property real maxRadius: Math.max(panel.width, panel.height) * 1.25
-        readonly property real currentR: panel.waveProgress * maxRadius
-        x: panel.waveOriginX - currentR
-        y: panel.waveOriginY - currentR
-        width: currentR * 2
-        height: currentR * 2
-        radius: currentR
-        color: root.scrim
-        opacity: Math.max(0.0, 1.0 - panel.waveProgress * 0.25)
-      }
-
-      // Primary luminous wavefront ring (Catppuccin Blue #89b4fa ripple)
-      Rectangle {
-        visible: panel.waveProgress > 0.01 && panel.waveProgress < 0.98
-        readonly property real maxRadius: Math.max(panel.width, panel.height) * 1.25
-        readonly property real currentR: panel.waveProgress * maxRadius
-        x: panel.waveOriginX - currentR
-        y: panel.waveOriginY - currentR
-        width: currentR * 2
-        height: currentR * 2
-        radius: currentR
-        color: "transparent"
-        border.color: Qt.rgba(0.54, 0.71, 0.98, (1.0 - panel.waveProgress) * 0.55)
-        border.width: Math.max(1.0, 3.5 * (1.0 - panel.waveProgress))
-      }
-
-      // Secondary trailing echo ripple (Catppuccin Mauve #cba6f7)
-      Rectangle {
-        visible: panel.waveProgress > 0.08 && panel.waveProgress < 0.94
-        readonly property real maxRadius: Math.max(panel.width, panel.height) * 1.25
-        readonly property real currentR: Math.max(0.0, (panel.waveProgress - 0.08) * maxRadius)
-        x: panel.waveOriginX - currentR
-        y: panel.waveOriginY - currentR
-        width: currentR * 2
-        height: currentR * 2
-        radius: currentR
-        color: "transparent"
-        border.color: Qt.rgba(0.79, 0.65, 0.97, (1.0 - panel.waveProgress) * 0.35)
-        border.width: Math.max(1.0, 2.0 * (1.0 - panel.waveProgress))
+      Behavior on opacity {
+        NumberAnimation {
+          duration: 180
+          easing.type: Easing.OutExpo
+        }
       }
     }
 
