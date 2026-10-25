@@ -2210,7 +2210,7 @@ Item {
       visible: sections.hasContent
     }
 
-    // Pill background surface & border matching popup styling
+    // Pill background surface matching popup styling (border removed for seamless floating look)
     Rectangle {
       id: centerPillSurface
       x: root.vertical ? sections.contentX : (sections.contentX - sections.pillPadding)
@@ -2219,8 +2219,8 @@ Item {
       height: root.vertical ? (sections.contentSpan + sections.pillPadding * 2) : sections.pillHeight
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
       color: Commons.Color.popups.background
-      border.color: Commons.Color.popups.border
-      border.width: 1
+      border.color: "transparent"
+      border.width: 0
       z: -1
       visible: sections.hasContent
     }
@@ -2570,14 +2570,14 @@ Item {
       visible: pillRoot.visible
     }
 
-    // Pill background surface & border matching popup styling
+    // Pill background surface matching popup styling (border removed for seamless floating look)
     Rectangle {
       id: pillSurface
       anchors.fill: parent
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
       color: Commons.Color.popups.background
-      border.color: Commons.Color.popups.border
-      border.width: 1
+      border.color: "transparent"
+      border.width: 0
       z: 0
     }
 
