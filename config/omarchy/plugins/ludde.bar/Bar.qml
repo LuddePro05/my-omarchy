@@ -3110,13 +3110,13 @@ Item {
         layer.enabled: width > 0 && height > 0
         layer.effect: MultiEffect {
           colorization: slot.hasSemanticTint ? 1.0 : 0.0
-          colorizationColor: slot.semanticColor
+          colorizationColor: "#ffffff"
           shadowEnabled: true
           shadowColor: slot.hasSemanticTint
-            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 0.70)
-            : Qt.rgba(root.barForeground.r, root.barForeground.g, root.barForeground.b, 0.35)
-          shadowBlur: 0.40
-          shadowVerticalOffset: 0
+            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 0.90)
+            : Qt.rgba(0, 0, 0, 0.70)
+          shadowBlur: slot.hasSemanticTint ? 0.50 : 0.15
+          shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
           shadowHorizontalOffset: 0
 
           Behavior on colorizationColor {
