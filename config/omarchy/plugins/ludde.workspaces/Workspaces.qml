@@ -70,6 +70,10 @@ BarWidget {
     return ids
   }
 
+  // Explicit property so every pill's glowColor binding refreshes when the
+  // visible row grows or shrinks, not just the newly created pill.
+  readonly property int workspaceCount: displayedWorkspaces.length
+
   function workspaceIds() {
     return root.displayedWorkspaces
   }
@@ -199,11 +203,12 @@ BarWidget {
   // The bar's electric gradient, spread across the workspaces from the left
   // (mauve) to the right (sapphire). Each workspace glows in the hue of its
   // own place on the row, so the active number and its underline pill keep
-  // the same left-to-right flow as the bar's other gradient elements.
-  function workspaceGlowColor(index) {
+  // the same left-to-right flow as the bar's other gradient elements. The
+  // total is the number of visible pills, passed in so the hue re-spreads
+  // when a fourth or fifth workspace appears.
+  function workspaceGlowColor(index, total) {
     var c1 = Qt.color("#c040ff") // Electric Mauve
     var c2 = Qt.color("#00a8ff") // Electric Sapphire
-    var total = root.displayedWorkspaces.length
     var t = total <= 1 ? 0.0 : Math.max(0.0, Math.min(1.0, index / (total - 1)))
     return Qt.rgba(
       c1.r + (c2.r - c1.r) * t,
@@ -235,7 +240,7 @@ BarWidget {
         readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
         readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
         readonly property int workspaceIndex: root.displayedWorkspaces.indexOf(modelData)
-        readonly property color glowColor: root.workspaceGlowColor(workspaceIndex)
+        readonly property color glowColor: root.workspaceGlowColor(workspaceIndex, root.workspaceCount)
 
         bar: root.bar
         text: modelData === 10 ? "0" : String(modelData)
@@ -321,20 +326,10 @@ BarWidget {
           width: root.vertical ? Style.space(2) : Style.space(12)
           height: root.vertical ? Style.space(12) : Style.space(2)
           radius: Math.min(width, height) / 2
-          gradient: Gradient {
-            orientation: root.vertical ? Gradient.Vertical : Gradient.Horizontal
-            GradientStop { position: 0.0; color: "#c040ff" }
-            GradientStop { position: 1.0; color: "#00a8ff" }
-          }
-
-          layer.enabled: true
-          layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.9)
-            shadowBlur: 0.15
-            shadowVerticalOffset: 1
-            shadowHorizontalOffset: 0
-          }
+          // The pill stays white like the number and borrows the focused
+          // workspace's total-gradient aura instead of carrying a fixed
+          // mauve-to-sapphire fill of its own.
+          color: "#ffffff"
         }
       }
     }
