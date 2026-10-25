@@ -3095,18 +3095,72 @@ Item {
         opacity: slot.shouldBreathe ? widgetArea.breathingOpacity : 1.0
 
         layer.enabled: width > 0 && height > 0
-        layer.effect: MultiEffect {
-          colorization: 0.0
-          shadowEnabled: true
-          shadowColor: slot.hasSemanticTint
-            ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
-            : Qt.rgba(0, 0, 0, 0.70)
-          shadowBlur: slot.hasSemanticTint ? 0.36 : 0.15
-          shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
-          shadowHorizontalOffset: 0
+        layer.effect: Component {
+          Item {
+            id: effectRoot
+            property var source
 
-          Behavior on shadowColor {
-            ColorAnimation { duration: 150 }
+            // Pass 1: Wide electric glow aura
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: true
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : Qt.rgba(0, 0, 0, 0.70)
+              shadowBlur: slot.hasSemanticTint ? 0.95 : 0.15
+              shadowScale: slot.hasSemanticTint ? 1.08 : 1.0
+              shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
+
+            // Pass 2: Mid vibrant neon aura
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: slot.hasSemanticTint
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : "transparent"
+              shadowBlur: 0.50
+              shadowScale: 1.04
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+              visible: slot.hasSemanticTint
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
+
+            // Pass 3: Dense saturated core halo directly hugging the white sign
+            MultiEffect {
+              anchors.fill: parent
+              source: effectRoot.source
+              autoPaddingEnabled: true
+              shadowEnabled: slot.hasSemanticTint
+              shadowColor: slot.hasSemanticTint
+                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                : "transparent"
+              shadowBlur: 0.20
+              shadowScale: 1.0
+              shadowVerticalOffset: 0
+              shadowHorizontalOffset: 0
+              shadowOpacity: 1.0
+              visible: slot.hasSemanticTint
+
+              Behavior on shadowColor {
+                ColorAnimation { duration: 150 }
+              }
+            }
           }
         }
       }
