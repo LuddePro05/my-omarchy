@@ -117,6 +117,7 @@ Item {
   property color barForeground: useTransparentForeground ? transparentForeground : (isColorLight(detectedAppColor) ? Commons.Color.background : themeForeground)
   property color background: Qt.rgba(detectedAppColor.r, detectedAppColor.g, detectedAppColor.b, targetBarAlpha)
   readonly property color glassBackground: Qt.rgba(background.r, background.g, background.b, Math.min(background.a, 0.35))
+  readonly property color pillBackground: isColorLight(background) ? Qt.darker(background, 1.10) : Qt.lighter(background, 1.20)
   property color urgent: Commons.Color.bar.active
 
   onTargetBarAlphaChanged: {
@@ -2186,7 +2187,7 @@ Item {
     implicitWidth: root.vertical ? root.barSize : (hasContent ? (contentSpan + pillPadding * 2) : 0)
     implicitHeight: root.vertical ? (hasContent ? (contentSpan + pillPadding * 2) : 0) : root.barSize
 
-    // Pill background surface matching the bar's color, with drop shadow
+    // Pill background surface matching the bar's color (subtly brighter), with drop shadow
     Rectangle {
       id: centerPillSurface
       x: root.vertical ? sections.contentX : (sections.contentX - sections.pillPadding)
@@ -2194,7 +2195,7 @@ Item {
       width: root.vertical ? sections.pillHeight : (sections.contentSpan + sections.pillPadding * 2)
       height: root.vertical ? (sections.contentSpan + sections.pillPadding * 2) : sections.pillHeight
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
-      color: root.background
+      color: root.pillBackground
       border.width: 0
 
       layer.enabled: true
@@ -2532,12 +2533,12 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    // Pill background surface matching the bar's color, with drop shadow
+    // Pill background surface matching the bar's color (subtly brighter), with drop shadow
     Rectangle {
       id: pillSurface
       anchors.fill: parent
       radius: root.vertical ? Math.round(width / 2) : Math.round(height / 2)
-      color: root.background
+      color: root.pillBackground
       border.width: 0
 
       layer.enabled: true
