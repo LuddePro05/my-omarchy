@@ -27,7 +27,7 @@ def get_window_color():
         at_x, at_y = win.get('at', [0, 0])
         w, h = win.get('size', [0, 0])
         if w <= 0 or h <= 0:
-            return '#1e1e2e'
+            return '#181824'
 
         # Sample across full width at y = at_y + 8 (the header / tab area)
         y = at_y + min(8, max(2, h // 20))
@@ -36,12 +36,12 @@ def get_window_color():
         data = p.stdout
         idx = data.find(b'255\n')
         if idx == -1:
-            return '#1e1e2e'
+            return '#181824'
 
         px = data[idx + 4:]
         colors = [(px[i], px[i+1], px[i+2]) for i in range(0, len(px), 3) if i + 2 < len(px)]
         if not colors:
-            return '#1e1e2e'
+            return '#181824'
 
         # Quantize colors into 16-step buckets to identify the dominant header color
         buckets = [(c[0] // 16, c[1] // 16, c[2] // 16) for c in colors]
@@ -54,7 +54,7 @@ def get_window_color():
 
         return f'#{r:02x}{g:02x}{b:02x}'
     except Exception:
-        return '#1e1e2e'
+        return '#181824'
 
 if __name__ == '__main__':
     print(get_window_color())

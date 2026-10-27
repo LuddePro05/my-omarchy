@@ -89,9 +89,11 @@ Item {
   property bool foregroundAnimationEnabled: true
 
   // --- Adaptive bar background & color ---
+  readonly property color wallpaperColor: Qt.color("#181824")
   readonly property color defaultBarColor: Commons.Color.background
-  property color detectedAppColor: defaultBarColor
+  property color detectedAppColor: wallpaperColor
   property real targetBarAlpha: 0.0
+  property int currentWorkspaceId: 1
   property string activeWindowClass: ""
   property string activeWindowTitle: ""
   property bool activeWindowFullscreen: false
@@ -117,7 +119,7 @@ Item {
   property color barForeground: useTransparentForeground ? transparentForeground : (isColorLight(detectedAppColor) ? Commons.Color.background : themeForeground)
   property color background: Qt.rgba(detectedAppColor.r, detectedAppColor.g, detectedAppColor.b, targetBarAlpha)
   readonly property color glassBackground: Qt.rgba(background.r, background.g, background.b, Math.min(background.a, 0.35))
-  readonly property color pillBackground: targetBarAlpha <= 0.001 ? Qt.rgba(0, 0, 0, 0) : (isColorLight(background) ? Qt.darker(background, 1.10) : Qt.lighter(background, 1.20))
+  readonly property color pillBackground: targetBarAlpha <= 0.001 ? Qt.lighter(wallpaperColor, 1.20) : (isColorLight(background) ? Qt.darker(background, 1.10) : Qt.lighter(background, 1.20))
   property color urgent: Commons.Color.bar.active
 
   onTargetBarAlphaChanged: {
@@ -1453,7 +1455,7 @@ Item {
     // keep the bar transparent!
     if (activeWindowFloating) {
       targetBarAlpha = 0.0
-      console.log("[AdaptiveBar] FLOATING WINDOW (" + activeWindowClass + ") -> alpha=0.0 (transparent)")
+      detectedAppColor = wallpaperColor
       sampleColorTimer.stop()
       return
     }
@@ -1461,7 +1463,7 @@ Item {
     var cls = (activeWindowClass || "").toLowerCase()
     if (!cls) {
       targetBarAlpha = 0.0
-      detectedAppColor = defaultBarColor
+      detectedAppColor = wallpaperColor
       sampleColorTimer.stop()
       return
     }
@@ -1527,6 +1529,7 @@ Item {
         var colStr = String(line || "").trim()
         if (colStr === "TRANSPARENT") {
           root.targetBarAlpha = 0.0
+          root.detectedAppColor = root.wallpaperColor
           return
         }
         if (colStr === "DEFAULT") {
@@ -1559,6 +1562,7 @@ Item {
   }
 
   function handleHyprlandEvent(line) {
+    console.log("[AdaptiveBarEvent] " + line)
     if (line.indexOf("openwindow>>") === 0) {
       var parts = line.substring(12).split(",")
       // format: address,workspace,class,title
@@ -1617,7 +1621,30 @@ Item {
       var fsVal = line.substring(12).trim()
       root.activeWindowFullscreen = (fsVal === "1" || fsVal === "2")
       root.recomputeTargetAlpha()
-    } else if (line.indexOf("workspace>>") === 0 || line.indexOf("workspacev2>>") === 0 || line.indexOf("focusedmon>>") === 0 || line.indexOf("changefloatingmode>>") === 0 || line.indexOf("movewindow>>") === 0 || line.indexOf("movewindowv2>>") === 0) {
+    } else if (line.indexOf("workspace>>") === 0) {
+      var wsName = line.substring(11).trim()
+      var parsedWs = parseInt(wsName)
+      if (!isNaN(parsedWs) && parsedWs > 0) {
+        root.currentWorkspaceId = parsedWs
+      }
+      root.scheduleQueryActiveWindow()
+    } else if (line.indexOf("workspacev2>>") === 0) {
+      var wsParts = line.substring(13).split(",")
+      var wsId = parseInt(wsParts[0])
+      if (!isNaN(wsId) && wsId > 0) {
+        root.currentWorkspaceId = wsId
+      }
+      root.scheduleQueryActiveWindow()
+    } else if (line.indexOf("focusedmon>>") === 0) {
+      var fmParts = line.substring(12).split(",")
+      if (fmParts.length >= 2) {
+        var fmWsId = parseInt(fmParts[1])
+        if (!isNaN(fmWsId) && fmWsId > 0) {
+          root.currentWorkspaceId = fmWsId
+        }
+      }
+      root.scheduleQueryActiveWindow()
+    } else if (line.indexOf("changefloatingmode>>") === 0 || line.indexOf("movewindow>>") === 0 || line.indexOf("movewindowv2>>") === 0) {
       root.scheduleQueryActiveWindow()
     }
   }
@@ -1646,12 +1673,13 @@ Item {
         try {
           var obj = JSON.parse(data)
           var mon = Hyprland.focusedMonitor
-          var currentWsId = (mon && mon.activeWorkspace) ? mon.activeWorkspace.id : -1
+          var monWsId = (mon && mon.activeWorkspace) ? mon.activeWorkspace.id : -1
+          var targetWsId = root.currentWorkspaceId > 0 ? root.currentWorkspaceId : monWsId
           var monWidth = (mon && mon.width) ? mon.width : 1920
           var monX = (mon && mon.x !== undefined) ? mon.x : 0
 
           var hasValidClass = !!(obj && obj.class && String(obj.class).trim().length > 0)
-          var isMatchingWorkspace = !obj || !obj.workspace || currentWsId < 0 || (obj.workspace.id === currentWsId)
+          var isMatchingWorkspace = hasValidClass && (!obj.workspace || targetWsId < 0 || obj.workspace.id === targetWsId)
 
           // In scrolling layout, check if window is scrolled off-screen horizontally
           var isHorizontallyOnScreen = true
@@ -1715,10 +1743,7 @@ Item {
 
   Process {
     id: hyprSocketProc
-    command: [
-      "socat", "-U", "-",
-      "UNIX-CONNECT:" + (Quickshell.env("XDG_RUNTIME_DIR") || "/run/user/1000") + "/hypr/" + Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") + "/.socket2.sock"
-    ]
+    command: [root.home + "/.config/omarchy/plugins/ludde.bar/hypr-events.py"]
     running: true
     onRunningChanged: {
       if (!running) hyprSocketReconnectTimer.restart()
@@ -1727,6 +1752,16 @@ Item {
       onRead: function(line) {
         root.handleHyprlandEvent(String(line || "").trim())
       }
+    }
+  }
+
+  Connections {
+    target: Hyprland
+    function onFocusedWorkspaceChanged() {
+      root.scheduleQueryActiveWindow()
+    }
+    function onActiveToplevelChanged() {
+      root.scheduleQueryActiveWindow()
     }
   }
 
@@ -2254,9 +2289,9 @@ Item {
       color: root.pillBackground
       border.width: 0
 
-      layer.enabled: root.targetBarAlpha > 0.01
+      layer.enabled: true
       layer.effect: MultiEffect {
-        shadowEnabled: root.targetBarAlpha > 0.01
+        shadowEnabled: true
         shadowColor: Qt.rgba(0, 0, 0, 0.65)
         shadowBlur: 0.7
         shadowVerticalOffset: 2
@@ -2597,9 +2632,9 @@ Item {
       color: root.pillBackground
       border.width: 0
 
-      layer.enabled: root.targetBarAlpha > 0.01
+      layer.enabled: true
       layer.effect: MultiEffect {
-        shadowEnabled: root.targetBarAlpha > 0.01
+        shadowEnabled: true
         shadowColor: Qt.rgba(0, 0, 0, 0.65)
         shadowBlur: 0.7
         shadowVerticalOffset: 2
