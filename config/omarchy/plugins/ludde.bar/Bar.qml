@@ -117,7 +117,7 @@ Item {
   property color barForeground: useTransparentForeground ? transparentForeground : (isColorLight(detectedAppColor) ? Commons.Color.background : themeForeground)
   property color background: Qt.rgba(detectedAppColor.r, detectedAppColor.g, detectedAppColor.b, targetBarAlpha)
   readonly property color glassBackground: Qt.rgba(background.r, background.g, background.b, Math.min(background.a, 0.35))
-  readonly property color pillBackground: isColorLight(background) ? Qt.darker(background, 1.10) : Qt.lighter(background, 1.20)
+  readonly property color pillBackground: targetBarAlpha <= 0.001 ? Qt.rgba(0, 0, 0, 0) : (isColorLight(background) ? Qt.darker(background, 1.10) : Qt.lighter(background, 1.20))
   property color urgent: Commons.Color.bar.active
 
   onTargetBarAlphaChanged: {
@@ -1466,8 +1466,8 @@ Item {
       return
     }
 
-    // Chromium / Chrome (frosted glass matching theme)
-    if (cls.indexOf("chrom") !== -1) {
+    // Browsers (frosted glass matching theme)
+    if (cls.indexOf("chrom") !== -1 || cls.indexOf("brave") !== -1 || cls.indexOf("firefox") !== -1 || cls.indexOf("zen") !== -1) {
       sampleColorTimer.stop()
       detectedAppColor = defaultBarColor
       targetBarAlpha = 0.88
@@ -1491,7 +1491,7 @@ Item {
     }
 
     // Terminal (frosted glass matching theme)
-    if (cls === "alacritty" || cls === "org.omarchy.agent" || cls === "kitty" || cls === "foot" || cls === "ghostty") {
+    if (cls === "alacritty" || cls === "org.omarchy.agent" || cls === "kitty" || cls === "foot" || cls === "ghostty" || cls === "wezterm") {
       sampleColorTimer.stop()
       detectedAppColor = defaultBarColor
       targetBarAlpha = 0.54
@@ -1548,6 +1548,16 @@ Item {
     }
   }
 
+  property bool activeWindowQueryPending: false
+
+  function scheduleQueryActiveWindow() {
+    if (activeWindowQueryProc.running) {
+      activeWindowQueryPending = true
+    } else {
+      queryActiveWindowTimer.restart()
+    }
+  }
+
   function handleHyprlandEvent(line) {
     if (line.indexOf("openwindow>>") === 0) {
       var parts = line.substring(12).split(",")
@@ -1557,7 +1567,7 @@ Item {
         root.screensaverWindowCount++
         root.screensaverActive = true
       }
-      queryActiveWindowTimer.restart()
+      root.scheduleQueryActiveWindow()
     } else if (line.indexOf("closewindow>>") === 0) {
       var closeAddr = line.substring(13).trim()
       if (root.screensaverWindows[closeAddr]) {
@@ -1567,14 +1577,14 @@ Item {
           root.screensaverActive = false
         }
       }
-      queryActiveWindowTimer.restart()
+      root.scheduleQueryActiveWindow()
     } else if (line.indexOf("destroyworkspace>>special:screensaver") === 0 || line.indexOf("destroyworkspacev2>>") === 0) {
       if (line.indexOf("screensaver") !== -1) {
         root.screensaverWindows = ({})
         root.screensaverWindowCount = 0
         root.screensaverActive = false
       }
-      queryActiveWindowTimer.restart()
+      root.scheduleQueryActiveWindow()
     } else if (line.indexOf("activewindow>>") === 0) {
       var payload = line.substring(14)
       var commaIdx = payload.indexOf(",")
@@ -1587,13 +1597,28 @@ Item {
       } else if (winClass !== "" && root.screensaverWindowCount === 0) {
         root.screensaverActive = false
       }
-      queryActiveWindowTimer.restart()
+      if (!winClass) {
+        root.activeWindowFullscreen = false
+        root.activeWindowFloating = false
+      }
+      root.recomputeTargetAlpha()
+      root.scheduleQueryActiveWindow()
+    } else if (line.indexOf("activewindowv2>>") === 0) {
+      var addr = line.substring(16).trim()
+      if (!addr || addr === "0x0") {
+        root.activeWindowClass = ""
+        root.activeWindowTitle = ""
+        root.activeWindowFullscreen = false
+        root.activeWindowFloating = false
+        root.recomputeTargetAlpha()
+      }
+      root.scheduleQueryActiveWindow()
     } else if (line.indexOf("fullscreen>>") === 0) {
       var fsVal = line.substring(12).trim()
       root.activeWindowFullscreen = (fsVal === "1" || fsVal === "2")
       root.recomputeTargetAlpha()
-    } else if (line.indexOf("workspace>>") === 0 || line.indexOf("changefloatingmode>>") === 0) {
-      queryActiveWindowTimer.restart()
+    } else if (line.indexOf("workspace>>") === 0 || line.indexOf("workspacev2>>") === 0 || line.indexOf("focusedmon>>") === 0 || line.indexOf("changefloatingmode>>") === 0 || line.indexOf("movewindow>>") === 0 || line.indexOf("movewindowv2>>") === 0) {
+      root.scheduleQueryActiveWindow()
     }
   }
 
@@ -1609,12 +1634,36 @@ Item {
   Process {
     id: activeWindowQueryProc
     command: ["hyprctl", "activewindow", "-j"]
+    onExited: {
+      if (root.activeWindowQueryPending) {
+        root.activeWindowQueryPending = false
+        queryActiveWindowTimer.restart()
+      }
+    }
     stdout: SplitParser {
       splitMarker: ""
       onRead: function(data) {
         try {
           var obj = JSON.parse(data)
-          if (obj && obj.class) {
+          var mon = Hyprland.focusedMonitor
+          var currentWsId = (mon && mon.activeWorkspace) ? mon.activeWorkspace.id : -1
+          var monWidth = (mon && mon.width) ? mon.width : 1920
+          var monX = (mon && mon.x !== undefined) ? mon.x : 0
+
+          var hasValidClass = !!(obj && obj.class && String(obj.class).trim().length > 0)
+          var isMatchingWorkspace = !obj || !obj.workspace || currentWsId < 0 || (obj.workspace.id === currentWsId)
+
+          // In scrolling layout, check if window is scrolled off-screen horizontally
+          var isHorizontallyOnScreen = true
+          if (hasValidClass && obj.at && obj.size && obj.at.length > 0 && obj.size.length > 0) {
+            var winX = obj.at[0]
+            var winW = obj.size[0]
+            if ((winX + winW <= monX) || (winX >= monX + monWidth)) {
+              isHorizontallyOnScreen = false
+            }
+          }
+
+          if (hasValidClass && isMatchingWorkspace && isHorizontallyOnScreen) {
             root.activeWindowClass = String(obj.class || "")
             root.activeWindowTitle = String(obj.title || "")
             root.activeWindowFullscreen = !!(obj.fullscreen && obj.fullscreen > 0)
@@ -1625,8 +1674,15 @@ Item {
               root.screensaverActive = false
             }
             root.recomputeTargetAlpha()
-          } else if (obj && !obj.class && root.screensaverWindowCount === 0) {
-            root.screensaverActive = false
+          } else {
+            root.activeWindowClass = ""
+            root.activeWindowTitle = ""
+            root.activeWindowFullscreen = false
+            root.activeWindowFloating = false
+            if (root.screensaverWindowCount === 0) {
+              root.screensaverActive = false
+            }
+            root.recomputeTargetAlpha()
           }
         } catch (e) {
           // ignore
@@ -2198,9 +2254,9 @@ Item {
       color: root.pillBackground
       border.width: 0
 
-      layer.enabled: true
+      layer.enabled: root.targetBarAlpha > 0.01
       layer.effect: MultiEffect {
-        shadowEnabled: true
+        shadowEnabled: root.targetBarAlpha > 0.01
         shadowColor: Qt.rgba(0, 0, 0, 0.65)
         shadowBlur: 0.7
         shadowVerticalOffset: 2
@@ -2541,9 +2597,9 @@ Item {
       color: root.pillBackground
       border.width: 0
 
-      layer.enabled: true
+      layer.enabled: root.targetBarAlpha > 0.01
       layer.effect: MultiEffect {
-        shadowEnabled: true
+        shadowEnabled: root.targetBarAlpha > 0.01
         shadowColor: Qt.rgba(0, 0, 0, 0.65)
         shadowBlur: 0.7
         shadowVerticalOffset: 2
