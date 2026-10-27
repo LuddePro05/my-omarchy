@@ -518,8 +518,10 @@ BarWidget {
       )
     }
 
-    readonly property color inactiveGlowColor: Qt.rgba(0.88, 0.90, 0.93, 1.0)
-    readonly property color glowColor: iconActive ? activeGlowColor : inactiveGlowColor
+    // Each indicator glows in its place along the electric gradient.
+    // Inactive toggles glow dimmer with a soft aura, and when activated
+    // they burn at full strength with all three passes like the rest.
+    readonly property color glowColor: activeGlowColor
 
     implicitWidth: indicatorSource.item && indicatorSource.item.visible ? indicatorSource.item.implicitWidth : 0
     implicitHeight: indicatorSource.item && indicatorSource.item.visible ? indicatorSource.item.implicitHeight : 0
@@ -546,9 +548,9 @@ BarWidget {
       source: indicatorSlot.indicatorId ? Qt.resolvedUrl("indicators/" + indicatorSlot.indicatorId + ".qml") : ""
       transform: Translate { y: indicatorSlot.opticalOffsetY }
 
-      // The aura rides the icon's own opacity: active icons burn with their
-      // gradient hue, while revealed inactive icons get a single neutral-gray
-      // pass so they read as dormant rather than another active row.
+      // The aura rides the icon's active state: active icons burn with their
+      // vibrant three-pass gradient hue at full strength, while revealed
+      // inactive icons glow dimmer in their gradient color with a single soft pass.
       layer.enabled: item !== null && item.visible
       layer.effect: Component {
         Item {
@@ -566,7 +568,11 @@ BarWidget {
             shadowScale: 1.08
             shadowVerticalOffset: 0
             shadowHorizontalOffset: 0
-            shadowOpacity: 1.0
+            shadowOpacity: indicatorSlot.iconActive ? 1.0 : 0.40
+
+            Behavior on shadowOpacity {
+              NumberAnimation { duration: 150 }
+            }
           }
 
           // Pass 2: Mid vibrant neon aura
