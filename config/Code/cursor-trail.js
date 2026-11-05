@@ -138,7 +138,7 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('resize', () => { resize(); startLoop(); }, { passive: true });
 
   window.addEventListener(
     'wheel',

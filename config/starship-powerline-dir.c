@@ -199,9 +199,6 @@ static void get_column_color(int dst[3], double col, int term_width) {
 
 int main(int argc, char *argv[]) {
     int is_right = (argc > 1 && strcmp(argv[1], "--right") == 0);
-    int term_width = get_terminal_width();
-    if (term_width < 40) term_width = 80;
-
     const char *pwd = getenv("PWD");
     const char *home = getenv("HOME");
     char path_buf[4096];
@@ -344,6 +341,9 @@ int main(int argc, char *argv[]) {
         printf("\033[38;2;%d;%d;%dm\033[49m\033[0m", prev_c[0], prev_c[1], prev_c[2]);
     } else {
         /* RIGHT SIDE: User and Time headers */
+        int term_width = get_terminal_width();
+        if (term_width < 40) term_width = 80;
+
         const char *user = getenv("USER");
         if (!user) user = "user";
 

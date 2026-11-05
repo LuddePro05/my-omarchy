@@ -49,11 +49,15 @@ fi
 if [ -f "$HOME/.config/brave-flags.conf" ]; then
   sed -i "s|/home/[^/]*|$HOME|g" "$HOME/.config/brave-flags.conf"
 fi
+if [ -f "$HOME/.config/gtk-4.0/gtk.css" ]; then
+  sed -i "s|/home/[^/]*|$HOME|g" "$HOME/.config/gtk-4.0/gtk.css"
+fi
 
 # 3. Ensure executable permissions on scripts & hooks
 echo "🔧 Setting executable permissions on scripts and hooks..."
 chmod +x "$HOME/.config/herdr/shell" 2>/dev/null || true
 chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.py" 2>/dev/null || true
+chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events.py" 2>/dev/null || true
 if [ -d "$HOME/.config/omarchy/hooks" ]; then
   find "$HOME/.config/omarchy/hooks" -type f -name "*.hook" -exec chmod +x {} + 2>/dev/null || true
   find "$HOME/.config/omarchy/hooks" -type f -name "*-sync" -exec chmod +x {} + 2>/dev/null || true
