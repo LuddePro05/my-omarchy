@@ -141,10 +141,20 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottom: parent.bottom
       anchors.bottomMargin: Style.space(67)
-      color: Util.alpha(Commons.Color.background, 0.78)
-      borderSpec: Border.surfaceSpec("popups", "border", Commons.Color.popups.border, 0)
-      radius: Style.cornerRadius
+      color: Qt.rgba(0.114, 0.114, 0.169, 0.90) // #1d1d2b frosted glass
+      borderSpec: Border.flat(Qt.rgba(0.75, 0.25, 1.0, 0.25), 1) // subtle mauve outline
+      radius: Math.round(height / 2) // Sleek capsule pill
       opacity: root.opened ? 1 : 0
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowColor: Qt.rgba(0, 0, 0, 0.70)
+        shadowBlur: 0.65
+        shadowVerticalOffset: 3
+        shadowHorizontalOffset: 0
+        shadowOpacity: 1.0
+      }
 
       Row {
         anchors.fill: parent
@@ -154,40 +164,95 @@ Item {
         anchors.leftMargin: card.borderLeft + root.pad
         spacing: root.hasProgress ? root.gap : root.messageGap
 
-        layer.enabled: true
-        layer.effect: MultiEffect {
-          shadowEnabled: true
-          shadowColor: Qt.rgba(0, 0, 0, 0.95)
-          shadowBlur: 0.15
-          shadowVerticalOffset: 1
-          shadowHorizontalOffset: 0
-        }
         Item {
           width: root.iconWidth
           height: parent.height
-          Text {
-            textFormat: Text.PlainText
-            // Sit the glyph's ink flush in the column, centered when the
-            // column is wider than this particular glyph.
-            x: Math.round((root.iconWidth - root.iconInkWidth) / 2 - iconMetrics.tightBoundingRect.x)
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.icon
-            font: iconMetrics.font
-            color: Commons.Color.popups.text
+
+          Item {
+            anchors.fill: parent
+            layer.enabled: true
+            layer.effect: Component {
+              Item {
+                id: iconEffectRoot
+                property var source
+
+                MultiEffect {
+                  anchors.fill: parent
+                  source: iconEffectRoot.source
+                  autoPaddingEnabled: false
+                  shadowEnabled: true
+                  shadowColor: Qt.color("#00a8ff") // Electric Sapphire
+                  shadowBlur: 0.40
+                  shadowScale: 1.0
+                  shadowOpacity: 1.0
+                }
+                MultiEffect {
+                  anchors.fill: parent
+                  source: iconEffectRoot.source
+                  autoPaddingEnabled: false
+                  shadowEnabled: true
+                  shadowColor: Qt.color("#00a8ff")
+                  shadowBlur: 0.18
+                  shadowScale: 1.0
+                  shadowOpacity: 1.0
+                }
+              }
+            }
+
+            Text {
+              textFormat: Text.PlainText
+              // Sit the glyph's ink flush in the column, centered when the
+              // column is wider than this particular glyph.
+              x: Math.round((root.iconWidth - root.iconInkWidth) / 2 - iconMetrics.tightBoundingRect.x)
+              anchors.verticalCenter: parent.verticalCenter
+              text: root.icon
+              font: iconMetrics.font
+              color: "#ffffff"
+            }
           }
         }
+
         Rectangle {
           visible: root.hasProgress
           width: root.barWidth
-          height: Math.max(Style.space(6), Style.spacing.sm)
+          height: Style.space(8)
+          radius: height / 2
           anchors.verticalCenter: parent.verticalCenter
-          color: Util.alpha(Commons.Color.popups.text, 0.45)
+          color: Qt.rgba(1, 1, 1, 0.12)
+          border.width: 1
+          border.color: Qt.rgba(1, 1, 1, 0.05)
+
           Rectangle {
             // Anchored so a right-to-left layout fills from the right.
             anchors.left: parent.left
             height: parent.height
-            width: parent.width * (root.hasProgress ? root.value / root.maxValue : 0)
-            color: Commons.Color.accent
+            width: parent.width * (root.hasProgress ? Math.max(0.0, Math.min(1.0, root.value / root.maxValue)) : 0)
+            radius: height / 2
+
+            gradient: Gradient {
+              orientation: Gradient.Horizontal
+              GradientStop { position: 0.0; color: "#00a8ff" } // Electric Sapphire
+              GradientStop { position: 1.0; color: "#c040ff" } // Electric Mauve
+            }
+
+            layer.enabled: true
+            layer.effect: Component {
+              Item {
+                id: progressEffectRoot
+                property var source
+
+                MultiEffect {
+                  anchors.fill: parent
+                  source: progressEffectRoot.source
+                  autoPaddingEnabled: false
+                  shadowEnabled: true
+                  shadowColor: Qt.color("#00a8ff")
+                  shadowBlur: 0.35
+                  shadowScale: 1.0
+                  shadowOpacity: 0.85
+                }
+              }
+            }
 
             Behavior on width {
               enabled: root.opened
@@ -195,6 +260,7 @@ Item {
             }
           }
         }
+
         Text {
           textFormat: Text.PlainText
           visible: root.message !== ""
@@ -205,9 +271,19 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: root.message
           font: messageMetrics.font
-          color: Commons.Color.popups.text
+          color: "#ffffff"
           elide: Text.ElideRight
           maximumLineCount: 1
+
+          layer.enabled: true
+          layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.60)
+            shadowBlur: 0.20
+            shadowVerticalOffset: 1
+            shadowHorizontalOffset: 0
+            shadowOpacity: 0.80
+          }
         }
       }
     }

@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Effects
 import qs.Commons
 import qs.Commons as Commons
 import qs.Ui
@@ -1520,19 +1521,25 @@ Item {
               // Faded: the row is here to say the software is already
               // installed, not to be picked.
               opacity: row.disabled ? 0.4 : 1
-              radius: root.cornerRadius
-              color: row.hasCursor ? root.selectedBackground : "transparent"
-              borderSpec: row.hasCursor ? root.selectedBorderSpec : Border.none()
+              radius: Math.min(height / 2, Style.space(12))
+              color: row.hasCursor ? Qt.rgba(0.125, 0.125, 0.19, 0.95) : "transparent"
+              borderSpec: row.hasCursor ? Border.flat(Qt.rgba(0.75, 0.25, 1.0, 0.35), 1) : Border.none()
 
               Rectangle {
-                visible: false
-                width: Style.space(4)
-                height: parent.height - Style.space(18)
-                radius: Math.min(root.cornerRadius, Style.space(4))
-                color: root.selectedBackground
-                anchors.left: parent.left
-                anchors.leftMargin: root.rowReservedBorderLeft + Style.space(8)
-                anchors.verticalCenter: parent.verticalCenter
+                id: pillGlow
+                anchors.fill: parent
+                radius: row.radius
+                visible: row.hasCursor
+                color: Qt.rgba(0.75, 0.25, 1.0, 0.12)
+                z: -1
+                layer.enabled: row.hasCursor
+                layer.effect: MultiEffect {
+                  shadowEnabled: true
+                  shadowColor: "#00a8ff"
+                  shadowBlur: 0.30
+                  shadowOpacity: 0.50
+                  shadowScale: 1.0
+                }
               }
 
               Text {
@@ -1540,7 +1547,7 @@ Item {
                 textFormat: Text.PlainText
                 visible: row.hasIcon && !row.isApp
                 text: row.icon
-                color: row.hasCursor ? root.selectedText : root.foreground
+                color: row.hasCursor ? "#ffffff" : root.foreground
                 font.family: row.iconFont.length > 0 ? row.iconFont : root.fontFamily
                 font.pixelSize: Style.font.iconLarge
                 width: Style.space(36)
@@ -1549,6 +1556,14 @@ Item {
                 anchors.left: parent.left
                 anchors.leftMargin: root.rowReservedBorderLeft + Style.space(8)
                 y: contentColumn.y + labelText.y + (labelText.height - height) / 2
+                layer.enabled: row.hasCursor
+                layer.effect: MultiEffect {
+                  shadowEnabled: row.hasCursor
+                  shadowColor: "#00a8ff"
+                  shadowBlur: 0.35
+                  shadowOpacity: 0.70
+                  shadowScale: 1.0
+                }
               }
 
               Image {
@@ -1566,6 +1581,14 @@ Item {
                 anchors.left: parent.left
                 anchors.leftMargin: root.rowReservedBorderLeft + Style.space(8) + (Style.space(36) - width) / 2
                 y: contentColumn.y + labelText.y + (labelText.height - height) / 2
+                layer.enabled: row.hasCursor
+                layer.effect: MultiEffect {
+                  shadowEnabled: row.hasCursor
+                  shadowColor: "#00a8ff"
+                  shadowBlur: 0.35
+                  shadowOpacity: 0.60
+                  shadowScale: 1.0
+                }
               }
 
               Column {
@@ -1582,7 +1605,7 @@ Item {
                   textFormat: Text.PlainText
                   width: parent.width
                   text: row.label
-                  color: row.hasCursor ? root.selectedText : root.foreground
+                  color: row.hasCursor ? "#ffffff" : root.foreground
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.heading
                   font.weight: Font.Medium
@@ -1595,8 +1618,8 @@ Item {
                   // A parent path's separator points along the reading direction.
                   text: Commons.I18n.rightToLeft && row.kind !== "dmenu" ? row.detail.replace(/ › /g, " ‹ ") : row.detail
                   visible: (root.filterText || row.kind === "dmenu") && row.detail.length > 0
-                  color: root.foreground
-                  opacity: 0.52
+                  color: row.hasCursor ? Qt.rgba(0.9, 0.9, 1.0, 0.80) : root.foreground
+                  opacity: row.hasCursor ? 1.0 : 0.52
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.bodySmall
                   elide: Text.ElideRight
@@ -1625,7 +1648,7 @@ Item {
                 Text {
                   textFormat: Text.PlainText
                   text: row.kind === "menu" || row.kind === "link" ? (Commons.I18n.rightToLeft ? "‹" : "›") : ""
-                  color: row.hasCursor ? root.selectedText : root.foreground
+                  color: row.hasCursor ? "#ffffff" : root.foreground
                   opacity: row.kind === "menu" || row.kind === "link" ? 0.36 : 0
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.heading
