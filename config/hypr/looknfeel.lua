@@ -89,12 +89,12 @@ hl.config({
 
     blur = {
       enabled = true,
-      size = 10,
-      passes = 4,
+      size = 8,
+      passes = 3,
       new_optimizations = true,
       ignore_opacity = true,
       xray = false,
-      noise = 0.018,
+      noise = 0.015,
       contrast = 1.05,
       brightness = 0.85,
       vibrancy = 0.38,
@@ -108,54 +108,80 @@ hl.config({
 -- Keep workspace tiled windows at corner rounding = 0, no outline/border
 hl.window_rule({ match = { float = false }, rounding = 0, border_size = 0 })
 
--- Define your custom Chromebook-style curves
+-- Define custom snappy, smooth curves
 hl.curve("fluent_decel", { type = "bezier", points = { {0.1, 1}, {1, 1} } })
 hl.curve("easeOutExpo", { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
 hl.curve("geminiChill", { type = "bezier", points = { {0.33, 1}, {0.68, 1} } })
 
--- Apply the curve to workspace transitions (vertical slide matches vertical swipe gestures)
+-- Snappy workspace transitions (vertical slide matches vertical swipe gestures)
 hl.animation({ 
   leaf = "workspaces", 
   enabled = true, 
-  speed = 4, 
-  bezier = "fluent_decel", 
+  speed = 2.6, 
+  bezier = "easeOutExpo", 
   style = "slidevert" 
+})
+
+-- Snappy, crisp window opening without heavy geometry scaling lag
+hl.animation({
+  leaf = "windowsIn",
+  enabled = true,
+  speed = 2.2,
+  bezier = "easeOutExpo",
+  style = "popin 96%",
+})
+
+-- Smooth exponential exit for closing windows (replaces abrupt linear)
+hl.animation({
+  leaf = "windowsOut",
+  enabled = true,
+  speed = 1.6,
+  bezier = "easeOutExpo",
+  style = "popin 96%",
+})
+
+-- Fast, responsive window tiling moves (replaces 800ms global fallback)
+hl.animation({
+  leaf = "windowsMove",
+  enabled = true,
+  speed = 2.2,
+  bezier = "easeOutExpo",
 })
 
 -- Smooth cross-fade when switching active window focus
 hl.animation({
   leaf = "fadeSwitch",
   enabled = true,
-  speed = 3,
-  bezier = "fluent_decel",
+  speed = 2.2,
+  bezier = "easeOutExpo",
 })
 
 -- Buttery-smooth exponential ease for backdrop dimming and layer popups (menu, clipboard, emojis, polkit, etc.)
 hl.animation({
   leaf = "fadeDim",
   enabled = true,
-  speed = 4,
+  speed = 2.2,
   bezier = "easeOutExpo",
 })
 
 hl.animation({
   leaf = "fadeLayersIn",
   enabled = true,
-  speed = 4,
+  speed = 2.2,
   bezier = "easeOutExpo",
 })
 
 hl.animation({
   leaf = "fadeLayersOut",
   enabled = true,
-  speed = 3,
+  speed = 1.8,
   bezier = "easeOutExpo",
 })
 
 hl.animation({
   leaf = "layersIn",
   enabled = true,
-  speed = 4,
+  speed = 2.2,
   bezier = "easeOutExpo",
   style = "fade",
 })
@@ -163,7 +189,7 @@ hl.animation({
 hl.animation({
   leaf = "layersOut",
   enabled = true,
-  speed = 3,
+  speed = 1.8,
   bezier = "easeOutExpo",
   style = "fade",
 })
