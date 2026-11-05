@@ -1528,7 +1528,7 @@ Item {
   Process {
     id: colorSamplerProc
     command: [
-      root.home + "/.config/omarchy/plugins/ludde.bar/sample-window-color.py",
+      root.home + "/.config/omarchy/plugins/ludde.bar/sample-window-color",
       String(root.activeWindowX),
       String(root.activeWindowY),
       String(root.activeWindowW),
@@ -3215,10 +3215,10 @@ Item {
         height: slot.widgetHeight
         opacity: slot.shouldBreathe ? widgetArea.breathingOpacity : 1.0
 
-        // Herdr paints its own aura around the server glyph. Keeping the
-        // slot effect off lets its count badge sit outside that aura instead
+        // Herdr and omaplug paint their own aura around their glyph. Keeping the
+        // slot effect off lets their count badges sit outside that aura instead
         // of glowing along with the whole widget.
-        layer.enabled: width > 0 && height > 0 && slot.moduleName !== "jankeesvw.herdr"
+        layer.enabled: width > 0 && height > 0 && slot.moduleName !== "jankeesvw.herdr" && slot.moduleName !== "omaplug"
         layer.effect: Component {
           Item {
             id: effectRoot
@@ -3233,8 +3233,8 @@ Item {
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
                 : Qt.rgba(0, 0, 0, 0.70)
-              shadowBlur: slot.hasSemanticTint ? 0.95 : 0.15
-              shadowScale: slot.hasSemanticTint ? 1.08 : 1.0
+              shadowBlur: slot.hasSemanticTint ? 0.40 : 0.15
+              shadowScale: 1.0
               shadowVerticalOffset: slot.hasSemanticTint ? 0 : 1
               shadowHorizontalOffset: 0
               shadowOpacity: 1.0
@@ -3253,8 +3253,8 @@ Item {
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
                 : "transparent"
-              shadowBlur: 0.50
-              shadowScale: 1.04
+              shadowBlur: 0.24
+              shadowScale: 1.0
               shadowVerticalOffset: 0
               shadowHorizontalOffset: 0
               shadowOpacity: 1.0
@@ -3274,7 +3274,7 @@ Item {
               shadowColor: slot.hasSemanticTint
                 ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
                 : "transparent"
-              shadowBlur: 0.20
+              shadowBlur: 0.10
               shadowScale: 1.0
               shadowVerticalOffset: 0
               shadowHorizontalOffset: 0
@@ -3286,67 +3286,45 @@ Item {
               }
             }
 
-            // Passes 4-6: Weather's glyph is a single thin sign, so the same
-            // three passes read about a third as bright as the neighbouring
-            // icons. Three weather-only passes (wide, mid and core) stack the
-            // same semantic hue back up to an equal electric presence.
-            MultiEffect {
+            // Passes 4-5: Weather's glyph is a single thin sign, so extra core/mid
+            // halo passes give it equal ink presence on the stroke without spreading to edges.
+            Loader {
               anchors.fill: parent
-              source: effectRoot.source
-              autoPaddingEnabled: false
-              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
-              shadowColor: slot.hasSemanticTint
-                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
-                : "transparent"
-              shadowBlur: 0.85
-              shadowScale: 1.12
-              shadowVerticalOffset: 0
-              shadowHorizontalOffset: 0
-              shadowOpacity: 1.0
-              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+              active: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+              sourceComponent: Item {
+                MultiEffect {
+                  anchors.fill: parent
+                  source: effectRoot.source
+                  autoPaddingEnabled: false
+                  shadowEnabled: true
+                  shadowColor: Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                  shadowBlur: 0.24
+                  shadowScale: 1.0
+                  shadowVerticalOffset: 0
+                  shadowHorizontalOffset: 0
+                  shadowOpacity: 1.0
 
-              Behavior on shadowColor {
-                ColorAnimation { duration: 150 }
-              }
-            }
+                  Behavior on shadowColor {
+                    ColorAnimation { duration: 150 }
+                  }
+                }
 
-            MultiEffect {
-              anchors.fill: parent
-              source: effectRoot.source
-              autoPaddingEnabled: false
-              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
-              shadowColor: slot.hasSemanticTint
-                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
-                : "transparent"
-              shadowBlur: 0.50
-              shadowScale: 1.06
-              shadowVerticalOffset: 0
-              shadowHorizontalOffset: 0
-              shadowOpacity: 1.0
-              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
+                MultiEffect {
+                  anchors.fill: parent
+                  source: effectRoot.source
+                  autoPaddingEnabled: false
+                  shadowEnabled: true
+                  shadowColor: Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
+                  shadowBlur: 0.10
+                  shadowScale: 1.0
+                  shadowVerticalOffset: 0
+                  shadowHorizontalOffset: 0
+                  shadowOpacity: 1.0
 
-              Behavior on shadowColor {
-                ColorAnimation { duration: 150 }
-              }
-            }
-
-            MultiEffect {
-              anchors.fill: parent
-              source: effectRoot.source
-              autoPaddingEnabled: false
-              shadowEnabled: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
-              shadowColor: slot.hasSemanticTint
-                ? Qt.rgba(slot.semanticColor.r, slot.semanticColor.g, slot.semanticColor.b, 1.0)
-                : "transparent"
-              shadowBlur: 0.25
-              shadowScale: 1.02
-              shadowVerticalOffset: 0
-              shadowHorizontalOffset: 0
-              shadowOpacity: 1.0
-              visible: slot.hasSemanticTint && slot.moduleName === "omarchy.weather"
-
-              Behavior on shadowColor {
-                ColorAnimation { duration: 150 }
+                  Behavior on shadowColor {
+                    ColorAnimation { duration: 150 }
+                  }
+                }
               }
             }
           }

@@ -564,8 +564,8 @@ BarWidget {
             autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
-            shadowBlur: 0.95
-            shadowScale: 1.08
+            shadowBlur: 0.40
+            shadowScale: 1.0
             shadowVerticalOffset: 0
             shadowHorizontalOffset: 0
             shadowOpacity: indicatorSlot.iconActive ? 1.0 : 0.40
@@ -583,8 +583,8 @@ BarWidget {
             autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
-            shadowBlur: 0.50
-            shadowScale: 1.04
+            shadowBlur: 0.24
+            shadowScale: 1.0
             shadowVerticalOffset: 0
             shadowHorizontalOffset: 0
             shadowOpacity: 1.0
@@ -598,7 +598,7 @@ BarWidget {
             autoPaddingEnabled: false
             shadowEnabled: true
             shadowColor: indicatorSlot.glowColor
-            shadowBlur: 0.20
+            shadowBlur: 0.10
             shadowScale: 1.0
             shadowVerticalOffset: 0
             shadowHorizontalOffset: 0
