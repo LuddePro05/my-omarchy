@@ -8,7 +8,7 @@
 
 ## Current Desktop & Shell Preferences
 - **Screensaver Branding**:
-  - Text is `"LUDWIG EMSJO"` in `~/.config/omarchy/branding/screensaver.txt`.
+  - Text is `"EMSJO"` in `~/.config/omarchy/branding/screensaver.txt`.
   - The topbar unmaps and hides automatically whenever the screensaver window activates.
 - **Topbar (`ludde.bar`)**:
   - **Layout**: 3-island floating pill design:
