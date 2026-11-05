@@ -17,11 +17,65 @@
   let isTyping = false;
   let typingTimeout = null;
   let hadTrails = false;
+  let isRunning = false;
+  let idleFrames = 0;
+  const MAX_IDLE_FRAMES = 8;
+  let heartbeatTimer = null;
+  let observer = null;
+
+  function scheduleHeartbeat() {
+    clearTimeout(heartbeatTimer);
+    heartbeatTimer = setTimeout(() => {
+      if (!isRunning) {
+        startLoop();
+      }
+    }, 250);
+  }
+
+  function startLoop() {
+    idleFrames = 0;
+    clearTimeout(heartbeatTimer);
+    if (!isRunning) {
+      isRunning = true;
+      requestAnimationFrame(step);
+    }
+  }
+
+  function ensureObserver() {
+    if (observer) return;
+    const workbench = document.querySelector('.monaco-workbench') || document.body;
+    if (workbench) {
+      observer = new MutationObserver((mutations) => {
+        for (let i = 0; i < mutations.length; i++) {
+          const m = mutations[i];
+          if (m.target && m.target.classList && m.target.classList.contains('cursor')) {
+            startLoop();
+            break;
+          }
+        }
+      });
+      observer.observe(workbench, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+  }
+
+  // Wake up loop on user interaction
+  window.addEventListener('keyup', startLoop, { capture: true, passive: true });
+  window.addEventListener('mousedown', startLoop, { capture: true, passive: true });
+  window.addEventListener('mouseup', startLoop, { capture: true, passive: true });
+  window.addEventListener('mousemove', startLoop, { capture: true, passive: true });
+  window.addEventListener('selectionchange', startLoop, { capture: true, passive: true });
+  window.addEventListener('focus', startLoop, { capture: true, passive: true });
 
   // Suppress trail animation when typing regular text, but immediately allow arrows & navigation
   window.addEventListener(
     'keydown',
     (e) => {
+      startLoop();
       if (
         e.key.startsWith('Arrow') ||
         e.key === 'Home' ||
@@ -50,6 +104,7 @@
   );
 
   function ensureCanvas() {
+    ensureObserver();
     const parent = document.querySelector('.monaco-workbench') || document.body;
     if (!parent) return;
 
@@ -88,6 +143,7 @@
   window.addEventListener(
     'wheel',
     () => {
+      startLoop();
       isScrolling = true;
       activeTrails = [];
       cursorMap.clear();
@@ -294,12 +350,23 @@
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
+    if (activeTrails.length === 0 && !hadTrails) {
+      idleFrames++;
+      if (idleFrames > MAX_IDLE_FRAMES) {
+        isRunning = false;
+        scheduleHeartbeat();
+        return;
+      }
+    } else {
+      idleFrames = 0;
+    }
+
     requestAnimationFrame(step);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(step));
+    document.addEventListener('DOMContentLoaded', () => startLoop());
   } else {
-    requestAnimationFrame(step);
+    startLoop();
   }
 })();

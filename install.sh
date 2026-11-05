@@ -90,16 +90,21 @@ if [ ! -d "$HOME/.zsh/fzf-tab" ]; then
   git clone https://github.com/Aloxaf/fzf-tab "$HOME/.zsh/fzf-tab"
 fi
 
-# 6. Build starship-powerline-dir helper if gcc is available
-if [ -f "$HOME/.config/starship-powerline-dir.c" ]; then
-  if command -v gcc &>/dev/null; then
+# 6. Build starship-powerline-dir helper and sample-window-color if gcc is available
+if command -v gcc &>/dev/null; then
+  if [ -f "$HOME/.config/starship-powerline-dir.c" ]; then
     echo "⚙️  Compiling starship-powerline-dir binary..."
     mkdir -p "$HOME/.local/bin"
-    gcc -O3 -o "$HOME/.local/bin/starship-powerline-dir" "$HOME/.config/starship-powerline-dir.c"
+    gcc -O3 -o "$HOME/.local/bin/starship-powerline-dir" "$HOME/.config/starship-powerline-dir.c" -lm
     chmod +x "$HOME/.local/bin/starship-powerline-dir"
-  else
-    echo "⚠️  gcc not found; install gcc to compile the powerline directory helper."
   fi
+  if [ -f "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.c" ]; then
+    echo "⚙️  Compiling sample-window-color binary..."
+    gcc -O3 -o "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color" "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.c"
+    chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color"
+  fi
+else
+  echo "⚠️  gcc not found; install gcc to compile native helpers."
 fi
 
 # 7. VS Code cursor trail setup

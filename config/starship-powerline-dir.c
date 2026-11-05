@@ -8,6 +8,10 @@
 #include <fcntl.h>
 #include <time.h>
 #include <math.h>
+#include <spawn.h>
+#include <sys/wait.h>
+
+extern char **environ;
 
 typedef struct {
     const char *name;
@@ -156,12 +160,22 @@ static GitInfo get_git_info(const char *pwd) {
             }
 
             if (info.is_git) {
-                char cmd[8192];
-                snprintf(cmd, sizeof(cmd), "git -C \"%s\" diff-index --quiet HEAD -- 2>/dev/null", curr);
-                int ret = system(cmd);
-                if (ret != 0) {
-                    info.is_dirty = 1;
+                pid_t pid;
+                char *argv_git[] = {"git", "-C", curr, "diff-index", "--quiet", "HEAD", "--", NULL};
+                posix_spawn_file_actions_t actions;
+                posix_spawn_file_actions_init(&actions);
+                posix_spawn_file_actions_addopen(&actions, 1, "/dev/null", O_WRONLY, 0);
+                posix_spawn_file_actions_addopen(&actions, 2, "/dev/null", O_WRONLY, 0);
+
+                if (posix_spawnp(&pid, "git", &actions, NULL, argv_git, environ) == 0) {
+                    int status;
+                    if (waitpid(pid, &status, 0) != -1) {
+                        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+                            info.is_dirty = 1;
+                        }
+                    }
                 }
+                posix_spawn_file_actions_destroy(&actions);
             }
             break;
         }

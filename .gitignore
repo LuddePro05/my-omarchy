@@ -4,3 +4,4 @@
 *.pyc
 __pycache__/
 .DS_Store
+config/omarchy/plugins/ludde.bar/sample-window-color
