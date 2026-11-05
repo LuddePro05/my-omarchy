@@ -20,21 +20,10 @@
   let isRunning = false;
   let idleFrames = 0;
   const MAX_IDLE_FRAMES = 8;
-  let heartbeatTimer = null;
   let observer = null;
-
-  function scheduleHeartbeat() {
-    clearTimeout(heartbeatTimer);
-    heartbeatTimer = setTimeout(() => {
-      if (!isRunning) {
-        startLoop();
-      }
-    }, 250);
-  }
 
   function startLoop() {
     idleFrames = 0;
-    clearTimeout(heartbeatTimer);
     if (!isRunning) {
       isRunning = true;
       requestAnimationFrame(step);
@@ -354,7 +343,6 @@
       idleFrames++;
       if (idleFrames > MAX_IDLE_FRAMES) {
         isRunning = false;
-        scheduleHeartbeat();
         return;
       }
     } else {

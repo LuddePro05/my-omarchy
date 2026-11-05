@@ -101,12 +101,12 @@ static GitInfo get_git_info(const char *pwd) {
     snprintf(curr, sizeof(curr), "%s", pwd);
 
     while (curr[0]) {
-        char cand[8192];
+        char cand[4104];
         snprintf(cand, sizeof(cand), "%s/.git", curr);
 
         struct stat st;
         if (stat(cand, &st) == 0) {
-            char head_path[8192] = {0};
+            char head_path[4120] = {0};
             if (S_ISDIR(st.st_mode)) {
                 snprintf(head_path, sizeof(head_path), "%s/HEAD", cand);
             } else if (S_ISREG(st.st_mode)) {
@@ -251,7 +251,6 @@ int main(int argc, char *argv[]) {
 
         /* Arch logo sits at columns 0..5 (C_DARK #1e3a5f) */
         int prev_c[3] = {C_DARK[0], C_DARK[1], C_DARK[2]};
-        double cur_col = 6.0;
 
         for (int i = 0; i < seg_count; i++) {
             const char *part = segments[i];
@@ -273,15 +272,6 @@ int main(int argc, char *argv[]) {
 
             /* Add slash between subdirectories: parents get trailing slash */
             const char *slash = (i < seg_count - 1 && strcmp(part, "/") != 0) ? "/" : "";
-
-            /* Visible length:
-             * For i == 0: 1 space before icon, 1 space after icon, name, slash/space
-             * For i > 0: tight directly against arrow, icon, 1 space, name, slash/space */
-            int visible_len = (i == 0) ? ((int)strlen(part) + 4) : ((int)strlen(part) + 3);
-
-            double start_col = cur_col + 1.0;
-            double end_col = start_col + (double)visible_len - 1.0;
-            double center_col = (start_col + end_col) / 2.0;
 
             int curr_c[3];
             double t = (seg_count <= 1) ? 0.6 : (0.15 + 0.85 * (double)i / (double)(seg_count - 1));
@@ -312,7 +302,6 @@ int main(int argc, char *argv[]) {
             prev_c[0] = curr_c[0];
             prev_c[1] = curr_c[1];
             prev_c[2] = curr_c[2];
-            cur_col = end_col + 1.0;
         }
 
         /* Git inside main header: yellow background with dark text */

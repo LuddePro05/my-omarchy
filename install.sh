@@ -56,7 +56,9 @@ fi
 # 3. Ensure executable permissions on scripts & hooks
 echo "🔧 Setting executable permissions on scripts and hooks..."
 chmod +x "$HOME/.config/herdr/shell" 2>/dev/null || true
+chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color" 2>/dev/null || true
 chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.py" 2>/dev/null || true
+chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events" 2>/dev/null || true
 chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events.py" 2>/dev/null || true
 if [ -d "$HOME/.config/omarchy/hooks" ]; then
   find "$HOME/.config/omarchy/hooks" -type f -name "*.hook" -exec chmod +x {} + 2>/dev/null || true
@@ -106,6 +108,11 @@ if command -v gcc &>/dev/null; then
     echo "⚙️  Compiling sample-window-color binary..."
     gcc -O3 -o "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color" "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color.c"
     chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/sample-window-color"
+  fi
+  if [ -f "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events.c" ]; then
+    echo "⚙️  Compiling hypr-events binary..."
+    gcc -O3 -o "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events" "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events.c"
+    chmod +x "$HOME/.config/omarchy/plugins/ludde.bar/hypr-events"
   fi
 else
   echo "⚠️  gcc not found; install gcc to compile native helpers."

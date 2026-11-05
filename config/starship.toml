@@ -33,13 +33,13 @@ Linux = "󰌽"
 disabled = true
 
 [custom.directory]
-command = "/home/ludde/.local/bin/starship-powerline-dir"
+command = "starship-powerline-dir"
 when = "true"
 format = "$output"
 
 # --- Right Header: Dynamic Gradient (User & Time) ---
 [custom.right]
-command = "/home/ludde/.local/bin/starship-powerline-dir --right"
+command = "starship-powerline-dir --right"
 when = "true"
 format = "$output"
 

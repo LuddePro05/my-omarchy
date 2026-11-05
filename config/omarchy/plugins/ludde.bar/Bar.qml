@@ -1759,7 +1759,7 @@ Item {
 
   Process {
     id: hyprSocketProc
-    command: [root.home + "/.config/omarchy/plugins/ludde.bar/hypr-events.py"]
+    command: [root.home + "/.config/omarchy/plugins/ludde.bar/hypr-events"]
     running: true
     onRunningChanged: {
       if (!running) hyprSocketReconnectTimer.restart()
