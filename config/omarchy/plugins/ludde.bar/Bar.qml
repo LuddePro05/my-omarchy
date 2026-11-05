@@ -1738,10 +1738,10 @@ Item {
   Process {
     id: screensaverInitialProbe
     running: true
-    command: ["bash", "-c", "pgrep -f '[o]rg.omarchy.screensaver' >/dev/null && echo yes || echo no"]
+    command: ["pgrep", "-f", "org.omarchy.screensaver"]
     stdout: SplitParser {
       onRead: function(line) {
-        if (String(line).trim() === "yes") {
+        if (String(line || "").trim() !== "") {
           root.screensaverActive = true
         }
       }

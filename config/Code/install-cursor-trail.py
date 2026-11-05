@@ -25,42 +25,45 @@ def main():
         print(f"VS Code workbench directory not found: {WORKBENCH_DIR}")
         sys.exit(0)
 
-    # 1. Copy cursor-trail.js
-    print(f"Deploying cursor-trail.js to {TRAIL_DEST}...")
-    shutil.copy2(TRAIL_SRC, TRAIL_DEST)
+    try:
+        # 1. Copy cursor-trail.js
+        print(f"Deploying cursor-trail.js to {TRAIL_DEST}...")
+        shutil.copy2(TRAIL_SRC, TRAIL_DEST)
 
-    # 2. Patch workbench.html if not already patched
-    with open(HTML_PATH, "r", encoding="utf-8") as f:
-        html = f.read()
+        # 2. Patch workbench.html if not already patched
+        with open(HTML_PATH, "r", encoding="utf-8") as f:
+            html = f.read()
 
-    tag = '<script src="./cursor-trail.js" type="module"></script>'
-    if tag not in html:
-        print("Adding cursor-trail.js script tag to workbench.html...")
-        target = '<script src="./workbench.js" type="module"></script>'
-        if target in html:
-            html = html.replace(target, f"{target}\n\t{tag}")
-            with open(HTML_PATH, "w", encoding="utf-8") as f:
-                f.write(html)
-        else:
-            print("Warning: workbench.js script tag not found in workbench.html")
+        tag = '<script src="./cursor-trail.js" type="module"></script>'
+        if tag not in html:
+            print("Adding cursor-trail.js script tag to workbench.html...")
+            target = '<script src="./workbench.js" type="module"></script>'
+            if target in html:
+                html = html.replace(target, f"{target}\n\t{tag}")
+                with open(HTML_PATH, "w", encoding="utf-8") as f:
+                    f.write(html)
+            else:
+                print("Warning: workbench.js script tag not found in workbench.html")
 
-    # 3. Recalculate checksum and update product.json
-    if os.path.exists(PRODUCT_PATH):
-        with open(HTML_PATH, "rb") as f:
-            content = f.read().replace(b"\r\n", b"\n")
-        checksum = base64.b64encode(hashlib.sha256(content).digest()).decode("utf-8").rstrip("=")
+        # 3. Recalculate checksum and update product.json
+        if os.path.exists(PRODUCT_PATH):
+            with open(HTML_PATH, "rb") as f:
+                content = f.read().replace(b"\r\n", b"\n")
+            checksum = base64.b64encode(hashlib.sha256(content).digest()).decode("utf-8").rstrip("=")
 
-        with open(PRODUCT_PATH, "r", encoding="utf-8") as f:
-            product = json.load(f)
+            with open(PRODUCT_PATH, "r", encoding="utf-8") as f:
+                product = json.load(f)
 
-        if "checksums" in product:
-            rel_path = "vs/code/electron-browser/workbench/workbench.html"
-            product["checksums"][rel_path] = checksum
-            with open(PRODUCT_PATH, "w", encoding="utf-8") as f:
-                json.dump(product, f, indent="\t")
-            print(f"Updated product.json checksum ({checksum}) successfully!")
+            if "checksums" in product:
+                rel_path = "vs/code/electron-browser/workbench/workbench.html"
+                product["checksums"][rel_path] = checksum
+                with open(PRODUCT_PATH, "w", encoding="utf-8") as f:
+                    json.dump(product, f, indent="\t")
+                print(f"Updated product.json checksum ({checksum}) successfully!")
 
-    print("VS Code cursor trail installation complete!")
+        print("VS Code cursor trail installation complete!")
+    except PermissionError:
+        print(f"Notice: Root permissions required to modify VS Code system files in {CODE_BASE} (run: sudo python3 {__file__}).")
 
 if __name__ == "__main__":
     main()
