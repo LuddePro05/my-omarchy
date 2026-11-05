@@ -4,7 +4,7 @@
 -- Find its class with: hyprctl clients
 -- o.transparent_window("my-app")
 -- o.transparent_window("my-app", "0.9 0.85") -- Custom active/inactive opacity.
-o.transparent_window("(com\\.microsoft\\.VSCode|code-url-handler|code)", "0.90 0.85")
+-- Note: VS Code custom frosted glass transparency (0.88 0.82) is configured via window_rule below.
 
 
 -- https://wiki.hypr.land/Configuring/Basics/Variables/#general

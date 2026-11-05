@@ -15,8 +15,8 @@ else
   compinit -C
 fi
 
-# Enable fzf-tab
-source ~/.zsh/fzf-tab/fzf-tab.plugin.zsh
+# Enable fzf-tab if installed
+[[ -f ~/.zsh/fzf-tab/fzf-tab.plugin.zsh ]] && source ~/.zsh/fzf-tab/fzf-tab.plugin.zsh
 
 # Style the fzf popup to match Catppuccin Mocha colors
 export FZF_DEFAULT_OPTS=" \

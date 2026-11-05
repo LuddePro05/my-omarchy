@@ -1843,8 +1843,8 @@ Item {
   Process {
     id: barHiddenProbe
     running: true
-    command: ["bash", "-c", "[[ -f $HOME/.local/state/omarchy/toggles/bar-off ]] && echo yes || echo no"]
-    stdout: SplitParser { onRead: function(line) { root.barHidden = String(line).trim() === "yes" } }
+    command: ["test", "-f", root.home + "/.local/state/omarchy/toggles/bar-off"]
+    onExited: function(exitCode) { root.barHidden = (exitCode === 0) }
   }
   FileView {
     path: root.home + "/.local/state/omarchy/toggles"
