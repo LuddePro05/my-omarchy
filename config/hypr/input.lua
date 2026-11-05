@@ -643,7 +643,9 @@ local function collapse_workspaces()
   is_collapsing = false
 end
 
-local function update_persistent_workspaces()
+local last_persistent_limits = {}
+
+local function update_persistent_workspaces(force)
   local ok, err = pcall(function()
     local windows = hl.get_windows() or {}
     local bases = {}
@@ -667,11 +669,14 @@ local function update_persistent_workspaces()
       end
 
       local limit = math.min(base + 10, maxActive + 1)
-      for id = base + 1, limit do
-        hl.workspace_rule({ workspace = tostring(id), persistent = true, layout = "scrolling" })
-      end
-      for id = limit + 1, base + 10 do
-        hl.workspace_rule({ workspace = tostring(id), persistent = false, layout = "scrolling" })
+      if force or last_persistent_limits[base] ~= limit then
+        last_persistent_limits[base] = limit
+        for id = base + 1, limit do
+          hl.workspace_rule({ workspace = tostring(id), persistent = true, layout = "scrolling" })
+        end
+        for id = limit + 1, base + 10 do
+          hl.workspace_rule({ workspace = tostring(id), persistent = false, layout = "scrolling" })
+        end
       end
     end
   end)
@@ -815,7 +820,6 @@ update_persistent_workspaces()
 hl.on("window.open", function(window)
   if is_collapsing then return end
   handle_window_spawned(window)
-  update_persistent_workspaces()
   schedule_workspace_update()
 end)
 hl.on("window.close", on_workspace_state_change)
@@ -824,6 +828,6 @@ hl.on("window.move_to_workspace", on_workspace_state_change)
 hl.on("workspace.active", schedule_workspace_update)
 hl.on("config.reloaded", function()
   collapse_workspaces()
-  update_persistent_workspaces()
+  update_persistent_workspaces(true)
 end)
 

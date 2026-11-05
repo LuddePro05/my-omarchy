@@ -98,6 +98,10 @@ Item {
   property string activeWindowTitle: ""
   property bool activeWindowFullscreen: false
   property bool activeWindowFloating: false
+  property int activeWindowX: 0
+  property int activeWindowY: 0
+  property int activeWindowW: 0
+  property int activeWindowH: 0
   property var appColorCache: ({
     "chromium": Commons.Color.background,
     "google-chrome": Commons.Color.background,
@@ -1523,7 +1527,13 @@ Item {
 
   Process {
     id: colorSamplerProc
-    command: [root.home + "/.config/omarchy/plugins/ludde.bar/sample-window-color.py"]
+    command: [
+      root.home + "/.config/omarchy/plugins/ludde.bar/sample-window-color.py",
+      String(root.activeWindowX),
+      String(root.activeWindowY),
+      String(root.activeWindowW),
+      String(root.activeWindowH)
+    ]
     stdout: SplitParser {
       onRead: function(line) {
         var colStr = String(line || "").trim()
@@ -1544,7 +1554,6 @@ Item {
             if (root.activeWindowClass && !root.activeWindowFullscreen) {
               root.appColorCache[root.activeWindowClass.toLowerCase()] = col
             }
-            console.log("[AdaptiveBar] sampled color for opaque " + root.activeWindowClass + " -> " + colStr)
           }
         }
       }
@@ -1562,7 +1571,6 @@ Item {
   }
 
   function handleHyprlandEvent(line) {
-    console.log("[AdaptiveBarEvent] " + line)
     if (line.indexOf("openwindow>>") === 0) {
       var parts = line.substring(12).split(",")
       // format: address,workspace,class,title
@@ -1651,7 +1659,7 @@ Item {
 
   Timer {
     id: queryActiveWindowTimer
-    interval: 10
+    interval: 35
     repeat: false
     onTriggered: {
       if (!activeWindowQueryProc.running) activeWindowQueryProc.running = true
@@ -1696,6 +1704,10 @@ Item {
             root.activeWindowTitle = String(obj.title || "")
             root.activeWindowFullscreen = !!(obj.fullscreen && obj.fullscreen > 0)
             root.activeWindowFloating = !!obj.floating
+            root.activeWindowX = (obj.at && obj.at[0] !== undefined) ? obj.at[0] : 0
+            root.activeWindowY = (obj.at && obj.at[1] !== undefined) ? obj.at[1] : 0
+            root.activeWindowW = (obj.size && obj.size[0] !== undefined) ? obj.size[0] : 0
+            root.activeWindowH = (obj.size && obj.size[1] !== undefined) ? obj.size[1] : 0
             if (root.activeWindowClass === "org.omarchy.screensaver") {
               root.screensaverActive = true
             } else if (root.screensaverWindowCount === 0 && root.activeWindowClass !== "") {
@@ -1707,6 +1719,10 @@ Item {
             root.activeWindowTitle = ""
             root.activeWindowFullscreen = false
             root.activeWindowFloating = false
+            root.activeWindowX = 0
+            root.activeWindowY = 0
+            root.activeWindowW = 0
+            root.activeWindowH = 0
             if (root.screensaverWindowCount === 0) {
               root.screensaverActive = false
             }

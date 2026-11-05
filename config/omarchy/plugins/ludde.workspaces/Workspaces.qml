@@ -21,10 +21,9 @@ BarWidget {
     return null
   }
 
-  property int updateTrigger: 0
+  property var displayedWorkspaces: [1, 2]
 
-  readonly property var displayedWorkspaces: {
-    var _t = root.updateTrigger
+  function updateDisplayedWorkspaces() {
     var focusedId = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 0
     var workspaces = Hyprland.workspaces.values
     var toplevels = Hyprland.toplevels.values
@@ -67,7 +66,19 @@ BarWidget {
     for (var id = 1; id <= end; id++) {
       ids.push(id)
     }
-    return ids
+
+    var prev = root.displayedWorkspaces
+    if (prev && prev.length === ids.length) {
+      var same = true
+      for (var m = 0; m < ids.length; m++) {
+        if (prev[m] !== ids[m]) {
+          same = false
+          break
+        }
+      }
+      if (same) return
+    }
+    root.displayedWorkspaces = ids
   }
 
   // Explicit property so every pill's glowColor binding refreshes when the
@@ -153,20 +164,28 @@ BarWidget {
     if (root.bar) root.bar.run("omarchy-hyprland-workspace-layout-toggle")
   }
 
-  Component.onCompleted: refresh()
+  Component.onCompleted: {
+    root.refresh()
+    root.updateDisplayedWorkspaces()
+  }
 
   Connections {
     target: Hyprland
     function onFocusedWorkspaceChanged() {
       root.showFocusedMode()
-      root.updateTrigger++
+      root.updateDisplayedWorkspaces()
     }
     function onRawEvent(event) {
       var name = event ? String(event.name) : ""
       if (name === "configreloaded") {
         root.refresh()
-      } else {
-        root.updateTrigger++
+        root.updateDisplayedWorkspaces()
+      } else if (name === "createworkspace" || name === "destroyworkspace" ||
+                 name === "openwindow" || name === "closewindow" ||
+                 name === "movewindow" || name === "movewindowv2" ||
+                 name === "workspace" || name === "workspacev2" ||
+                 name === "focusedmon") {
+        root.updateDisplayedWorkspaces()
       }
     }
   }

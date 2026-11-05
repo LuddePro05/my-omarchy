@@ -7,9 +7,13 @@ setopt SHARE_HISTORY          # Share history between active terminal tabs
 setopt HIST_IGNORE_ALL_DUPS   # Eliminate duplicate entries
 setopt HIST_REDUCE_BLANKS     # Remove unnecessary blanks
 
-# --- Basic Completion ---
+# --- Basic Completion (cached for fast shell startup) ---
 autoload -Uz compinit
-compinit
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 
 # Enable fzf-tab
 source ~/.zsh/fzf-tab/fzf-tab.plugin.zsh
@@ -79,19 +83,14 @@ hdl() {
   herdr pane run "$editor_pane" "${EDITOR:-nvim} ." >/dev/null
 }
 
-# --- Prompt (Optional: Starship) ---
-# If using starship prompt:
-if command -v starship &> /dev/null; then
-  eval "$(starship init zsh)"
-fi
-
-
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Initialize Starship
-eval "$(starship init zsh)"
+if command -v starship &> /dev/null; then
+  eval "$(starship init zsh)"
+fi
 
 # Save prompt state and restore it before each new active line
 STARSHIP_PROMPT="$PROMPT"

@@ -6,26 +6,33 @@ from collections import Counter
 
 def get_window_color():
     try:
-        raw_win = subprocess.check_output(['hyprctl', 'activewindow', '-j'], timeout=0.5)
-        win = json.loads(raw_win)
-        if not win or not win.get('class') or not win.get('mapped', True):
-            return 'TRANSPARENT'
+        if len(sys.argv) >= 5:
+            at_x = int(sys.argv[1])
+            at_y = int(sys.argv[2])
+            w = int(sys.argv[3])
+            h = int(sys.argv[4])
+        else:
+            raw_win = subprocess.check_output(['hyprctl', 'activewindow', '-j'], timeout=0.5)
+            win = json.loads(raw_win)
+            if not win or not win.get('class') or not win.get('mapped', True):
+                return 'TRANSPARENT'
 
-        is_floating = win.get('floating', False)
-        is_fullscreen = win.get('fullscreen', 0) > 0
+            is_floating = win.get('floating', False)
+            is_fullscreen = win.get('fullscreen', 0) > 0
 
-        # If floating and not fullscreen, the active window does not cover the top bar
-        # (e.g. omacalc, dialogs, popups) -> Bar should stay transparent.
-        if is_floating and not is_fullscreen:
-            return 'TRANSPARENT'
+            # If floating and not fullscreen, the active window does not cover the top bar
+            # (e.g. omacalc, dialogs, popups) -> Bar should stay transparent.
+            if is_floating and not is_fullscreen:
+                return 'TRANSPARENT'
 
-        # Known frosted / transparent applications use the native desktop theme background
-        win_class = (win.get('class') or '').lower()
-        if any(c in win_class for c in ['alacritty', 'org.omarchy.agent', 'kitty', 'foot', 'ghostty', 'chrom', 'code', 'obsidian']):
-            return 'DEFAULT'
+            # Known frosted / transparent applications use the native desktop theme background
+            win_class = (win.get('class') or '').lower()
+            if any(c in win_class for c in ['alacritty', 'org.omarchy.agent', 'kitty', 'foot', 'ghostty', 'chrom', 'code', 'obsidian']):
+                return 'DEFAULT'
 
-        at_x, at_y = win.get('at', [0, 0])
-        w, h = win.get('size', [0, 0])
+            at_x, at_y = win.get('at', [0, 0])
+            w, h = win.get('size', [0, 0])
+
         if w <= 0 or h <= 0:
             return '#181824'
 
