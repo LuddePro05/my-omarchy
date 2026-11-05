@@ -1905,13 +1905,8 @@ Item {
     // good: when the mode settles it, or after two seconds without one.
     readonly property bool shouldHideBar: root.barHidden || root.screensaverActive
 
-    visible: !remapGuard.remapping && (cutoutWaitOver || !cutoutPending) && !root.screensaverActive
+    visible: (cutoutWaitOver || !cutoutPending) && !root.screensaverActive
     exclusionMode: shouldHideBar ? ExclusionMode.Ignore : ExclusionMode.Auto
-
-    ScreenMoveRemap {
-      id: remapGuard
-      window: barWindow
-    }
 
     // Parked by its full thickness, which a notch floor may make more than
     // barSize, so no strip of it stays on screen.
